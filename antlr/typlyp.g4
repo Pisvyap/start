@@ -47,7 +47,7 @@ ifStatement : 'esli' '(' expr ')' block ('inache' block)?;
 whileStatement : 'poka' '(' expr ')' block;
 
 // Новый цикл for
-forStatement : 'schitaem' '(' forInit? ';' expr? ';' forUpdate? ')' block;
+forStatement : 'schitaem' '(' forInit? expr? ';' forUpdate? ')' block;
 
 // Инициализация цикла for
 forInit : varDecl | assignment;
@@ -61,8 +61,6 @@ expr
     | expr ('+' | '-') expr
     | expr ('<' | '<=' | '>' | '>=') expr
     | expr ('==' | '!=') expr
-    | expr '&&' expr
-    | expr '||' expr
     | '!' expr
     | ID
     | ID '[' expr ']'
@@ -70,7 +68,7 @@ expr
     | BOOL
     | '(' expr ')'
     | ID '(' argList? ')'
-    | '[' exprList? ']'
+    | 'new' type '[' expr ']' // Создание массива
     | 'extern' ID '(' argList? ')'
     ;
 
