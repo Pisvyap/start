@@ -70,8 +70,30 @@ public:
     }
 
     std::any visitStatement(typlypParser::StatementContext *context) override {
-        auto statementNode = std::make_shared<StatementNode>();
         std::cout << "          In visitStatement" << std::endl;
-        return statementNode;
+        if (context->varDecl()) {
+            return std::any_cast<StatementNode::Ptr>(visitVarDecl(context->varDecl()));
+        }
+        return nullptr;
+    }
+
+    std::any visitVarDecl(typlypParser::VarDeclContext* context) override {
+        auto varDeclNode = std::make_shared<VariableDeclarationNode>();
+        std::cout << "              In visitVarDecl" << std::endl;
+
+        varDeclNode->name = context->ID()->getText();
+        varDeclNode->type = context->type()->getText();
+        varDeclNode->initializer = std::any_cast<ExpressionNode::Ptr>(visitExpr(context->expr()));
+
+        std::cout << "              End visitVarDecl" << std::endl;
+
+        return static_cast<StatementNode::Ptr>(varDeclNode);
+    }
+
+    std::any visitExpr(typlypParser::ExprContext* context) override {
+        auto exprNode = std::make_shared<ExpressionNode>();
+        std::cout << "                  In visitExpr" << std::endl;
+        std::cout << "                  " << context->children[0]->getText() << std::endl;
+        return exprNode;
     }
 };
