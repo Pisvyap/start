@@ -8,6 +8,7 @@
 
 class ProgramNode final : ASTNode {
 public:
+    std::vector<Ptr<ExternalFunctionNode>> externalFunctions;
     std::vector<Ptr<FunctionNode>> functions;
     std::vector<Ptr<StatementNode>> statements;
 };
