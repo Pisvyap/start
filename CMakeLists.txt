@@ -12,6 +12,9 @@ set(
         grammar/typlypListener.cpp
         grammar/typlypParser.cpp
         grammar/typlypVisitor.cpp
+
+        ast/ASTNode.cpp
+        ast/ASTBuilder.cpp
 )
 
 add_subdirectory(antlr4-cpp-runtime)
