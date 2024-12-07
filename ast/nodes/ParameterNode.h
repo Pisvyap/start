@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Nodes.h"
+#include "../ASTNode.h"
 
 class ParameterNode : public ASTNode {
 public:

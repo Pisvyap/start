@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "../ASTNode.h"
-#include "Nodes.h"
+#include "ParameterNode.h"
 
 class ExternalFunctionNode : public ASTNode {
 public:

@@ -1,9 +1,12 @@
 vneshnaya narisovatChislo(x: chislo): chislo;
 vneshnaya narisovatChisla(x: chislo[]): chislo;
 
-delo factorial(n: chislo, m: logika): chislo {
-    pust result: chislo = factorial(n);
-    pust cho: logika = pravda;
+delo factorial(n: chislo): chislo {
+    esli (n == 0) {
+        vernut 1;
+    } inache {
+        vernut n;
+    }
 }
 
 pust number: chislo = 20;

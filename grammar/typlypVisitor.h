@@ -3,11 +3,8 @@
 
 #pragma once
 
-
 #include "antlr4-runtime.h"
 #include "typlypParser.h"
-
-
 
 /**
  * This class defines an abstract visitor for a parse tree

@@ -1,7 +1,15 @@
 #pragma once
 
 #include "ASTNode.h"
-#include "nodes/Nodes.h"
+#include "nodes/CodeBlockNode.h"
+#include "nodes/ExpressionNode.h"
+#include "nodes/FunctionNode.h"
+#include "nodes/StatementNode.h"
+#include "nodes/ExternalFunctionNode.h"
+#include "nodes/ProgramNode.h"
+#include "nodes/IfStatementNode.h"
+#include "nodes/ParameterNode.h"
+#include "nodes/ReturnStatementNode.h"
 
 #include "../grammar/typlypBaseVisitor.h"
 
@@ -74,10 +82,34 @@ public:
     }
 
     std::any visitStatement(typlypParser::StatementContext *context) override {
-        if (context->varDecl()) {
+        if (context->varDecl())
             return std::any_cast<Ptr<StatementNode>>(visitVarDecl(context->varDecl()));
-        }
+
+        if (context->ifStatement())
+            return std::any_cast<Ptr<StatementNode>>(visitIfStatement(context->ifStatement()));
+
+        if (context->returnStatement())
+            return std::any_cast<Ptr<StatementNode>>(visitReturnStatement(context->returnStatement()));
+
         return nullptr;
+    }
+
+    std::any visitReturnStatement(typlypParser::ReturnStatementContext* context) override {
+        auto returnNode = std::make_shared<ReturnStatementNode>();
+        returnNode->expression = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
+
+        return static_cast<Ptr<StatementNode>>(returnNode);
+    }
+
+    std::any visitIfStatement(typlypParser::IfStatementContext* context) override {
+        auto ifNode = std::make_shared<IfStatementNode>();
+
+        ifNode->condition = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
+        ifNode->thenBlock = std::any_cast<Ptr<CodeBlockNode>>(visitBlock(context->block(0)));
+        if (context->block().size() > 1)
+            ifNode->elseBlock = std::any_cast<Ptr<CodeBlockNode>>(visitBlock(context->block(1)));
+
+        return static_cast<Ptr<StatementNode>>(ifNode);
     }
 
     std::any visitVarDecl(typlypParser::VarDeclContext* context) override {

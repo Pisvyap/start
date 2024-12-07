@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../ASTNode.h"
-#include "Nodes.h"
+#include "ExpressionNode.h"
 
 class StatementNode : public ASTNode {};
 

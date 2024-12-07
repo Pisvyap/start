@@ -7,7 +7,6 @@
 #include "ast/ASTBuilder.h"
 #include "ast/ASTNode.h"
 #include "grammar/typlypLexer.h"
-#include "ast/nodes/Nodes.h"
 
 std::string readFile(const std::string& fileName) {
     const std::string path = "../scratches/" + fileName;

@@ -3,7 +3,9 @@
 #include <vector>
 
 #include "../ASTNode.h"
-#include "Nodes.h"
+#include "ExternalFunctionNode.h"
+#include "FunctionNode.h"
+#include "StatementNode.h"
 
 class ProgramNode final : ASTNode {
 public:

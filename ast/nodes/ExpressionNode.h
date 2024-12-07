@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Nodes.h"
+#include "../ASTNode.h"
 
-class ExpressionNode : public ASTNode {
-public:
-};
+class ExpressionNode : public ASTNode { };
 
 class AssignmentNode : public ASTNode {
 public:

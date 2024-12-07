@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "../ASTNode.h"
-#include "Nodes.h"
+#include "ParameterNode.h"
 
 class FunctionNode : public ASTNode {
 public:
