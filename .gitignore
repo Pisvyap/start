@@ -1,3 +1,4 @@
-cmake-build-debug
 .idea
 antlr4-cpp-runtime/demo
+/cmake-build-debug/
+/cmake-build-debug/Testing/
