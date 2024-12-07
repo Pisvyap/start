@@ -4,56 +4,48 @@
 #include <vector>
 #include <string>
 
+
+template<typename T = void>
 class ASTNode {
+public:
+    virtual ~ASTNode() = default;
+
+    using Ptr = std::shared_ptr<T>;
+};
+
+template<>
+class ASTNode<void> {
     public:
-      virtual ~ASTNode() = default;
+    virtual ~ASTNode() = default;
+
+    using Ptr = std::shared_ptr<ASTNode>;
 };
 
-using ASTNodePtr = std::shared_ptr<ASTNode>;
+class StatementNode : public ASTNode<StatementNode> {};
 
-class ProgramNode : public ASTNode {
-public:
-    std::vector<ASTNodePtr> declarations;
-};
+class ExpressionNode : public ASTNode<ExpressionNode> {};
 
-class FunctionNode : public ASTNode {
-public:
-    std::string name;
-    std::vector<std::pair<std::string, ASTNodePtr>> parameters; // pair<name, parameter>
-    std::string returnType;
-    ASTNodePtr body;
-};
-
-class CodeBlockNode : public ASTNode {
-public:
-    std::vector<ASTNodePtr> statements;
-};
-
-class StatementNode : public ASTNode {};
-
-class VariableDeclarationNode : public ASTNode {
+class VariableDeclarationNode : public ASTNode<VariableDeclarationNode> {
 public:
     std::string name;
     std::string type;
-    ASTNodePtr initializer;
+    ExpressionNode::Ptr initializer;
 };
 
-class AssignmentNode : public ASTNode {
+class AssignmentNode : public ASTNode<AssignmentNode> {
 public:
     std::string name;
     std::string type;
-    ASTNodePtr value;
+    ASTNode::Ptr value; // TODO replace with concrete type?
 };
 
-class ExpressionNode : public ASTNode {};
-
-class BinaryOperationNode : public ASTNode {
+class BinaryOperationNode : public ASTNode<BinaryOperationNode> {
 public:
     enum BinaryOperationType {
         Add, Sub, Mul, Div, Mod
     };
     BinaryOperationType operation;
-    ASTNodePtr left;
-    ASTNodePtr right;
+    ExpressionNode::Ptr left;
+    ExpressionNode::Ptr right;
 };
 

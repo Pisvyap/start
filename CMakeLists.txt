@@ -15,6 +15,7 @@ set(
 
         ast/ASTNode.cpp
         ast/ASTBuilder.cpp
+        ast/nodes/Nodes.h
 )
 
 add_subdirectory(antlr4-cpp-runtime)

@@ -5,7 +5,9 @@
 
 #include "antlr4-runtime.h"
 #include "ast/ASTBuilder.h"
+#include "ast/ASTNode.h"
 #include "grammar/typlypLexer.h"
+#include "ast/nodes/Nodes.h"
 
 std::string readFile(const std::string& fileName) {
     const std::string path = "../scratches/" + fileName;
@@ -22,8 +24,9 @@ std::string readFile(const std::string& fileName) {
     return contents;
 }
 
+
 int main() {
-    const std::string input = readFile("factorial.typlyp");
+    const std::string input = readFile("func.typlyp");
 
     // Создание ANTLR потока
     antlr4::ANTLRInputStream inputStream(input);
@@ -36,7 +39,12 @@ int main() {
 
     // Строим AST
     ASTBuilder builder;
-    auto ast = builder.visitProgram(tree);
+    try {
+        auto ast = builder.visitProgram(tree);
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+    }
+
 
     return 0;
 }
