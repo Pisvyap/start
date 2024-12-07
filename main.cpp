@@ -41,6 +41,7 @@ int main() {
     ASTBuilder builder;
     try {
         auto ast = builder.visitProgram(tree);
+        std::any_cast<Ptr<ProgramNode>>(ast)->print(0);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
     }

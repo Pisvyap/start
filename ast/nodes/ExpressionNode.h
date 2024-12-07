@@ -2,7 +2,9 @@
 
 #include "Nodes.h"
 
-class ExpressionNode : public ASTNode {};
+class ExpressionNode : public ASTNode {
+public:
+};
 
 class AssignmentNode : public ASTNode {
 public:

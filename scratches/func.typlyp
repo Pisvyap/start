@@ -5,3 +5,6 @@ delo factorial(n: chislo, m: logika): chislo {
     pust result: chislo = factorial(n);
     pust cho: logika = pravda;
 }
+
+pust number: chislo = 20;
+pust result: chislo = factorial(number);
