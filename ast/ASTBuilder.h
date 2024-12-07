@@ -12,14 +12,15 @@ public:
 
         std::cout << "Start reading function decls" << std::endl;
         for (auto& func : context->functionDecl()) {
-            programNode->functions.push_back(std::any_cast<FunctionNode::Ptr>(visitFunctionDecl(func)));
+            programNode->functions.push_back(std::any_cast<Ptr<FunctionNode>>(visitFunctionDecl(func)));
         }
         std::cout << "End reading function decls" << std::endl;
 
         std::cout << "Start reading statements" << std::endl;
         for (auto& statement : context->statement()) {
-            programNode->statements.push_back(std::any_cast<StatementNode::Ptr>(visitStatement(statement)));
+            programNode->statements.push_back(std::any_cast<Ptr<StatementNode>>(visitStatement(statement)));
         }
+
         std::cout << "End reading statements" << std::endl;
 
         return programNode;
@@ -37,12 +38,12 @@ public:
         std::cout << "  Start reading parameters " << std::endl;
         if (context->paramList()) {
             for (auto param : context->paramList()->param()) {
-                functionNode->parameters.push_back(std::any_cast<ParameterNode::Ptr>(visitParam(param)));
+                functionNode->parameters.push_back(std::any_cast<Ptr<ParameterNode>>(visitParam(param)));
             }
         }
         std::cout << "  Read all parameters" << std::endl;
 
-        functionNode->body = std::any_cast<CodeBlockNode::Ptr>(visitBlock(context->block()));
+        functionNode->body = std::any_cast<Ptr<CodeBlockNode>>(visitBlock(context->block()));
 
         return functionNode;
     }
@@ -63,7 +64,7 @@ public:
 
         std::cout << "      In visitBlock" << std::endl;
         for (auto& statement : context->statement()) {
-            blockNode->statements.push_back(std::any_cast<StatementNode::Ptr>(visitStatement(statement)));
+            blockNode->statements.push_back(std::any_cast<Ptr<StatementNode>>(visitStatement(statement)));
         }
 
         return blockNode;
@@ -72,7 +73,7 @@ public:
     std::any visitStatement(typlypParser::StatementContext *context) override {
         std::cout << "          In visitStatement" << std::endl;
         if (context->varDecl()) {
-            return std::any_cast<StatementNode::Ptr>(visitVarDecl(context->varDecl()));
+            return std::any_cast<Ptr<StatementNode>>(visitVarDecl(context->varDecl()));
         }
         return nullptr;
     }
@@ -83,11 +84,11 @@ public:
 
         varDeclNode->name = context->ID()->getText();
         varDeclNode->type = context->type()->getText();
-        varDeclNode->initializer = std::any_cast<ExpressionNode::Ptr>(visitExpr(context->expr()));
+        varDeclNode->initializer = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
 
         std::cout << "              End visitVarDecl" << std::endl;
 
-        return static_cast<StatementNode::Ptr>(varDeclNode);
+        return static_cast<Ptr<StatementNode>>(varDeclNode);
     }
 
     std::any visitExpr(typlypParser::ExprContext* context) override {

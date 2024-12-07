@@ -2,21 +2,21 @@
 
 #include "Nodes.h"
 
-class ExpressionNode : public ASTNode<ExpressionNode> {};
+class ExpressionNode : public ASTNode {};
 
-class AssignmentNode : public ASTNode<AssignmentNode> {
+class AssignmentNode : public ASTNode {
 public:
     std::string name;
     std::string type;
-    ASTNode::Ptr value; // TODO replace with concrete type?
+    Ptr<ASTNode> value; // TODO replace with concrete type?
 };
 
-class BinaryOperationNode : public ASTNode<BinaryOperationNode> {
+class BinaryOperationNode : public ASTNode {
 public:
     enum BinaryOperationType {
         Add, Sub, Mul, Div, Mod
     };
     BinaryOperationType operation;
-    ExpressionNode::Ptr left;
-    ExpressionNode::Ptr right;
+    Ptr<ExpressionNode> left;
+    Ptr<ExpressionNode> right;
 };

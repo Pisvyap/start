@@ -1,6 +1,8 @@
 #pragma once
 
-class CodeBlockNode : public ASTNode<CodeBlockNode> {
+#include <vector>
+
+class CodeBlockNode : public ASTNode {
 public:
-    std::vector<StatementNode::Ptr> statements;
+    std::vector<Ptr<StatementNode>> statements;
 };

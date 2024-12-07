@@ -1,9 +1,13 @@
 #pragma once
+
+#include <vector>
+
 #include "../ASTNode.h"
+#include "../TreeWriter.h"
 #include "Nodes.h"
 
-class ProgramNode : ASTNode<ProgramNode> {
+class ProgramNode final : ASTNode {
 public:
-    std::vector<FunctionNode::Ptr> functions;
-    std::vector<StatementNode::Ptr> statements;
+    std::vector<Ptr<FunctionNode>> functions;
+    std::vector<Ptr<StatementNode>> statements;
 };
