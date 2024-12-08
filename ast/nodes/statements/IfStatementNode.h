@@ -17,8 +17,10 @@ public:
         std::cout << "THEN" << std::endl;
         thenBlock->print(indent + 1);
 
-        ASTNode::print(indent);
-        std::cout << "ELSE" << std::endl;
-        elseBlock->print(indent + 1);
+        if (elseBlock != nullptr) {
+            ASTNode::print(indent);
+            std::cout << "ELSE" << std::endl;
+            elseBlock->print(indent + 1);
+        }
     }
 };
