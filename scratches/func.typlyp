@@ -1,4 +1,14 @@
-poka (arr[left] < pivot) {
-    pust left: chislo = 1;
-    narisovatChislo(result);
+vneshnaya narisovatChislo(x: chislo): chislo;
+vneshnaya narisovatChisla(x: chislo[]): chislo;
+
+delo factorial(n: chislo): chislo {
+    esli (n == 0) {
+        vernut 1;
+    } inache {
+        vernut n * factorial(n - 1);
+    }
 }
+
+pust number: chislo = 20;
+pust result: chislo = factorial(number);
+narisovatChislo(result);

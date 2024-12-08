@@ -8,7 +8,6 @@ public:
     Ptr<ExpressionNode> expression;
     void print(const int indent) override {
         ASTNode::print(indent);
-        std::cout << "RETURN" << std::endl;
-        expression->print(indent + 1);
+        std::cout << "RETURN "; expression->print(indent); std::cout << "\n";
     }
 };

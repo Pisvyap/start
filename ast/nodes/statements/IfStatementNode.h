@@ -11,11 +11,12 @@ public:
     Ptr<CodeBlockNode> elseBlock;
     void print(const int indent) override {
         ASTNode::print(indent);
-        std::cout << "IF" << std::endl;
-        condition->print(indent);
+        std::cout << "IF "; condition->print(indent); std::cout << std::endl;
+
         ASTNode::print(indent);
         std::cout << "THEN" << std::endl;
         thenBlock->print(indent + 1);
+
         ASTNode::print(indent);
         std::cout << "ELSE" << std::endl;
         elseBlock->print(indent + 1);
