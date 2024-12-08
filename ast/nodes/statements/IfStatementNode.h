@@ -1,8 +1,8 @@
 #pragma once
 
 #include "StatementNode.h"
-#include "CodeBlockNode.h"
-#include "ExpressionNode.h"
+#include "../CodeBlockNode.h"
+#include "../ExpressionNode.h"
 
 class IfStatementNode : public StatementNode {
 public:

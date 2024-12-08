@@ -5,7 +5,7 @@
 #include "../ASTNode.h"
 #include "ExternalFunctionNode.h"
 #include "FunctionNode.h"
-#include "StatementNode.h"
+#include "statements/StatementNode.h"
 
 class ProgramNode final : ASTNode {
 public:

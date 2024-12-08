@@ -4,14 +4,15 @@
 #include "nodes/CodeBlockNode.h"
 #include "nodes/ExpressionNode.h"
 #include "nodes/FunctionNode.h"
-#include "nodes/StatementNode.h"
+#include "nodes/statements/StatementNode.h"
 #include "nodes/ExternalFunctionNode.h"
 #include "nodes/ProgramNode.h"
-#include "nodes/IfStatementNode.h"
+#include "nodes/statements/IfStatementNode.h"
 #include "nodes/ParameterNode.h"
-#include "nodes/ReturnStatementNode.h"
+#include "nodes/statements/ReturnStatementNode.h"
 
 #include "../grammar/typlypBaseVisitor.h"
+#include "nodes/statements/WhileStatementNode.h"
 
 class ASTBuilder : public typlypBaseVisitor {
 public:
@@ -91,7 +92,19 @@ public:
         if (context->returnStatement())
             return std::any_cast<Ptr<StatementNode>>(visitReturnStatement(context->returnStatement()));
 
-        return nullptr;
+        if (context->whileStatement())
+            return std::any_cast<Ptr<StatementNode>>(visitWhileStatement(context->whileStatement()));
+
+        return std::make_shared<StatementNode>();
+    }
+
+    std::any visitWhileStatement(typlypParser::WhileStatementContext* context) override {
+        auto node = std::make_shared<WhileStatementNode>();
+
+        node->condition = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
+        node->body = std::any_cast<Ptr<CodeBlockNode>>(visitBlock(context->block()));
+
+        return static_cast<Ptr<StatementNode>>(node);
     }
 
     std::any visitReturnStatement(typlypParser::ReturnStatementContext* context) override {

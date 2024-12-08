@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../ASTNode.h"
-#include "ExpressionNode.h"
+#include "../../ASTNode.h"
+#include "../ExpressionNode.h"
 
-class StatementNode : public ASTNode {};
+class StatementNode : public ASTNode { };
 
 class VariableDeclarationNode : public StatementNode {
 public:

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "StatementNode.h"
+#include "statements/StatementNode.h"
 
 class CodeBlockNode : public ASTNode {
 public:

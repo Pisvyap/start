@@ -18,12 +18,12 @@ block : '{' statement* '}';
 
 // Операторы
 statement
-    : varDecl
+    : varDecl // done
     | assignment
     | arrayAssignment
-    | returnStatement
-    | ifStatement
-    | whileStatement
+    | returnStatement // done
+    | ifStatement // done
+    | whileStatement // done
     | forStatement
     | expr ';'
     ;

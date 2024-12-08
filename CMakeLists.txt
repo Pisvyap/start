@@ -19,11 +19,12 @@ set(
         ast/nodes/ExpressionNode.h
         ast/nodes/ExternalFunctionNode.h
         ast/nodes/FunctionNode.h
-        ast/nodes/IfStatementNode.h
         ast/nodes/ParameterNode.h
         ast/nodes/ProgramNode.h
-        ast/nodes/ReturnStatementNode.h
-        ast/nodes/StatementNode.h
+        ast/nodes/statements/IfStatementNode.h
+        ast/nodes/statements/ReturnStatementNode.h
+        ast/nodes/statements/StatementNode.h
+        ast/nodes/statements/WhileStatementNode.h
 )
 
 add_subdirectory(antlr4-cpp-runtime)
