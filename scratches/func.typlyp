@@ -1,3 +1,4 @@
 poka (arr[left] < pivot) {
     pust left: chislo = 1;
+    narisovatChislo(result);
 }

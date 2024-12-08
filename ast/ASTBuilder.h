@@ -2,7 +2,7 @@
 
 #include "ASTNode.h"
 #include "nodes/CodeBlockNode.h"
-#include "nodes/ExpressionNode.h"
+#include "nodes/expressions/ExpressionNode.h"
 #include "nodes/FunctionNode.h"
 #include "nodes/statements/StatementNode.h"
 #include "nodes/ExternalFunctionNode.h"
@@ -12,7 +12,14 @@
 #include "nodes/statements/ReturnStatementNode.h"
 
 #include "../grammar/typlypBaseVisitor.h"
+#include "nodes/expressions/FunctionCallExpression.h"
+#include "nodes/statements/ExpressionStatementNode.h"
 #include "nodes/statements/WhileStatementNode.h"
+
+template<typename Node>
+Ptr<Node> acast(std::any any) {
+    return std::any_cast<Ptr<Node>>(any);
+}
 
 class ASTBuilder : public typlypBaseVisitor {
 public:
@@ -95,7 +102,10 @@ public:
         if (context->whileStatement())
             return std::any_cast<Ptr<StatementNode>>(visitWhileStatement(context->whileStatement()));
 
-        return std::make_shared<StatementNode>();
+        // Если ничего конкретного, то это statement в виде `expr;`
+        auto node = std::make_shared<ExpressionStatementNode>();
+        node->expression = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
+        return static_cast<Ptr<StatementNode>>(node);
     }
 
     std::any visitWhileStatement(typlypParser::WhileStatementContext* context) override {
@@ -136,7 +146,17 @@ public:
     }
 
     std::any visitExpr(typlypParser::ExprContext* context) override {
-        auto exprNode = std::make_shared<ExpressionNode>();
-        return exprNode;
+        if (context->ID() && context->LPAREN() && context->RPAREN()) { // Есть имя и скобки () -> вызов функции
+            // TODO проверка на вызов внешней функции? Или не нужна
+            auto node = std::make_shared<FunctionCallExpression>();
+            node->name = context->ID()->getText();
+            if (context->argList())
+                for (auto arg : context->argList()->expr())
+                    node->arguments.push_back(std::any_cast<Ptr<ExpressionNode>>(visitExpr(arg)));
+
+            return static_cast<Ptr<ExpressionNode>>(node);
+        }
+
+        return std::make_shared<ExpressionNode>();
     }
 };

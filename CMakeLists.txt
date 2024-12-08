@@ -16,7 +16,7 @@ set(
         ast/ASTNode.cpp
         ast/ASTBuilder.cpp
         ast/nodes/CodeBlockNode.h
-        ast/nodes/ExpressionNode.h
+        ast/nodes/expressions/ExpressionNode.h
         ast/nodes/ExternalFunctionNode.h
         ast/nodes/FunctionNode.h
         ast/nodes/ParameterNode.h
@@ -25,6 +25,8 @@ set(
         ast/nodes/statements/ReturnStatementNode.h
         ast/nodes/statements/StatementNode.h
         ast/nodes/statements/WhileStatementNode.h
+        ast/nodes/statements/ExpressionStatementNode.h
+        ast/nodes/expressions/FunctionCallExpression.h
 )
 
 add_subdirectory(antlr4-cpp-runtime)

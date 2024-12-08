@@ -2,7 +2,7 @@
 
 #include "StatementNode.h"
 #include "../CodeBlockNode.h"
-#include "../ExpressionNode.h"
+#include "../expressions/ExpressionNode.h"
 
 class IfStatementNode : public StatementNode {
 public:
