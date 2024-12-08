@@ -3,6 +3,7 @@
 
 #include "LiteralNode.h"
 
+// TODO use 128bit integers
 class NumberLiteralNode : public LiteralNode {
 public:
     int value;
