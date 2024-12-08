@@ -1,5 +1,7 @@
 #pragma once
 
+#include <typlypLexer.h>
+
 #include "ASTNode.h"
 #include "nodes/CodeBlockNode.h"
 #include "nodes/expressions/ExpressionNode.h"
@@ -12,7 +14,11 @@
 #include "nodes/statements/ReturnStatementNode.h"
 
 #include "../grammar/typlypBaseVisitor.h"
+#include "nodes/expressions/BinaryOperationNode.h"
+#include "nodes/expressions/BoolLiteralNode.h"
 #include "nodes/expressions/FunctionCallExpression.h"
+#include "nodes/expressions/IdentifierNode.h"
+#include "nodes/expressions/NumberLiteralNode.h"
 #include "nodes/statements/ExpressionStatementNode.h"
 #include "nodes/statements/WhileStatementNode.h"
 
@@ -154,6 +160,45 @@ public:
                 for (auto arg : context->argList()->expr())
                     node->arguments.push_back(std::any_cast<Ptr<ExpressionNode>>(visitExpr(arg)));
 
+            return static_cast<Ptr<ExpressionNode>>(node);
+        }
+
+        if (context->expr().size() == 2) {
+            auto node = std::make_shared<BinaryOperationNode>();
+
+            node->left = acast<ExpressionNode>(visitExpr(context->expr()[0]));
+            node->right = acast<ExpressionNode>(visitExpr(context->expr()[1]));
+
+            if (context->PLUS()) node->operation = BinaryOperationNode::Add;
+            else if (context->MINUS()) node->operation = BinaryOperationNode::Sub;
+            else if (context->MULT()) node->operation = BinaryOperationNode::Mul;
+            else if (context->DIV()) node->operation = BinaryOperationNode::Div;
+            else if (context->MOD()) node->operation = BinaryOperationNode::Mod;
+            else if (context->EQ()) node->operation = BinaryOperationNode::EQ;
+            else if (context->NEQ()) node->operation = BinaryOperationNode::NE;
+            else if (context->GT()) node->operation = BinaryOperationNode::GT;
+            else if (context->GE()) node->operation = BinaryOperationNode::GE;
+            else if (context->LT()) node->operation = BinaryOperationNode::LT;
+            else if (context->LE()) node->operation = BinaryOperationNode::LE;
+
+            return static_cast<Ptr<ExpressionNode>>(node);
+        }
+
+        if (context->INT()) {
+            auto node = std::make_shared<NumberLiteralNode>();
+            node->value = std::stoi(context->INT()->getText());
+            return static_cast<Ptr<ExpressionNode>>(node);
+        }
+
+        if (context->BOOL()) {
+            auto node = std::make_shared<BoolLiteralNode>();
+            node->value = context->BOOL()->getText() == "pravda";
+            return static_cast<Ptr<ExpressionNode>>(node);
+        }
+
+        if (context->ID() && context->expr().empty()) {
+            auto node = std::make_shared<IdentifierNode>();
+            node->name = context->ID()->getText();
             return static_cast<Ptr<ExpressionNode>>(node);
         }
 

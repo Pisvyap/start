@@ -27,6 +27,13 @@ set(
         ast/nodes/statements/WhileStatementNode.h
         ast/nodes/statements/ExpressionStatementNode.h
         ast/nodes/expressions/FunctionCallExpression.h
+        ast/nodes/expressions/BinaryOperationNode.h
+        ast/nodes/expressions/UnaryOperationNode.h
+        ast/nodes/statements/AssigmentStatementNode.h
+        ast/nodes/expressions/LiteralNode.h
+        ast/nodes/expressions/NumberLiteralNode.h
+        ast/nodes/expressions/BoolLiteralNode.h
+        ast/nodes/expressions/IdentifierNode.h
 )
 
 add_subdirectory(antlr4-cpp-runtime)

@@ -57,19 +57,19 @@ forUpdate : assignment;
 
 // Выражения
 expr
-    : expr ('*' | '/' | '%') expr
-    | expr ('+' | '-') expr
-    | expr ('<' | '<=' | '>' | '>=') expr
-    | expr ('==' | '!=') expr
-    | '!' expr
+    : expr ('*' | '/' | '%') expr // done
+    | expr ('+' | '-') expr // done
+    | expr ('<' | '<=' | '>' | '>=') expr // done
+    | expr ('==' | '!=') expr // done
+    | '!' expr // done
     | ID
     | ID '[' expr ']'
     | INT
     | BOOL
     | '(' expr ')'
-    | ID '(' argList? ')'
+    | ID '(' argList? ')' // done
     | 'new' type '[' expr ']' // Создание массива
-    | 'extern' ID '(' argList? ')'
+    | 'extern' ID '(' argList? ')' // done?
     ;
 
 // Список аргументов
