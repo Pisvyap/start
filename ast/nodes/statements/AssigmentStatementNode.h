@@ -7,6 +7,6 @@ public:
     Ptr<ExpressionNode> value;
     void print(const int indent) override {
         ASTNode::print(indent);
-        std::cout << name << " = "; value->print(indent); std::cout << std::endl;
+        std::cout << name << " := "; value->print(indent); std::cout << std::endl;
     }
 };

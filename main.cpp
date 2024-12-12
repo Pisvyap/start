@@ -25,7 +25,7 @@ std::string readFile(const std::string& fileName) {
 
 
 int main() {
-    const std::string input = readFile("func.typlyp");
+    const std::string input = readFile("test.typlyp");
 
     // Создание ANTLR потока
     antlr4::ANTLRInputStream inputStream(input);

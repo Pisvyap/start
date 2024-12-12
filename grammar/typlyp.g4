@@ -19,7 +19,7 @@ block : '{' statement* '}';
 // Операторы
 statement
     : varDecl // done
-    | assignment
+    | assignment // done
     | arrayAssignment
     | returnStatement // done
     | ifStatement // done
@@ -62,11 +62,11 @@ expr
     | expr ('<' | '<=' | '>' | '>=') expr // done
     | expr ('==' | '!=') expr // done
     | '!' expr // done
-    | ID
-    | ID '[' expr ']'
-    | INT
-    | BOOL
-    | '(' expr ')'
+    | ID // done
+    | ID '[' expr ']' // done
+    | INT // done
+    | BOOL // done
+    | '(' expr ')' // done
     | ID '(' argList? ')' // done
     | 'new' type '[' expr ']' // Создание массива
     | 'extern' ID '(' argList? ')' // done?

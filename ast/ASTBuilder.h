@@ -14,12 +14,15 @@
 #include "nodes/statements/ReturnStatementNode.h"
 
 #include "../grammar/typlypBaseVisitor.h"
+#include "nodes/expressions/ArrayIndexExpression.h"
 #include "nodes/expressions/BinaryOperationNode.h"
 #include "nodes/expressions/BoolLiteralNode.h"
 #include "nodes/expressions/FunctionCallExpression.h"
 #include "nodes/expressions/IdentifierNode.h"
 #include "nodes/expressions/NumberLiteralNode.h"
+#include "nodes/statements/AssigmentStatementNode.h"
 #include "nodes/statements/ExpressionStatementNode.h"
+#include "nodes/statements/VariableDecalrationNode.h"
 #include "nodes/statements/WhileStatementNode.h"
 
 template<typename Node>
@@ -108,9 +111,21 @@ public:
         if (context->whileStatement())
             return std::any_cast<Ptr<StatementNode>>(visitWhileStatement(context->whileStatement()));
 
+        if (context->assignment())
+            return std::any_cast<Ptr<StatementNode>>(visitAssignment(context->assignment()));
+
         // Если ничего конкретного, то это statement в виде `expr;`
         auto node = std::make_shared<ExpressionStatementNode>();
         node->expression = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
+        return static_cast<Ptr<StatementNode>>(node);
+    }
+
+    std::any visitAssignment(typlypParser::AssignmentContext* context) override {
+        auto node = std::make_shared<AssigmentStatementNode>();
+
+        node->name = context->ID()->getText();
+        node->value = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
+
         return static_cast<Ptr<StatementNode>>(node);
     }
 
@@ -200,6 +215,18 @@ public:
             auto node = std::make_shared<IdentifierNode>();
             node->name = context->ID()->getText();
             return static_cast<Ptr<ExpressionNode>>(node);
+        }
+
+        if (context->ID() && context->LBRACKET() && context->RBRACKET() && context->expr().size() == 1) {
+            auto node = std::make_shared<ArrayIndexExpression>();
+            node->arrayName = context->ID()->getText();
+            node->index = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
+            return static_cast<Ptr<ExpressionNode>>(node);
+        }
+
+        // (expr)
+        if (context->LPAREN() && context->RPAREN()) {
+            return visitExpr(context->expr()[0]);
         }
 
         return std::make_shared<ExpressionNode>();

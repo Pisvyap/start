@@ -34,6 +34,8 @@ set(
         ast/nodes/expressions/NumberLiteralNode.h
         ast/nodes/expressions/BoolLiteralNode.h
         ast/nodes/expressions/IdentifierNode.h
+        ast/nodes/expressions/ArrayIndexExpression.h
+        ast/nodes/statements/VariableDecalrationNode.h
 )
 
 add_subdirectory(antlr4-cpp-runtime)

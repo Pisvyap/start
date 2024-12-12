@@ -4,10 +4,7 @@ delo quickSort(arr: chislo[], left: chislo, right: chislo): chislo[] {
     }
 
     pust pivot: chislo = arr[(left + right) / 2];
-    pust index: chislo = partition(arr, left, right, pivot);
-
-    arr = quickSort(arr, left, index - 1);
-    arr = quickSort(arr, index, right);
+    ret = quickSort(arr, index, right);
 
     vernut arr;
 }

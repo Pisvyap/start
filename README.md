@@ -62,10 +62,8 @@ ANTLR и так умеет строить. Я предполагаю, что AST
 
 ---
 
-## Чего пока нет
+## TODO
 
 ### AST
-- Поддержки обращения к массивам `pust pivot: chislo = arr[(left + right) / 2];`
-- Поддержки присваивания `arr = quickSort(arr, index, right);`
 - Поддержки создания через **new** `pust numbers: chislo[] = new chislo[6];`
 - Поддержки цикла for `schitaem (pust i: chislo = 0 ; i<limit; i = i + 1;)`
