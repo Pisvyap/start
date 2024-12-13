@@ -19,9 +19,12 @@
 #include "nodes/expressions/BoolLiteralNode.h"
 #include "nodes/expressions/FunctionCallExpression.h"
 #include "nodes/expressions/IdentifierNode.h"
+#include "nodes/expressions/NewExpression.h"
 #include "nodes/expressions/NumberLiteralNode.h"
+#include "nodes/statements/ArrayAssigmentNode.h"
 #include "nodes/statements/AssigmentStatementNode.h"
 #include "nodes/statements/ExpressionStatementNode.h"
+#include "nodes/statements/ForStatement.h"
 #include "nodes/statements/VariableDecalrationNode.h"
 #include "nodes/statements/WhileStatementNode.h"
 
@@ -114,9 +117,47 @@ public:
         if (context->assignment())
             return std::any_cast<Ptr<StatementNode>>(visitAssignment(context->assignment()));
 
+        if (context->arrayAssignment())
+            return std::any_cast<Ptr<StatementNode>>(visitArrayAssignment(context->arrayAssignment()));
+
+        if (context->forStatement())
+            return std::any_cast<Ptr<StatementNode>>(visitForStatement(context->forStatement()));
+
         // Если ничего конкретного, то это statement в виде `expr;`
         auto node = std::make_shared<ExpressionStatementNode>();
         node->expression = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
+        return static_cast<Ptr<StatementNode>>(node);
+    }
+
+    std::any visitForStatement(typlypParser::ForStatementContext* context) override {
+        auto node = std::make_shared<ForStatement>();
+
+        node->init = std::any_cast<Ptr<StatementNode>>(visitForInit(context->forInit()));
+        node->condition = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
+        node->step = std::any_cast<Ptr<StatementNode>>(visitForUpdate(context->forUpdate()));
+        node->body = std::any_cast<Ptr<CodeBlockNode>>(visitBlock(context->block()));
+
+        return static_cast<Ptr<StatementNode>>(node);;
+    }
+
+    std::any visitForUpdate(typlypParser::ForUpdateContext* context) override {
+        return std::any_cast<Ptr<StatementNode>>(visitAssignment(context->assignment()));
+    }
+
+    std::any visitForInit(typlypParser::ForInitContext* context) override {
+        if (context->varDecl())
+            return std::any_cast<Ptr<StatementNode>>(visitVarDecl(context->varDecl()));
+        else
+            return std::any_cast<Ptr<StatementNode>>(visitAssignment(context->assignment()));
+    }
+
+    std::any visitArrayAssignment(typlypParser::ArrayAssignmentContext* context) override {
+        auto node = std::make_shared<ArrayAssigmentNode>();
+
+        node->arrayName = context->ID()->getText();
+        node->index = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
+        node->value = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[1]));
+
         return static_cast<Ptr<StatementNode>>(node);
     }
 
@@ -221,6 +262,13 @@ public:
             auto node = std::make_shared<ArrayIndexExpression>();
             node->arrayName = context->ID()->getText();
             node->index = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
+            return static_cast<Ptr<ExpressionNode>>(node);
+        }
+
+        if (context->type() && context->LBRACKET() && context->RBRACKET() && context->expr().size() == 1) {
+            auto node = std::make_shared<NewExpression>();
+            node->type = context->type()->getText();
+            node->expression = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
             return static_cast<Ptr<ExpressionNode>>(node);
         }
 

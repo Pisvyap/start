@@ -20,12 +20,12 @@ block : '{' statement* '}';
 statement
     : varDecl // done
     | assignment // done
-    | arrayAssignment
+    | arrayAssignment // done
     | returnStatement // done
     | ifStatement // done
     | whileStatement // done
-    | forStatement
-    | expr ';'
+    | forStatement // done
+    | expr ';' // done
     ;
 
 // Объявление переменной
@@ -68,7 +68,7 @@ expr
     | BOOL // done
     | '(' expr ')' // done
     | ID '(' argList? ')' // done
-    | 'new' type '[' expr ']' // Создание массива
+    | 'new' type '[' expr ']' // Создание массива done
     | 'extern' ID '(' argList? ')' // done?
     ;
 
