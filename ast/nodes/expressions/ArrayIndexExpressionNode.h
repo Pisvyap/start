@@ -1,7 +1,7 @@
 #pragma once
 #include "ExpressionNode.h"
 
-class ArrayIndexExpression : public ExpressionNode {
+class ArrayIndexExpressionNode : public ExpressionNode {
 public:
     std::string name;
     Ptr<ExpressionNode> index;
@@ -23,4 +23,5 @@ public:
 
         this->type = arr->type == INT_ARRAY ? INT : BOOL;
     }
+    virtual Value *Codegen();
 };

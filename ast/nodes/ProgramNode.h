@@ -35,4 +35,5 @@ public:
         for (const auto& stmt : statements)
             stmt->semantic_check(table);
     }
+    virtual Value *Codegen();
 };
