@@ -22,6 +22,7 @@ public:
         ASTNode::print(indent);
         for (auto& stmt : statements)
             stmt->print(indent);
+        std::cout << std::endl;
     }
 
     void semantic_check(SemanticTable& table) override {

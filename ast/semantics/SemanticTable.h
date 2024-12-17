@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
-enum Type {
+enum Type { // TODO возможно нужна поддержка для VOID так как внешние функции могут его возвращать
     INT,
     BOOL,
     INT_ARRAY,
@@ -13,13 +13,16 @@ enum Type {
 };
 
 static Type map_type(const std::string& name) {
-    switch (name) {
-        case "chislo": return INT;
-        case "logika": return BOOL;
-        case "chislo[]": return INT_ARRAY;
-        case "logika[]": return BOOL_ARRAY;
-        default: throw std::runtime_error("Unsupported type " + name);
-    }
+    if (name == "chislo")
+        return INT;
+    if (name == "logika")
+        return BOOL;
+    if (name == "chislo[]")
+        return INT_ARRAY;
+    if (name == "logika[]")
+        return BOOL_ARRAY;
+
+    throw std::runtime_error("Unsupported type " + name);
 }
 
 static std::string map_type(Type type) {
@@ -37,6 +40,8 @@ struct Symbol {
     Type type;
     bool isFunction;
     std::vector<Type> paramTypes; // Типы параметров, если функция
+
+    Symbol() { }
 
     Symbol(Type type, bool isFunction) : type(type), isFunction(isFunction) {}
 

@@ -1,30 +1,14 @@
 vneshnaya narisovatChislo(x: chislo): chislo;
+vneshnaya narisovatChisla(x: chislo[]): chislo;
 
-delo eratosthenes(n: chislo): logika[] {
-    pust primes: logika[] = new logika[n+1];
-
-    primes[0] = lozh;
-    primes[1] = lozh;
-
-    pust p: chislo = 2;
-    poka (p * p <= n) {
-        esli (primes[p] == pravda) {
-            pust i: chislo = p * p;
-            poka (i <= n) {
-                primes[i] = lozh;
-                i = i + p;
-            }
-        }
-        p = p + 1;
-    }
-
-    vernut primes;
-}
-
-pust limit: chislo = 30;
-pust primes: chislo[] = eratosthenes(limit);
-schitaem (pust i: chislo = 0 ; i<limit; i = i + 1;){
-    esli (primes[i]){
-    narisovatChislo(i);
+delo factorial(n: chislo): chislo {
+    esli (n == 0) {
+        vernut 1;
+    } inache {
+        vernut n * factorial(n - 1);
     }
 }
+
+pust number: chislo = 20;
+pust result: chislo = factorial(number);
+narisovatChislo(result);

@@ -57,7 +57,7 @@ public:
         auto node = std::make_shared<ExternalFunctionNode>();
 
         node->name = context->ID()->getText();
-        node->returnType = context->type()->getText();
+        node->returnType = map_type(context->type()->getText());
         if (context->paramList()) {
             for (auto& param : context->paramList()->param()) {
                 node->parameters.push_back(std::any_cast<Ptr<ParameterNode>>(visitParam(param)));
@@ -71,13 +71,11 @@ public:
         auto functionNode = std::make_shared<FunctionNode>();
 
         functionNode->name = context->ID()->getText();
-        functionNode->returnType = context->type()->getText();
+        functionNode->returnType = map_type(context->type()->getText());
 
-        if (context->paramList()) {
-            for (auto param : context->paramList()->param()) {
+        if (context->paramList())
+            for (auto param : context->paramList()->param())
                 functionNode->parameters.push_back(std::any_cast<Ptr<ParameterNode>>(visitParam(param)));
-            }
-        }
 
         functionNode->body = std::any_cast<Ptr<CodeBlockNode>>(visitBlock(context->block()));
 
@@ -87,7 +85,7 @@ public:
     std::any visitParam(typlypParser::ParamContext* context) override {
         auto paramNode = std::make_shared<ParameterNode>();
         paramNode->name = context->ID()->getText();
-        paramNode->type = context->type()->getText();
+        paramNode->type = map_type(context->type()->getText());
 
         return paramNode;
     }
@@ -154,7 +152,7 @@ public:
     std::any visitArrayAssignment(typlypParser::ArrayAssignmentContext* context) override {
         auto node = std::make_shared<ArrayAssigmentNode>();
 
-        node->arrayName = context->ID()->getText();
+        node->name = context->ID()->getText();
         node->index = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
         node->value = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[1]));
 
@@ -201,7 +199,7 @@ public:
         auto varDeclNode = std::make_shared<VariableDeclarationNode>();
 
         varDeclNode->name = context->ID()->getText();
-        varDeclNode->type = context->type()->getText();
+        varDeclNode->type = map_type(context->type()->getText());
         varDeclNode->initializer = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
 
         return static_cast<Ptr<StatementNode>>(varDeclNode);
@@ -241,14 +239,14 @@ public:
         }
 
         if (context->INT()) {
-            auto node = std::make_shared<NumberLiteralNode>();
-            node->value = std::stoi(context->INT()->getText());
+            auto node = std::make_shared<NumberLiteralNode>(context->INT()->getText());
+            std::cout << "FOUND INT" << context->INT()->getText() << std::endl;
             return static_cast<Ptr<ExpressionNode>>(node);
         }
 
         if (context->BOOL()) {
-            auto node = std::make_shared<BoolLiteralNode>();
-            node->value = context->BOOL()->getText() == "pravda";
+            auto node = std::make_shared<BoolLiteralNode>(context->BOOL()->getText());
+            std::cout << "FOUND BOOL" << context->BOOL()->getText() <<  std::endl;
             return static_cast<Ptr<ExpressionNode>>(node);
         }
 
@@ -260,14 +258,14 @@ public:
 
         if (context->ID() && context->LBRACKET() && context->RBRACKET() && context->expr().size() == 1) {
             auto node = std::make_shared<ArrayIndexExpression>();
-            node->arrayName = context->ID()->getText();
+            node->name = context->ID()->getText();
             node->index = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
             return static_cast<Ptr<ExpressionNode>>(node);
         }
 
         if (context->type() && context->LBRACKET() && context->RBRACKET() && context->expr().size() == 1) {
             auto node = std::make_shared<NewExpression>();
-            node->type = context->type()->getText();
+            node->type = map_type(context->type()->getText());
             node->expression = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
             return static_cast<Ptr<ExpressionNode>>(node);
         }
