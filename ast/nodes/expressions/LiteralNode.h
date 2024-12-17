@@ -1,13 +1,13 @@
 #pragma once
 #include "ExpressionNode.h"
 
+// Это когда указываем число или true/false
 class LiteralNode : public ExpressionNode {
 public:
-    enum VariableType {
-        INT, BOOL
-    };
-    VariableType type;
+    int int_value;
+    bool bool_value;
+
     void print(const int indent) override {
-        std::cout << (type == VariableType::INT ? "INT" : "BOOL");
+        std::cout << type;
     }
 };

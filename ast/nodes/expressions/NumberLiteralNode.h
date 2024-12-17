@@ -1,5 +1,4 @@
 #pragma once
-#include <bemapiset.h>
 
 #include "LiteralNode.h"
 
@@ -7,8 +6,13 @@
 class NumberLiteralNode : public LiteralNode {
 public:
     int value;
-    NumberLiteralNode() {
-        type = VariableType::INT;
+
+    NumberLiteralNode(const std::string& value) {
+        this->value = std::stoi(value);
+        this->type = INT;
+
+        this->int_value = this->value;
+        this->bool_value = this->value != 0;
     }
     void print(const int indent) override {
         std::cout << value;

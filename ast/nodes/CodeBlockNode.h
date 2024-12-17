@@ -12,4 +12,10 @@ public:
         for (auto& stmt : statements)
             stmt->print(indent + 1);
     }
+
+    void semantic_check(SemanticTable& table) override {
+        for (const auto& stmt : statements) {
+            stmt->semantic_check(table);
+        }
+    }
 };

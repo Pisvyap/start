@@ -11,33 +11,81 @@ public:
     BinaryOperationType operation;
     Ptr<ExpressionNode> left;
     Ptr<ExpressionNode> right;
+
     void print(const int indent) override {
         left->print(indent); std::cout << ' ' << print_enum(operation) << ' '; right->print(indent);
     }
+
+    void semantic_check(SemanticTable& table) override {
+        left->semantic_check(table);
+        right->semantic_check(table);
+        if (left->type != right->type)
+            throw std::runtime_error("Can't perform binary operation between types "
+                + std::to_string(left->type) + " and " + std::to_string(right->type));
+
+        switch (operation) {
+            case Add:
+            case Sub:
+            case Mul:
+            case Div:
+            case Mod:
+            case LT:
+            case LE:
+            case GT:
+            case GE:
+                if (left->type != INT)
+                    throw std::runtime_error("Arithmetic operations require 'chislo' type.");
+                break;
+            default:
+                break;
+        }
+
+        this->type = get_type();
+    }
 private:
+    Type get_type() const {
+        switch (operation) {
+            case Add:
+            case Sub:
+            case Mul:
+            case Div:
+            case Mod:
+                return INT;
+            case LT:
+            case LE:
+            case GT:
+            case GE:
+            case EQ:
+            case NE:
+                return BOOL;
+        }
+
+        throw std::runtime_error("Can't define return type");
+    }
+
     std::string print_enum(BinaryOperationType op) {
         switch (op) {
-            case BinaryOperationType::Add:
+            case Add:
                 return "+";
-            case BinaryOperationType::Sub:
+            case Sub:
                 return "-";
-            case BinaryOperationType::Mul:
+            case Mul:
                 return "*";
-            case BinaryOperationType::Div:
+            case Div:
                 return "/";
-            case BinaryOperationType::Mod:
+            case Mod:
                 return "%";
-            case BinaryOperationType::LT:
+            case LT:
                 return "<";
-            case BinaryOperationType::LE:
+            case LE:
                 return "<=";
-            case BinaryOperationType::GT:
+            case GT:
                 return ">";
-            case BinaryOperationType::GE:
+            case GE:
                 return ">=";
-            case BinaryOperationType::EQ:
+            case EQ:
                 return "==";
-            case BinaryOperationType::NE:
+            case NE:
                 return "!=";
         }
     }
