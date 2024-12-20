@@ -12,6 +12,19 @@
 #include "nodes/expressions/ArrayIndexExpressionNode.h"
 #include "nodes/expressions/NewExpressionNode.h"
 #include "nodes/expressions/FunctionCallExpressionNode.h"
+#include "nodes/statements/ArrayAssigmentNode.h"
+#include "nodes/statements/AssigmentStatementNode.h"
+#include "nodes/statements/ExpressionStatementNode.h"
+#include "nodes/statements/ForStatementNode.h"
+#include "nodes/statements/IfStatementNode.h"
+#include "nodes/statements/ReturnStatementNode.h"
+#include "nodes/statements/VariableDecalrationNode.h"
+#include "nodes/statements/WhileStatementNode.h"
+#include "nodes/CodeBlockNode.h"
+#include "nodes/ExternalFunctionNode.h"
+#include "nodes/FunctionNode.h"
+#include "nodes/ParameterNode.h"
+#include "nodes/ProgramNode.h"
 
 
 using namespace llvm_gen;
@@ -126,7 +139,7 @@ Value* NewExpressionNode::Codegen() {
 }
 
 Value* FunctionCallExpressionNode::Codegen() {
-    auto it = namedFunctions.find(name);
+    auto it = NamedValues.find(name);
     llvm::Function* func = it->second;
     std::vector<llvm::Value*> argv;
     for (auto arg : arguments) {
@@ -139,3 +152,154 @@ Value* FunctionCallExpressionNode::Codegen() {
 
 // Ноды STATEMENTS
 
+Value* ArrayAssigmentNode::Codegen() {
+    llvm::Value* idxPtr = index->Codegen();
+    llvm::Value* valPtr = value->Codegen();
+    auto it = NamedValues.find(arrayName);
+    llvm::Value* arrayPtr = it->second;
+    llvm::Value* idx64 = Builder.CreateSExt(idxPtr, llvm::Type::getInt64Ty(context), "index64");
+    llvm::Value* elementPtr = Builder.CreateGEP(
+            arrayPtr,
+            {llvm::ConstantInt::get(
+                    llvm::Type::getInt64Ty(context),
+                    0),
+             idx64},
+             "elementptr");
+    Builder.CreateStore(valPtr, elementPtr);
+    return nullptr;
+}
+
+Value* AssigmentStatementNode::Codegen() {
+    llvm::Value* valPtr = value->Codegen();
+    auto it = NamedValues.find(name);
+    if (it == NamedValues.end()) {
+        return nullptr;
+    }
+    llvm::Value* varPtr = it->second;
+    Builder.CreateStore(valPtr, varPtr);
+    return nullptr;
+}
+
+Value* ExpressionStatementNode::Codegen() {
+    Builder.insertBefore(expression, context);
+    Builder.setInsertPoint(llvm::BasicBlockGetFirst(context));
+    return expression->Codegen();
+}
+
+Value* ForStatementNode::Codegen() { //Очень надо будет чекать
+    BasicBlock *initBB = BasicBlock::Create(context, "for.init");
+    Builder.CreateBr(initBB);
+    Builder.SetInsertPoint(initBB);
+    init->Codegen();
+    Function *TheFunction = Builder.GetInsertBlock()->getParent();
+    BasicBlock *condBB = BasicBlock::Create(context, "for.cond", TheFunction);
+    BasicBlock *bodyBB = BasicBlock::Create(context, "for.body", TheFunction);
+    BasicBlock *stepBB = BasicBlock::Create(context, "for.step", TheFunction);
+    BasicBlock *afterBB = BasicBlock::Create(context, "for.after", TheFunction);
+
+    Builder.CreateBr(condBB);
+    Value *condVal = condition->Codegen();
+    Builder.CreateCondBr(condVal, bodyBB, afterBB);
+    Builder.SetInsertPoint(bodyBB);
+    body->Codegen();
+
+    Builder.CreateBr(stepBB);
+    Builder.SetInsertPoint(stepBB);
+    step->Codegen();
+    Builder.CreateBr(condBB);
+    Builder.SetInsertPoint(afterBB);
+    return ConstantInt::get(Type::getInt32Ty(context), 0);
+}
+
+Value* IfStatementNode::Codegen() { //Очень надо будет чекать
+    Value *condVal = condition->Codegen();
+    Function *TheFunction = Builder.GetInsertBlock()->getParent();
+    BasicBlock *thenBB = BasicBlock::Create(context, "if.then", TheFunction);
+    BasicBlock *elseBB = BasicBlock::Create(context, "if.else", TheFunction);
+    BasicBlock *mergeBB = BasicBlock::Create(context, "if.merge", TheFunction);
+    Builder.CreateCondBr(condVal, thenBB, elseBB);
+    Builder.SetInsertPoint(thenBB);
+    if (thenBlock != nullptr) {
+        thenBlock->Codegen();
+    }
+    Builder.CreateBr(mergeBB);
+    TheFunction->getBasicBlockList().push_back(elseBB);
+    Builder.SetInsertPoint(elseBB);
+    if (elseBlock != nullptr) {
+        elseBlock->Codegen();
+    }
+    Builder.CreateBr(mergeBB);
+
+    TheFunction->getBasicBlockList().push_back(mergeBB);
+    Builder.SetInsertPoint(mergeBB);
+
+    return ConstantInt::get(Type::getInt32Ty(context), 0);
+}
+
+Value* ReturnStatementNode::Codegen() {
+    Value* retVal = expression ? expression->Codegen() : nullptr;
+    Builder.CreateRet(retVal);
+    return nullptr;
+}
+
+Value* VariableDeclarationNode::Codegen() {
+    Type* varType = Type::getTypeByName(type, context);
+    Value* initVal = initializer ? initializer->Codegen() : nullptr;
+    initVal = Constant::getNullValue(varType);
+    AllocaInst* alloc = Builder.CreateAlloca(varType, nullptr, name.c_str());
+    Builder.CreateStore(initVal, alloc);
+    NamedValues[name] = alloc;
+    return nullptr;
+}
+
+Value* WhileStatementNode::Codegen()  { //Очень надо будет чекать
+    Function *TheFunction = Builder.GetInsertBlock()->getParent();
+    BasicBlock *condBB = BasicBlock::Create(context, "while.cond", TheFunction);
+    BasicBlock *bodyBB = BasicBlock::Create(context, "while.body", TheFunction);
+    BasicBlock *afterBB = BasicBlock::Create(context, "while.after", TheFunction);
+
+    Builder.CreateBr(condBB);
+    Builder.SetInsertPoint(condBB);
+    Value *condVal = condition->Codegen();
+
+    Builder.CreateCondBr(condVal, bodyBB, afterBB);
+    Builder.SetInsertPoint(bodyBB);
+    body->Codegen();
+    Builder.CreateBr(condBB);
+    Builder.SetInsertPoint(afterBB);
+
+    return ConstantInt::get(Type::getInt32Ty(context), 0);
+}
+
+// Ноды остальные
+
+Value CodeBlockNode::Codegen() {
+    for (auto &statement : statements) {
+        Value* result = statement->Codegen();
+    }
+    return nullptr;
+}
+
+Value ExternalFunctionNode::Codegen() { //Доделать, пока хз как точно
+}
+
+Value FunctionNode::Codegen() { //Доделать, пока хз как точно
+
+}
+
+Value ParameterNode::Codegen() { //Доделать, пока хз как точно
+}
+
+
+Value ProgramNode::Codegen() {
+    for (auto &extFunc : externalFunctions) {
+        extFunc->Codegen();
+    }
+    for (auto &func : functions) {
+        func->Codegen();
+    }
+    for (auto &stmt : statements) {
+        stmt->Codegen()
+    }
+    return nullptr;
+}
