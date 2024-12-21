@@ -1,10 +1,13 @@
 
-// Generated from C:/Users/ladyp/CLionProjects/tyaplyap/antlr/grammar/typlyp.g4 by ANTLR 4.13.2
+// Generated from C:/Users/ladyp/CLionProjects/tyaplyap/grammar/typlyp.g4 by ANTLR 4.13.2
 
 #pragma once
 
+
 #include "antlr4-runtime.h"
 #include "typlypParser.h"
+
+
 
 /**
  * This class defines an abstract visitor for a parse tree

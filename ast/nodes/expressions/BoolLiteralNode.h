@@ -6,7 +6,7 @@ public:
     bool value;
 
     BoolLiteralNode(const std::string& value) {
-        this->value = value == "pravda";
+        this->value = (value == "pravda");
         this->type = BOOL;
 
         this->bool_value = this->value;

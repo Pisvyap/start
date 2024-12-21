@@ -3,7 +3,7 @@ vneshnaya narisovatChisla(x: chislo[]): chislo;
 
 delo factorial(n: chislo): chislo {
     esli (n == 0) {
-        vernut 1;
+        vernut pravda;
     } inache {
         vernut n * factorial(n - 1);
     }
