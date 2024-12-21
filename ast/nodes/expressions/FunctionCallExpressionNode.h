@@ -3,7 +3,7 @@
 
 #include "ExpressionNode.h"
 
-class FunctionCallExpression : public ExpressionNode {
+class FunctionCallExpressionNode : public ExpressionNode {
 public:
     std::string name;
     std::vector<Ptr<ExpressionNode>> arguments;
@@ -38,4 +38,5 @@ public:
         // Сохраняемый возвращаемый тип
         this->type = func->type;
     }
+    virtual Value *Codegen();
 };

@@ -21,4 +21,5 @@ public:
         Symbol var(type, false);
         table.addSymbol(name, var);
     }
+    virtual Value *Codegen();
 };

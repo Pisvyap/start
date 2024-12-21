@@ -24,4 +24,5 @@ public:
           }
           table.addSymbol(name, func);
      }
+    virtual Value *Codegen();
 };

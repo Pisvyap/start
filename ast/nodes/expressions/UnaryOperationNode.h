@@ -24,4 +24,5 @@ public:
 
         this->type = BOOL;
     }
+    virtual Value *Codegen();
 };

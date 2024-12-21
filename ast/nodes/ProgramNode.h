@@ -24,7 +24,6 @@ public:
             stmt->print(indent);
         std::cout << std::endl;
     }
-
     void semantic_check(SemanticTable& table) override {
         for (const auto& ext : externalFunctions)
             ext->semantic_check(table);
