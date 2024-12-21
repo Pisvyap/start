@@ -40,11 +40,14 @@ int main() {
     ASTBuilder builder;
     try {
         auto ast = builder.visitProgram(tree);
-        std::any_cast<Ptr<ProgramNode>>(ast)->print(0);
+        auto enter = std::any_cast<Ptr<ProgramNode>>(ast);
+        enter->print(0);
+
+        SemanticTable table;
+        enter->semantic_check(table);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
     }
-
 
     return 0;
 }

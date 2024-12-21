@@ -23,4 +23,22 @@ public:
             elseBlock->print(indent + 1);
         }
     }
+
+    void semantic_check(SemanticTable& table) override {
+        condition->semantic_check(table);
+        if (condition->type != BOOL)
+            throw std::runtime_error("Type mismatch. Expected 'logika' int IF statement");
+
+        // Обрабатываем THEN ветку
+        table.enterScope();
+        thenBlock->semantic_check(table);
+        table.leaveScope();
+
+        // Обрабатываем ELSE ветку
+        if (elseBlock != nullptr) {
+            table.enterScope();
+            elseBlock->semantic_check(table);
+            table.leaveScope();
+        }
+    }
 };

@@ -39,6 +39,8 @@ set(
         ast/nodes/expressions/NewExpression.h
         ast/nodes/statements/ArrayAssigmentNode.h
         ast/nodes/statements/ForStatement.h
+        ast/semantics/SemanticTable.cpp
+        ast/semantics/SemanticTable.h
 )
 
 add_subdirectory(antlr4-cpp-runtime)

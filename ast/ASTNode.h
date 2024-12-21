@@ -1,8 +1,9 @@
 #pragma once
 
+#include "semantics/SemanticTable.h"
+
 #include <iostream>
 #include <memory>
-#include <string>
 
 
 class ASTNode {
@@ -12,6 +13,8 @@ public:
         for (int i = 0; i < indent; i++)
             std::cout << '\t';
     }
+
+    virtual void semantic_check(SemanticTable& table) { }
 };
 
 template<typename T>

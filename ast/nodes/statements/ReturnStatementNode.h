@@ -10,4 +10,8 @@ public:
         ASTNode::print(indent);
         std::cout << "RETURN "; expression->print(indent); std::cout << "\n";
     }
+
+    void semantic_check(SemanticTable& table) override {
+        expression->semantic_check(table); // TODO надо ли тут как-то обрабатывать, если RETURN в середине функции
+    }
 };

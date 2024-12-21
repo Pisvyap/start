@@ -10,4 +10,8 @@ public:
         std::cout << "ExpressionStatement ";
         expression->print(indent + 1);
     }
+
+    void semantic_check(SemanticTable& table) override {
+        expression->semantic_check(table);
+    }
 };

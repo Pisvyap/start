@@ -7,4 +7,12 @@ public:
     void print(const int indent) override {
         std::cout << name;
     }
+
+    void semantic_check(SemanticTable& table) override {
+        Symbol* decl = table.lookup(name);
+        if (decl == nullptr)
+            throw std::runtime_error("Identifier '" + name + "' does not exist");
+
+        this->type = decl->type;
+    }
 };

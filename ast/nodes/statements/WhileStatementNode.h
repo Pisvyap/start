@@ -13,4 +13,14 @@ public:
         std::cout << std::endl;
         body->print(indent + 1);
     }
+
+    void semantic_check(SemanticTable& table) override {
+        condition->semantic_check(table);
+        if (condition->type != BOOL)
+            throw std::runtime_error("Expected 'logika' in while condition");
+
+        table.enterScope();
+        body->semantic_check(table);
+        table.leaveScope();
+    }
 };
