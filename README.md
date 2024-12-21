@@ -62,6 +62,23 @@ ANTLR и так умеет строить. Я предполагаю, что AST
 
 ---
 
+### Работа с llvm.
+
+Добавил llvm-project как git submodule, при pull вам скачается llvm сурс файлы(+- 3 гб). Могут быть проблемы с clrf и rf читай предупреждения, которые может кидать гит
+Чтобы сбилдить сам llvm нужны cmake(https://community.chocolatey.org/packages/cmake) и ninja(https://github.com/ninja-build/ninja/wiki/Pre-built-Ninja-packages), их нужно установить, удобнее всего через менеджеры пакетов, ссылки чуть раньше. 
+
+Что бы сделать билд нужно прописать
+- cmake -S llvm -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug (Release, RelWithDebInfo)
+- ninja -C build check-llvm
+- Debug - дебаг, долго компилится - дает много дебаг инфы
+- Release - быстро компилится - ноль дебаг инфы
+- RelWithDebInfo - что-то среднее между Debug и Release
+- Подробнее тут https://llvm.org/docs/GettingStarted.html
+
+Теперь в папке build должны появиться нужные файлы для работы кодгена, нужно подключить их через cmake файл
+
+---
+
 ## TODO
 
 ### AST
