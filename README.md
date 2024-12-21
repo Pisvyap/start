@@ -64,8 +64,16 @@ ANTLR и так умеет строить. Я предполагаю, что AST
 
 ### Работа с llvm.
 
-Добавил llvm-project как git submodule, при pull вам скачается llvm сурс файлы(+- 3 гб). Могут быть проблемы с clrf и rf читай предупреждения, которые может кидать гит
-Чтобы сбилдить сам llvm нужны cmake(https://community.chocolatey.org/packages/cmake) и ninja(https://github.com/ninja-build/ninja/wiki/Pre-built-Ninja-packages), их нужно установить, удобнее всего через менеджеры пакетов, ссылки чуть раньше. 
+Добавил llvm-project как git submodule, при pull вам нужно еще сделать команду git submodule update --init --recursive 
+
+Скачается llvm сурс файлы(+- 3 гб). Могут быть проблемы с clrf и rf читай предупреждения, которые может кидать гит
+
+Чтобы сбилдить сам llvm нужны cmake(https://community.chocolatey.org/packages/cmake)
+(https://community.chocolatey.org/packages/cmake.portable) ставить оба, первый ставить через такую команду choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System')
+и ninja(https://github.com/ninja-build/ninja/wiki/Pre-built-Ninja-packages),
+их нужно установить, удобнее всего через менеджеры пакетов(https://chocolatey.org/install), ссылки чуть раньше. 
+
+Может выскачить ошибка при билде, 
 
 Что бы сделать билд нужно прописать
 - cmake -S llvm -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug (Release, RelWithDebInfo)
