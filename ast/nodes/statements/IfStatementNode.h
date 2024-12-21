@@ -41,4 +41,5 @@ public:
             table.leaveScope();
         }
     }
+    virtual Value *Codegen();
 };

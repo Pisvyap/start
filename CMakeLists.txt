@@ -4,6 +4,11 @@ project(typlyp VERSION 1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(LLVM REQUIRED CONFIG)
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+include_directories(${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+
 set(
         SOURCE_FILES
         grammar/typlypBaseListener.cpp
@@ -41,6 +46,7 @@ set(
         ast/nodes/statements/ForStatement.h
         ast/semantics/SemanticTable.cpp
         ast/semantics/SemanticTable.h
+        ast/CodeGeneration.cpp
 )
 
 add_subdirectory(antlr4-cpp-runtime)
@@ -55,6 +61,7 @@ target_link_libraries(
         typlyp
         PRIVATE
         antlr4_static
+        ${LLVM_LIBRARIES}
 )
 
 # Include directories

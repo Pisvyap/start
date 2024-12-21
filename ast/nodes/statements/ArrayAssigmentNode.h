@@ -34,4 +34,5 @@ public:
             || arr->type == BOOL_ARRAY && value->type != BOOL)
             throw std::runtime_error("Type mismatch in array assignment");
     }
+    virtual Value *Codegen();
 };

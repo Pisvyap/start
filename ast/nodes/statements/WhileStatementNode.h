@@ -23,4 +23,5 @@ public:
         body->semantic_check(table);
         table.leaveScope();
     }
+    virtual Value *Codegen();
 };

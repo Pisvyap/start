@@ -15,4 +15,5 @@ public:
     void print(const int indent) override {
         std::cout << (value ? "TRUE" : "FALSE");
     }
+    virtual Value *Codegen();
 };

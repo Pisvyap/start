@@ -14,4 +14,5 @@ public:
     void semantic_check(SemanticTable& table) override {
         expression->semantic_check(table); // TODO надо ли тут как-то обрабатывать, если RETURN в середине функции
     }
+    virtual Value *Codegen();
 };

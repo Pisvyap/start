@@ -15,6 +15,7 @@ public:
     }
 
     virtual void semantic_check(SemanticTable& table) { }
+    virtual Value *Codegen();
 };
 
 template<typename T>

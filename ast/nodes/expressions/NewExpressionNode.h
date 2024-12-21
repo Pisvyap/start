@@ -1,7 +1,7 @@
 #pragma once
 #include "ExpressionNode.h"
 
-class NewExpression : public ExpressionNode {
+class NewExpressionNode : public ExpressionNode {
 public:
     Ptr<ExpressionNode> expression;
     void print(const int indent) override {
@@ -13,4 +13,5 @@ public:
         if (expression->type != INT)
             throw std::runtime_error("Array creation requires 'chislo' expression");
     }
+    virtual Value *Codegen();
 };

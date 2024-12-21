@@ -10,4 +10,5 @@ public:
     void print(const int indent) override {
         std::cout << type;
     }
+    virtual Value *Codegen();
 };

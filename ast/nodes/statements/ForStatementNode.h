@@ -2,7 +2,7 @@
 #include "StatementNode.h"
 #include "../CodeBlockNode.h"
 
-class ForStatement : public StatementNode {
+class ForStatementNode : public StatementNode {
 public:
     Ptr<StatementNode> init; // TODO по хорошему наверное надо отдельную ноду для этого (как в грамматике)
     Ptr<ExpressionNode> condition;
@@ -17,4 +17,5 @@ public:
         step->print(indent + 1);
         body->print(indent + 1);
     }
+    virtual Value *Codegen();
 };
