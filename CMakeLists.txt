@@ -31,7 +31,7 @@ set(
         ast/nodes/statements/StatementNode.h
         ast/nodes/statements/WhileStatementNode.h
         ast/nodes/statements/ExpressionStatementNode.h
-        ast/nodes/expressions/FunctionCallExpression.h
+        ast/nodes/expressions/FunctionCallExpressionNode.h
         ast/nodes/expressions/BinaryOperationNode.h
         ast/nodes/expressions/UnaryOperationNode.h
         ast/nodes/statements/AssigmentStatementNode.h
@@ -39,11 +39,11 @@ set(
         ast/nodes/expressions/NumberLiteralNode.h
         ast/nodes/expressions/BoolLiteralNode.h
         ast/nodes/expressions/IdentifierNode.h
-        ast/nodes/expressions/ArrayIndexExpression.h
+        ast/nodes/expressions/ArrayIndexExpressionNode.h
         ast/nodes/statements/VariableDecalrationNode.h
-        ast/nodes/expressions/NewExpression.h
+        ast/nodes/expressions/NewExpressionNode.h
         ast/nodes/statements/ArrayAssigmentNode.h
-        ast/nodes/statements/ForStatement.h
+        ast/nodes/statements/ForStatementNode.h
         ast/semantics/SemanticTable.cpp
         ast/semantics/SemanticTable.h
         ast/CodeGeneration.cpp

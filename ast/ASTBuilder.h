@@ -128,7 +128,7 @@ public:
     }
 
     std::any visitForStatement(typlypParser::ForStatementContext* context) override {
-        auto node = std::make_shared<ForStatement>();
+        auto node = std::make_shared<ForStatementNode>();
 
         node->init = std::any_cast<Ptr<StatementNode>>(visitForInit(context->forInit()));
         node->condition = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
@@ -208,7 +208,7 @@ public:
     std::any visitExpr(typlypParser::ExprContext* context) override {
         if (context->ID() && context->LPAREN() && context->RPAREN()) { // Есть имя и скобки () -> вызов функции
             // TODO проверка на вызов внешней функции? Или не нужна
-            auto node = std::make_shared<FunctionCallExpression>();
+            auto node = std::make_shared<FunctionCallExpressionNode>();
             node->name = context->ID()->getText();
             if (context->argList())
                 for (auto arg : context->argList()->expr())
@@ -257,14 +257,14 @@ public:
         }
 
         if (context->ID() && context->LBRACKET() && context->RBRACKET() && context->expr().size() == 1) {
-            auto node = std::make_shared<ArrayIndexExpression>();
+            auto node = std::make_shared<ArrayIndexExpressionNode>();
             node->name = context->ID()->getText();
             node->index = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
             return static_cast<Ptr<ExpressionNode>>(node);
         }
 
         if (context->type() && context->LBRACKET() && context->RBRACKET() && context->expr().size() == 1) {
-            auto node = std::make_shared<NewExpression>();
+            auto node = std::make_shared<NewExpressionNode>();
             node->type = map_type(context->type()->getText());
             node->expression = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
             return static_cast<Ptr<ExpressionNode>>(node);
