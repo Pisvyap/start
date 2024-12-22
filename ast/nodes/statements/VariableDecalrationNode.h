@@ -5,11 +5,11 @@
 class VariableDeclarationNode : public StatementNode {
 public:
     std::string name;
-    Type type;
+    TypeStruct type;
     Ptr<ExpressionNode> initializer;
     void print(const int indent) override {
         ASTNode::print(indent);
-        std::cout << "VarDecl: " << type << ' ' << name << " := "; initializer->print(indent); std::cout << "\n";
+        std::cout << "VarDecl: " << type.type << ' ' << name << " := "; initializer->print(indent); std::cout << "\n";
     }
 
     void semantic_check(SemanticTable& table) override {

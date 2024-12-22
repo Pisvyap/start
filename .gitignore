@@ -1,4 +1,5 @@
 /.idea/
 antlr4-cpp-runtime/demo
+/llvm-project/
 /cmake-build-debug/
 /dist/

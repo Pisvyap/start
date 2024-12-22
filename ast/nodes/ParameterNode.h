@@ -5,10 +5,10 @@
 class ParameterNode : public ASTNode {
 public:
     std::string name;
-    Type type;
+    TypeStruct type;
     void print(const int indent) override {
         ASTNode::print(indent);
-        std::cout << "Parameter[name=" << name << ";type=" << type << ']' << std::endl;
+        std::cout << "Parameter[name=" << name << ";type=" << type.type << ']' << std::endl;
     }
     virtual llvm::Value *Codegen();
 };

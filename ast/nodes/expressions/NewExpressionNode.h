@@ -5,7 +5,7 @@ class NewExpressionNode : public ExpressionNode {
 public:
     Ptr<ExpressionNode> expression;
     void print(const int indent) override {
-        std::cout << "new " << type << " of size "; expression->print(indent);
+        std::cout << "new " << type.type << " of size "; expression->print(indent);
     }
 
     void semantic_check(SemanticTable& table) override {

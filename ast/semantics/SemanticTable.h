@@ -5,45 +5,75 @@
 #include <unordered_map>
 #include <vector>
 
-enum Type { // TODO возможно нужна поддержка для VOID так как внешние функции могут его возвращать
+enum Type {
     INT,
     BOOL,
     INT_ARRAY,
     BOOL_ARRAY
 };
 
-static Type map_type(const std::string& name) {
-    if (name == "chislo")
-        return INT;
-    if (name == "logika")
-        return BOOL;
-    if (name == "chislo[]")
-        return INT_ARRAY;
-    if (name == "logika[]")
-        return BOOL_ARRAY;
+struct TypeStruct {
+    Type type;
+    int array_size = 0;
+    TypeStruct() { }
+    TypeStruct(Type type) : type(type) { }
+    TypeStruct(Type type, int size) : type(type), array_size(size) {}
+    bool is_array() const {
+        return type == INT_ARRAY || type == BOOL_ARRAY;
+    }
+
+    bool operator==(const TypeStruct& other) const {
+        return type == other.type && array_size == other.array_size;
+    }
+
+    bool operator!=(const TypeStruct& other) const {
+        return !(*this == other);
+    }
+};
+
+static TypeStruct map_type(const std::string& name) {
+    if (name.substr(0, 6) == "chislo") {
+        if (name == "chislo")
+            return TypeStruct(INT);
+
+        size_t openBracket = name.find('[');
+        size_t closeBracket = name.find(']');
+        std::string numberStr = name.substr(openBracket + 1, closeBracket - openBracket - 1);
+        return TypeStruct(INT_ARRAY, std::stoi(numberStr));
+    }
+
+    if (name.substr(0, 6) == "logika") {
+        if (name == "logika")
+            return TypeStruct(BOOL);
+
+        size_t openBracket = name.find('[');
+        size_t closeBracket = name.find(']');
+        std::string numberStr = name.substr(openBracket + 1, closeBracket - openBracket - 1);
+        return TypeStruct(INT_ARRAY, std::stoi(numberStr));
+    }
 
     throw std::runtime_error("Unsupported type " + name);
 }
 
-static std::string map_type(Type type) {
-    switch (type) {
+static std::string map_type(TypeStruct type) {
+    switch (type.type) {
         case INT: return "int";
         case BOOL: return "bool";
-        case INT_ARRAY: return "int[]";
-        case BOOL_ARRAY: return "bool[]";
-        default: throw std::runtime_error("Unsupported type " + std::to_string(type));
+        case INT_ARRAY: return "int[" + std::to_string(type.array_size) + "]";
+        case BOOL_ARRAY: return "bool[" + std::to_string(type.array_size) + "]";
+        default: throw std::runtime_error("Unsupported type " + std::to_string(type.type));
     }
 }
 
 // Это типа описание идентификатора
 struct Symbol {
-    Type type;
+    TypeStruct type;
     bool isFunction;
-    std::vector<Type> paramTypes; // Типы параметров, если функция
+    std::vector<TypeStruct> paramTypes; // Типы параметров, если функция
 
     Symbol() { }
 
-    Symbol(Type type, bool isFunction) : type(type), isFunction(isFunction) {}
+    Symbol(TypeStruct type, bool isFunction) : type(type), isFunction(isFunction) {}
 
     Symbol(const Symbol& symbol) {
         type = symbol.type;
