@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.28.1)
 project(typlyp VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(LLVM_DIR "/Users/flowi0/Desktop/MyProjects/Pisvyap/start/llvm-project/build/lib/cmake/llvm")
+set(LLVM_DIR "C:/Ucheba/Pisvyap/start/llvm/clang+llvm-18.1.6-x86_64-pc-windows-msvc/lib/cmake/llvm")
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 include_directories(${LLVM_INCLUDE_DIRS})

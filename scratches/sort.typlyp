@@ -38,13 +38,13 @@ delo partition(arr: chislo[], left: chislo, right: chislo, pivot: chislo): chisl
     vernut left;
 }
 
-pust numbers: chislo[] = new chislo[6];
+pust numbers: chislo[6] = new chislo[6];
 numbers[0] = 3;
 numbers[1] = 2;
 numbers[2] = 1;
 numbers[3] = 8;
 numbers[4] = 6;
 numbers[5] = 10;
-pust sorted: chislo[] = quickSort(numbers, 0, 6);
+pust sorted: chislo[6] = quickSort(numbers, 0, 6);
 
 narisovatChisla(sorted);

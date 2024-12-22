@@ -1,5 +1,4 @@
 vneshnaya narisovatChislo(x: chislo): chislo;
-vneshnaya narisovatChisla(x: chislo[]): chislo;
 
 delo factorial(n: chislo): chislo {
     esli (n == 0) {
