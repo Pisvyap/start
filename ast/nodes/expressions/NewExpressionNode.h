@@ -13,5 +13,5 @@ public:
         if (expression->type != INT)
             throw std::runtime_error("Array creation requires 'chislo' expression");
     }
-    virtual Value *Codegen();
+    virtual llvm::Value *Codegen();
 };

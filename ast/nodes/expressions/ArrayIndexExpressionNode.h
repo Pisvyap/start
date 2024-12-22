@@ -23,5 +23,5 @@ public:
 
         this->type = arr->type == INT_ARRAY ? INT : BOOL;
     }
-    virtual Value *Codegen();
+    virtual llvm::Value *Codegen();
 };

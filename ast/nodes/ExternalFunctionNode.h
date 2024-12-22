@@ -24,5 +24,5 @@ public:
           }
           table.addSymbol(name, func);
      }
-    virtual Value *Codegen();
+    virtual llvm::Value *Codegen();
 };

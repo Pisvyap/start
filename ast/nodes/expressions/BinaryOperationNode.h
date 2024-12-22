@@ -42,7 +42,7 @@ public:
 
         this->type = get_type();
     }
-    virtual Value *Codegen();
+    virtual llvm::Value *Codegen();
 private:
     Type get_type() const {
         switch (operation) {

@@ -10,5 +10,5 @@ public:
         ASTNode::print(indent);
         std::cout << "Parameter[name=" << name << ";type=" << type << ']' << std::endl;
     }
-    virtual Value *Codegen();
+    virtual llvm::Value *Codegen();
 };

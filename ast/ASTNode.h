@@ -1,7 +1,7 @@
 #pragma once
 
 #include "semantics/SemanticTable.h"
-
+#include <llvm/IR/Value.h>
 #include <iostream>
 #include <memory>
 
@@ -15,7 +15,7 @@ public:
     }
 
     virtual void semantic_check(SemanticTable& table) { }
-    virtual Value *Codegen();
+    virtual llvm::Value *Codegen();
 };
 
 template<typename T>

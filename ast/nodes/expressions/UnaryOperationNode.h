@@ -24,5 +24,5 @@ public:
 
         this->type = BOOL;
     }
-    virtual Value *Codegen();
+    virtual llvm::Value *Codegen();
 };

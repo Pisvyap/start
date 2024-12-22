@@ -27,5 +27,5 @@ public:
                 + std::to_string(value->type)
                 + "' to variable '" + name + "'(type " + std::to_string(var->type) + ")");
     }
-    virtual Value *Codegen();
+    virtual llvm::Value *Codegen();
 };
