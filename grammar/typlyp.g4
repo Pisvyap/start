@@ -82,8 +82,8 @@ exprList : expr (',' expr)*;
 type
     : 'chislo'
     | 'logika'
-    | 'chislo' '[' ']'
-    | 'logika' '[' ']'
+    | 'chislo' '[' INT ']'
+    | 'logika' '[' INT ']'
     ;
 
 // Лексические правила

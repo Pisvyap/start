@@ -24,8 +24,8 @@ public:
 
         if (var->type != value->type)
             throw std::runtime_error("Type mismatch. Can't assign "
-                + std::to_string(value->type)
-                + "' to variable '" + name + "'(type " + std::to_string(var->type) + ")");
+                + std::to_string(value->type.type)
+                + "' to variable '" + name + "'(type " + std::to_string(var->type.type) + ")");
     }
     virtual llvm::Value *Codegen();
 };

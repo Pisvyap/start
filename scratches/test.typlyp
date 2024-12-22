@@ -1,13 +1,50 @@
 vneshnaya narisovatChislo(x: chislo): chislo;
+vneshnaya narisovatChisla(x: chislo[0]): chislo;
 
-delo factorial(n: chislo): chislo {
-    esli (n == 0) {
-        vernut pravda;
-    } inache {
-        vernut n * factorial(n - 1);
+delo quickSort(arr: chislo[0], left: chislo, right: chislo): chislo[0] {
+    esli (left >= right) {
+        vernut arr;
     }
+
+    pust pivot: chislo = arr[(left + right) / 2];
+    pust index: chislo = partition(arr, left, right, pivot);
+
+    arr = quickSort(arr, left, index - 1);
+    arr = quickSort(arr, index, right);
+
+    vernut arr;
 }
 
-pust number: chislo = 20;
-pust result: chislo = factorial(number);
-narisovatChislo(result);
+delo partition(arr: chislo[0], left: chislo, right: chislo, pivot: chislo): chislo {
+    poka (left <= right) {
+        poka (arr[left] < pivot) {
+            left = left + 1;
+        }
+
+        poka (arr[right] > pivot) {
+            right = right - 1;
+        }
+
+        esli (left <= right) {
+            pust temp: chislo = arr[left];
+            arr[left] = arr[right];
+            arr[right] = temp;
+
+            left = left + 1;
+            right = right - 1;
+        }
+    }
+
+    vernut left;
+}
+
+pust numbers: chislo[6] = new chislo[6];
+numbers[0] = 3;
+numbers[1] = 2;
+numbers[2] = 1;
+numbers[3] = 8;
+numbers[4] = 6;
+numbers[5] = 10;
+pust sorted: chislo[6] = quickSort(numbers, 0, 6);
+
+narisovatChisla(sorted);

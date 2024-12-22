@@ -4,18 +4,17 @@
 
 class ExpressionNode : public ASTNode {
 public:
-    Type type;
+    TypeStruct type;
 
-    explicit ExpressionNode(const Type type) : type(type) { }
+    explicit ExpressionNode(const TypeStruct& type) : type(type) { }
 
-    ExpressionNode() : type(INT) { }
+    ExpressionNode() : type(TypeStruct(INT, 0)) { }
 
-    explicit ExpressionNode(const std::string& type) {
-        this->type = map_type(type);
-    }
+    explicit ExpressionNode(const std::string& type) : type(map_type(type)) { }
 
     void print(const int indent) override {
         std::cout << "EXPR";
     }
-    virtual llvm::Value *Codegen();
+
+    virtual llvm::Value *Codegen() { return nullptr; }
 };

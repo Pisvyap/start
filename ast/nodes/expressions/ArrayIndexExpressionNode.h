@@ -17,11 +17,15 @@ public:
 
         // Проверка правильности индекса
         index->semantic_check(table);
-        if (index->type != INT)
+        if (index->type.type != INT)
             throw std::runtime_error("Arrays support only 'chislo' indices");
         // TODO проверка что не вышли за пределы? и другие проверки (отрицательные числа)
 
-        this->type = arr->type == INT_ARRAY ? INT : BOOL;
+        if (arr->type.type == INT_ARRAY) {
+            this->type = TypeStruct(INT);
+        } else {
+            this->type = TypeStruct(BOOL);
+        }
     }
     virtual llvm::Value *Codegen();
 };

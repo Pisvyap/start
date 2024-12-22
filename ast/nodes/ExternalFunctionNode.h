@@ -8,7 +8,7 @@ class ExternalFunctionNode : public ASTNode {
 public:
      std::string name;
      std::vector<Ptr<ParameterNode>> parameters;
-     Type returnType;
+     TypeStruct returnType;
      void print(const int indent) override {
           ASTNode::print(indent);
           printf("ExternalFunction: %s -> %s\n", name.c_str(), returnType);

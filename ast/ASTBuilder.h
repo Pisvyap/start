@@ -240,13 +240,11 @@ public:
 
         if (context->INT()) {
             auto node = std::make_shared<NumberLiteralNode>(context->INT()->getText());
-            std::cout << "FOUND INT" << context->INT()->getText() << std::endl;
             return static_cast<Ptr<ExpressionNode>>(node);
         }
 
         if (context->BOOL()) {
             auto node = std::make_shared<BoolLiteralNode>(context->BOOL()->getText());
-            std::cout << "FOUND BOOL" << context->BOOL()->getText() <<  std::endl;
             return static_cast<Ptr<ExpressionNode>>(node);
         }
 

@@ -21,7 +21,7 @@ public:
         right->semantic_check(table);
         if (left->type != right->type)
             throw std::runtime_error("Can't perform binary operation between types "
-                + std::to_string(left->type) + " and " + std::to_string(right->type));
+                + std::to_string(left->type.type) + " and " + std::to_string(right->type.type));
 
         switch (operation) {
             case Add:

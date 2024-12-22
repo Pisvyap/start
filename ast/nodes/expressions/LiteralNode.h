@@ -8,7 +8,7 @@ public:
     bool bool_value;
 
     void print(const int indent) override {
-        std::cout << type;
+        std::cout << type.type;
     }
-    virtual llvm::Value *Codegen();
+    virtual llvm::Value *Codegen() { }
 };

@@ -9,7 +9,7 @@ class FunctionNode : public ASTNode {
 public:
     std::string name;
     std::vector<Ptr<ParameterNode>> parameters; // pair<name, parameter>
-    Type returnType;
+    TypeStruct returnType;
     Ptr<CodeBlockNode> body;
     void print(const int indent) override {
         ASTNode::print(indent);
