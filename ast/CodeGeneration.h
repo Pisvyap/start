@@ -1,9 +1,11 @@
+#ifndef CODEGENERATION_H
+#define CODEGENERATION_H
 #include <map>
 #include <vector>
-#include "llvm/DerivedTypes.h"
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
-#include "llvm/Support/IRBuilder.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/IRBuilder.h"
 #include "nodes/expressions/NumberLiteralNode.h"
 #include "nodes/expressions/BinaryOperationNode.h"
 #include "nodes/expressions/BoolLiteralNode.h"
@@ -27,26 +29,32 @@
 #include "nodes/ProgramNode.h"
 
 
-using namespace llvm_gen;
+using namespace llvm;
 
 // Value *ErrorV(const char *Str) { Error(Str); return 0; } // Обработчик ошибок (у нас вообще он будет???)
 static LLVMContext context;
-static Module *TheModule; //LLVM-конструкция, содержит все функции/глобалы в куске кода
+static llvm::Module *TheModule; //LLVM-конструкция, содержит все функции/глобалы в куске кода
 static IRBuilder<> Builder(context); //вспомогательный объект, помогает генерировать инструкции LLVM
-static std::map<std::string, Value*> NamedValues; //таблица символов
+static std::map<std::string, llvm::AllocaInst*> NamedValues; //таблица символов
 
 // Ноды EXPRESSIONS
 
-Value *NumberLiteralNode::Codegen() {
-    llvm::Type* intType = llvm::Type::getInt128Ty(context);
-    llvm::ConstantInt* constVal = llvm::ConstantInt::get(intType, value, true /*signed*/);
-    return constVal;
+llvm::Value *NumberLiteralNode::Codegen() {
+    llvm::ConstantInt* constVal = llvm::ConstantInt::get(
+        context,                          
+        llvm::APInt(128, value, true)
+    );
+
+    return constVal; 
 }
 
 Value *BoolLiteralNode::Codegen() {
-    llvm::Type* boolType = llvm::Type::getInt1Ty(context);
-    llvm::ConstantInt* constVal = llvm::ConstantInt::get(boolType, value, /*isSigned=*/false);
-    return constVal;
+    llvm::ConstantInt* constVal = llvm::ConstantInt::get(
+        context,                          
+        llvm::APInt(1, value, true)
+    );
+
+    return constVal; 
 }
 
 Value* BinaryOperationNode::Codegen() {
@@ -95,24 +103,27 @@ Value* UnaryOperationNode::Codegen() {
 Value* IdentifierNode::Codegen() {
     auto it = NamedValues.find(name);
     if (it != NamedValues.end()) {
-        return Builder.CreateLoad(it->second, name.c_str());
+
+        return Builder.CreateLoad(
+            it->second->getAllocatedType(),
+            it->second,
+            name.c_str());
     }
     return nullptr;
 }
 
 Value* ArrayIndexExpressionNode::Codegen() {
     llvm::Value* idxPtr = index->Codegen();
-    auto it = NamedValues.find(arrayName);
+    auto it = NamedValues.find(name);
     if (it != NamedValues.end()) {
         llvm::Value* arrayPtr = it->second;
-        llvm::Value* idx64 = Builder.CreateSExt(idxPtr, llvm::Type::getInt64Ty(context), "index64");
-        llvm::Value* elementPtr = Builder.CreateGEP(arrayPtr,
-                                                    {llvm::ConstantInt::get(
-                                                            llvm::Type::getInt64Ty(context),
-                                                            0),
-                                                     idx64},
-                                                    "elementptr");
-        llvm::Value* loadedValue = Builder.CreateLoad(elementPtr, "loadedval");
+        llvm::Value* idx128 = Builder.CreateSExt(idxPtr, llvm::Type::getInt128Ty(context), "index128");
+        llvm::Type* elementType = arrayPtr->getType()->getArrayElementType();
+
+        llvm::Value* elementPtr = Builder.CreateGEP(elementType, arrayPtr,
+            { llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0), idx128 }, "elementptr");
+
+        llvm::Value* loadedValue = Builder.CreateLoad(elementType, elementPtr, "loadedval");
 
         return loadedValue;
     }
@@ -125,7 +136,7 @@ Value* NewExpressionNode::Codegen() {
     llvm::Type* sizeType = llvm::Type::getInt32Ty(context);
     llvm::Value* size32 = Builder.CreateZExtOrTrunc(sizeExpr, sizeType);
     llvm::Function* mallocFn = llvm::cast<llvm::Function>(
-            context.pModule->getOrInsertFunction(
+            context.GpModule->getOrInsertFunction(
                     "malloc",
                     llvm::FunctionType::get(
                             llvm::PointerType::getUnqual(
@@ -140,13 +151,13 @@ Value* NewExpressionNode::Codegen() {
 
 Value* FunctionCallExpressionNode::Codegen() {
     auto it = NamedValues.find(name);
-    llvm::Function* func = it->second;
+    llvm::Function* func = it->second->getFunction();
     std::vector<llvm::Value*> argv;
     for (auto arg : arguments) {
         llvm::Value* argV = arg->Codegen();
         argv.push_back(argV);
     }
-    llvm::Value* res = Builder.CreateCall(func, argsv); //Как я понял void у нас нет, поэтому пока так
+    llvm::Value* res = Builder.CreateCall(func, argv); //Как я понял void у нас нет, поэтому пока так
     return res;
 }
 
@@ -155,14 +166,13 @@ Value* FunctionCallExpressionNode::Codegen() {
 Value* ArrayAssigmentNode::Codegen() {
     llvm::Value* idxPtr = index->Codegen();
     llvm::Value* valPtr = value->Codegen();
-    auto it = NamedValues.find(arrayName);
+    auto it = NamedValues.find(name);
     llvm::Value* arrayPtr = it->second;
+    llvm::Type* elementType = arrayPtr->getType()->getArrayElementType();
     llvm::Value* idx64 = Builder.CreateSExt(idxPtr, llvm::Type::getInt64Ty(context), "index64");
-    llvm::Value* elementPtr = Builder.CreateGEP(
+    llvm::Value* elementPtr = Builder.CreateGEP(elementType,
             arrayPtr,
-            {llvm::ConstantInt::get(
-                    llvm::Type::getInt64Ty(context),
-                    0),
+            {llvm::ConstantInt::get(llvm::Type::getInt64Ty(context),0),
              idx64},
              "elementptr");
     Builder.CreateStore(valPtr, elementPtr);
@@ -181,9 +191,19 @@ Value* AssigmentStatementNode::Codegen() {
 }
 
 Value* ExpressionStatementNode::Codegen() {
-    Builder.insertBefore(expression, context);
-    Builder.setInsertPoint(llvm::BasicBlockGetFirst(context));
-    return expression->Codegen();
+    llvm::BasicBlock* currentBlock = Builder.GetInsertBlock();
+    if (!currentBlock) {
+        llvm::errs() << "Error: No insertion point set in the builder\n";
+        return nullptr;
+    }
+
+    llvm::Value* exprValue = expression->Codegen();
+    if (!exprValue) {
+        llvm::errs() << "Error: failed to generate code for expression\n";
+        return nullptr;
+    }
+
+    return exprValue;
 }
 
 Value* ForStatementNode::Codegen() { //Очень надо будет чекать
@@ -208,32 +228,53 @@ Value* ForStatementNode::Codegen() { //Очень надо будет чекат
     step->Codegen();
     Builder.CreateBr(condBB);
     Builder.SetInsertPoint(afterBB);
-    return ConstantInt::get(Type::getInt32Ty(context), 0);
+    return ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
 }
 
 Value* IfStatementNode::Codegen() { //Очень надо будет чекать
-    Value *condVal = condition->Codegen();
-    Function *TheFunction = Builder.GetInsertBlock()->getParent();
-    BasicBlock *thenBB = BasicBlock::Create(context, "if.then", TheFunction);
-    BasicBlock *elseBB = BasicBlock::Create(context, "if.else", TheFunction);
-    BasicBlock *mergeBB = BasicBlock::Create(context, "if.merge", TheFunction);
-    Builder.CreateCondBr(condVal, thenBB, elseBB);
-    Builder.SetInsertPoint(thenBB);
-    if (thenBlock != nullptr) {
-        thenBlock->Codegen();
+    llvm::Value* condVal = condition->Codegen();
+    if (!condVal) {
+        llvm::errs() << "Error: failed to generate condition for if statement\n";
+        return nullptr;
     }
-    Builder.CreateBr(mergeBB);
-    TheFunction->getBasicBlockList().push_back(elseBB);
-    Builder.SetInsertPoint(elseBB);
-    if (elseBlock != nullptr) {
-        elseBlock->Codegen();
+
+    condVal = Builder.CreateICmpNE(
+        condVal,
+        llvm::ConstantInt::get(condVal->getType(), 0),
+        "ifcond"
+    );
+
+    llvm::Function* TheFunction = Builder.GetInsertBlock()->getParent();
+
+    llvm::BasicBlock* thenBB = llvm::BasicBlock::Create(context, "if.then", TheFunction);
+    llvm::BasicBlock* elseBB = llvm::BasicBlock::Create(context, "if.else");
+    llvm::BasicBlock* mergeBB = llvm::BasicBlock::Create(context, "if.merge");
+
+    Builder.CreateCondBr(condVal, thenBB, elseBB);
+
+    Builder.SetInsertPoint(thenBB);
+    if (thenBlock) {
+        if (!thenBlock->Codegen()) {
+            llvm::errs() << "Error: failed to generate code for then block\n";
+            return nullptr;
+        }
     }
     Builder.CreateBr(mergeBB);
 
-    TheFunction->getBasicBlockList().push_back(mergeBB);
+    elseBB->insertInto(TheFunction);
+    Builder.SetInsertPoint(elseBB);
+    if (elseBlock) {
+        if (!elseBlock->Codegen()) {
+            llvm::errs() << "Error: failed to generate code for else block\n";
+            return nullptr;
+        }
+    }
+    Builder.CreateBr(mergeBB);
+
+    mergeBB->insertInto(TheFunction);
     Builder.SetInsertPoint(mergeBB);
 
-    return ConstantInt::get(Type::getInt32Ty(context), 0);
+    return llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
 }
 
 Value* ReturnStatementNode::Codegen() {
@@ -268,30 +309,30 @@ Value* WhileStatementNode::Codegen()  { //Очень надо будет чек�
     Builder.CreateBr(condBB);
     Builder.SetInsertPoint(afterBB);
 
-    return ConstantInt::get(Type::getInt32Ty(context), 0);
+    return ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
 }
 
 // Ноды остальные
 
-Value CodeBlockNode::Codegen() {
+Value *CodeBlockNode::Codegen() {
     for (auto &statement : statements) {
         Value* result = statement->Codegen();
     }
     return nullptr;
 }
 
-Value ExternalFunctionNode::Codegen() { //Доделать, пока хз как точно
+llvm::Value *ExternalFunctionNode::Codegen() { //Доделать, пока хз как точно
 }
 
-Value FunctionNode::Codegen() { //Доделать, пока хз как точно
+llvm::Value *FunctionNode::Codegen() { //Доделать, пока хз как точно
 
 }
 
-Value ParameterNode::Codegen() { //Доделать, пока хз как точно
+llvm::Value *ParameterNode::Codegen() { //Доделать, пока хз как точно
 }
 
 
-Value ProgramNode::Codegen() {
+llvm::Value *ProgramNode::Codegen() {
     for (auto &extFunc : externalFunctions) {
         extFunc->Codegen();
     }
@@ -299,7 +340,8 @@ Value ProgramNode::Codegen() {
         func->Codegen();
     }
     for (auto &stmt : statements) {
-        stmt->Codegen()
+        stmt->Codegen();
     }
     return nullptr;
 }
+#endif // CODEGENERATION_H
