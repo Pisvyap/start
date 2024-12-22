@@ -3,6 +3,7 @@ project(typlyp VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(LLVM_ENABLE_PIC ON)
 
 set(LLVM_DIR "C:/Ucheba/Pisvyap/start/llvm/clang+llvm-18.1.6-x86_64-pc-windows-msvc/lib/cmake/llvm")
 find_package(LLVM REQUIRED CONFIG)
