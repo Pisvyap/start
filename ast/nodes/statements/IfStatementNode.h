@@ -41,5 +41,6 @@ public:
             table.leaveScope();
         }
     }
-    virtual llvm::Value *Codegen();
+
+    llvm::Value *Codegen() override;
 };

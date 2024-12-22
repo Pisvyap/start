@@ -15,5 +15,6 @@ public:
 
         this->type = decl->type;
     }
-    virtual llvm::Value *Codegen();
+
+    llvm::Value *Codegen() override;
 };

@@ -13,7 +13,7 @@ public:
     Ptr<CodeBlockNode> body;
     void print(const int indent) override {
         ASTNode::print(indent);
-        printf("Function %s -> %s\n", name.c_str(), returnType);
+        printf("Function %s -> %d\n", name.c_str(), returnType.type);
         for (auto& param: parameters)
             param->print(indent + 1);
         body->print(indent + 1);
@@ -41,5 +41,6 @@ public:
         body->semantic_check(table);
         table.leaveScope();
     }
-    virtual llvm::Value *Codegen();
+
+    llvm::Value *Codegen() override;
 };

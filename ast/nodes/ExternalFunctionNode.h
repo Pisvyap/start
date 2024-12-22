@@ -11,7 +11,7 @@ public:
      TypeStruct returnType;
      void print(const int indent) override {
           ASTNode::print(indent);
-          printf("ExternalFunction: %s -> %s\n", name.c_str(), returnType);
+          printf("ExternalFunction: %s -> %d\n", name.c_str(), returnType.type);
           for (auto& param : parameters)
                param->print(indent+1);
      }
@@ -24,5 +24,6 @@ public:
           }
           table.addSymbol(name, func);
      }
-    virtual llvm::Value *Codegen();
+
+     llvm::Value *Codegen() override;
 };

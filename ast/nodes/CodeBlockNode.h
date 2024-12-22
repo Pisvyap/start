@@ -18,5 +18,6 @@ public:
             stmt->semantic_check(table);
         }
     }
-    virtual llvm::Value *Codegen();
+
+    llvm::Value *Codegen() override;
 };

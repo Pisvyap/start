@@ -16,5 +16,5 @@ public:
         std::cout << "EXPR";
     }
 
-    virtual llvm::Value *Codegen() { return nullptr; }
+    llvm::Value *Codegen() override { return nullptr; }
 };

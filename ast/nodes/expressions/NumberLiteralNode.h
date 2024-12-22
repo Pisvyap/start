@@ -17,5 +17,6 @@ public:
     void print(const int indent) override {
         std::cout << value;
     }
-    virtual llvm::Value *Codegen();
+
+    llvm::Value *Codegen() override;
 };

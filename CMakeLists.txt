@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(LLVM_ENABLE_PIC ON)
 
-set(LLVM_DIR "C:/Ucheba/Pisvyap/start/llvm/clang+llvm-18.1.6-x86_64-pc-windows-msvc/lib/cmake/llvm")
+set(LLVM_DIR "/Users/flowi0/Desktop/MyProjects/Pisvyap/start/llvm-project/build/lib/cmake/llvm")
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 include_directories(${LLVM_INCLUDE_DIRS})
@@ -63,6 +63,7 @@ target_link_libraries(
         typlyp
         PRIVATE
         antlr4_static
+        LLVMCore LLVMSupport
         ${LLVM_LIBRARIES}
 )
 

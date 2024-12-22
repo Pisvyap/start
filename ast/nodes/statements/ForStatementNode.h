@@ -17,5 +17,6 @@ public:
         step->print(indent + 1);
         body->print(indent + 1);
     }
-    virtual llvm::Value *Codegen();
+
+    llvm::Value *Codegen() override;
 };
