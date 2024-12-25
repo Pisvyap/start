@@ -131,10 +131,10 @@ Value* ArrayIndexExpressionNode::Codegen() {
 }
 
 Value* NewExpressionNode::Codegen() {
-    llvm::Value* sizeExpr = expression->Codegen();
-    llvm::Type* sizeType = llvm::Type::getInt128Ty(context);
-    llvm::Value* size128 = Builder.CreateZExtOrTrunc(sizeExpr, sizeType);
-
+    // llvm::Value* sizeExpr = expression->Codegen();
+    // llvm::Type* sizeType = llvm::Type::getInt128Ty(context);
+    // llvm::Value* size128 = Builder.CreateZExtOrTrunc(sizeExpr, sizeType);
+    llvm::Type* sizeType = llvm::Type::getInt128Ty(context); // TODO заглушка, удалить
 
     auto* mallocFn = llvm::cast<llvm::Function>(
             module->getOrInsertFunction(
@@ -146,7 +146,8 @@ Value* NewExpressionNode::Codegen() {
             ).getCallee()
     );
 
-    llvm::Value* allocatedMemory = Builder.CreateCall(mallocFn, {size128});
+    // llvm::Value* allocatedMemory = Builder.CreateCall(mallocFn, {size128});
+    llvm::Value* allocatedMemory = Builder.CreateCall(mallocFn, {0}); // TODO заглушка, удалить
     llvm::Type* ptrType = llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(context));
     llvm::Value* castedPtr = Builder.CreateBitCast(allocatedMemory, ptrType);
     return castedPtr;
@@ -292,9 +293,9 @@ Value* VariableDeclarationNode::Codegen() {
          varType = llvm::Type::getInt128Ty(context);
      else if(type.type == BOOL)
          varType = llvm::Type::getInt1Ty(context);
-     else if (type.type == INT_ARRAY)
+     else if (type.type == INT && type.is_array)
          varType = llvm::ArrayType::get(llvm::Type::getInt128Ty(context), type.array_size);
-     else if (type.type == BOOL_ARRAY)
+     else if (type.type == BOOL && type.is_array)
          varType = llvm::ArrayType::get(llvm::Type::getInt1Ty(context), type.array_size);
      else {
          llvm::errs() << "Unknown type: " << type.type << "\n";

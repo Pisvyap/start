@@ -254,6 +254,7 @@ public:
             return static_cast<Ptr<ExpressionNode>>(node);
         }
 
+        // chislo[1]
         if (context->ID() && context->LBRACKET() && context->RBRACKET() && context->expr().size() == 1) {
             auto node = std::make_shared<ArrayIndexExpressionNode>();
             node->name = context->ID()->getText();
@@ -261,9 +262,10 @@ public:
             return static_cast<Ptr<ExpressionNode>>(node);
         }
 
-        if (context->type() && context->LBRACKET() && context->RBRACKET() && context->expr().size() == 1) {
+        // chislo<1>
+        if (context->scalarType()) {
             auto node = std::make_shared<NewExpressionNode>();
-            node->type = map_type(context->type()->getText());
+            node->type = map_type(context->scalarType()->getText(), true);
             node->expression = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
             return static_cast<Ptr<ExpressionNode>>(node);
         }

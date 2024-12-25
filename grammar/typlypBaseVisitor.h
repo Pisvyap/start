@@ -95,6 +95,14 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitScalarType(typlypParser::ScalarTypeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitArrayType(typlypParser::ArrayTypeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
 
 };
 

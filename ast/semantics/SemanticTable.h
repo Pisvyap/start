@@ -5,75 +5,102 @@
 #include <unordered_map>
 #include <vector>
 
-enum Type {
+enum ScalarType {
     INT,
-    BOOL,
-    INT_ARRAY,
-    BOOL_ARRAY
+    BOOL
 };
 
-struct TypeStruct {
-    Type type;
-    int array_size = 0;
-    TypeStruct() { }
-    TypeStruct(Type type) : type(type) { }
-    TypeStruct(Type type, int size) : type(type), array_size(size) {}
-    bool is_array() const {
-        return type == INT_ARRAY || type == BOOL_ARRAY;
+struct Type {
+    ScalarType type;
+    bool is_array;
+    int array_size;
+    Type() { }
+    Type(ScalarType type) : type(type), is_array(false), array_size(0) { }
+    Type(ScalarType type, bool is_array) : type(type), is_array(is_array), array_size(0) {}
+    Type(ScalarType type, bool is_array, int size) : type(type), is_array(is_array), array_size(size) { }
+
+    bool operator==(const Type& other) const {
+        return type == other.type && is_array == other.is_array;
     }
 
-    bool operator==(const TypeStruct& other) const {
-        return type == other.type && array_size == other.array_size;
-    }
-
-    bool operator!=(const TypeStruct& other) const {
+    bool operator!=(const Type& other) const {
         return !(*this == other);
     }
 };
 
-static TypeStruct map_type(const std::string& name) {
+static Type map_type(const std::string& name, bool is_array) {
+    if (name == "chislo")
+        return Type(INT, is_array);
+    if (name == "logika")
+        return Type(BOOL, is_array);
+    throw std::runtime_error("Unknown type: " + name);
+}
+
+static Type map_type(const std::string& name) {
     if (name.substr(0, 6) == "chislo") {
         if (name == "chislo")
-            return TypeStruct(INT);
+            return Type(INT);
 
-        size_t openBracket = name.find('[');
-        size_t closeBracket = name.find(']');
+        size_t openBracket = name.find('<');
+        size_t closeBracket = name.find('>');
         std::string numberStr = name.substr(openBracket + 1, closeBracket - openBracket - 1);
-        return TypeStruct(INT_ARRAY, std::stoi(numberStr));
+        try {
+            int number = std::stoi(numberStr);
+            return Type(INT, true, number);
+        } catch (const std::invalid_argument& e) {
+            return Type(INT, true);
+        }
     }
 
     if (name.substr(0, 6) == "logika") {
         if (name == "logika")
-            return TypeStruct(BOOL);
+            return Type(BOOL);
 
-        size_t openBracket = name.find('[');
-        size_t closeBracket = name.find(']');
+        size_t openBracket = name.find('<');
+        size_t closeBracket = name.find('>');
         std::string numberStr = name.substr(openBracket + 1, closeBracket - openBracket - 1);
-        return TypeStruct(INT_ARRAY, std::stoi(numberStr));
+        try {
+            int number = std::stoi(numberStr);
+            return Type(BOOL, true, number);
+        } catch (const std::invalid_argument& e) {
+            return Type(BOOL, true);
+        }
     }
 
     throw std::runtime_error("Unsupported type " + name);
 }
 
-static std::string map_type(TypeStruct type) {
-    switch (type.type) {
+static std::string to_string(const ScalarType& type) {
+    switch (type) {
         case INT: return "int";
         case BOOL: return "bool";
-        case INT_ARRAY: return "int[" + std::to_string(type.array_size) + "]";
-        case BOOL_ARRAY: return "bool[" + std::to_string(type.array_size) + "]";
+        default: return "null";
+    }
+}
+
+static std::string to_string(Type type) {
+    switch (type.type) {
+        case INT:
+            if (!type.is_array)
+                return "int";
+            return "int[" + (type.array_size == 0 ? "" : std::to_string(type.array_size)) + "]";
+        case BOOL:
+            if (!type.is_array)
+                return "bool";
+            return "bool[" + (type.array_size == 0 ? "" : std::to_string(type.array_size)) + "]";
         default: throw std::runtime_error("Unsupported type " + std::to_string(type.type));
     }
 }
 
 // Это типа описание идентификатора
 struct Symbol {
-    TypeStruct type;
+    Type type;
     bool isFunction;
-    std::vector<TypeStruct> paramTypes; // Типы параметров, если функция
+    std::vector<Type> paramTypes; // Типы параметров, если функция
 
     Symbol() { }
 
-    Symbol(TypeStruct type, bool isFunction) : type(type), isFunction(isFunction) {}
+    Symbol(Type type, bool isFunction) : type(type), isFunction(isFunction) {}
 
     Symbol(const Symbol& symbol) {
         type = symbol.type;
