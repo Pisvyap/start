@@ -23,6 +23,10 @@ public:
                 + ". Expected " + to_string(type) + ", Got " + to_string(initializer->type));
         }
 
+        if (type.is_array) {
+            type.array_size = initializer->type.array_size;
+        }
+
         // Добавление переменной в скоуп
         Symbol var(type, false);
         table.addSymbol(name, var);

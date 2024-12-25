@@ -112,6 +112,7 @@ struct Symbol {
 class SemanticTable {
 private:
     std::list<std::unordered_map<std::string, Symbol>> scopes;
+    int index = 0; // TODO вместо удаления скоупов сделать индекс для переиспользования
 public:
     void enterScope() {
         scopes.push_back({});
