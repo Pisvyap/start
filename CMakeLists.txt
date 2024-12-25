@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.28.1)
+cmake_minimum_required(VERSION 3.30)
 project(typlyp VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(LLVM_ENABLE_PIC ON)
 
 set(LLVM_DIR "${CMAKE_SOURCE_DIR}/llvm-project/lib/cmake/llvm")
 
@@ -54,14 +53,16 @@ set(
         ast/CodeGeneration.cpp
 )
 
-add_subdirectory(
-        antlr4-cpp-runtime
-        llvm-project
-)
-
 if(MSVC)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebug$<$<CONFIG:Debug>:>")
+    # Использование /MD (динамическая библиотека времени выполнения)
+    set(CMAKE_C_FLAGS_RELEASE "/MD")
+    set(CMAKE_CXX_FLAGS_RELEASE "/MD")
+    set(CMAKE_C_FLAGS_DEBUG "/MDd")
+    set(CMAKE_CXX_FLAGS_DEBUG "/MDd")
 endif()
+
+message(STATUS "ANTLR4 Runtime Library Path: ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/libs/antlr4_runtime.lib")
+message(STATUS "ANTLR4 Include Path: ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/include")
 
 add_executable(
         typlyp
@@ -69,16 +70,17 @@ add_executable(
         ${SOURCE_FILES}
 )
 
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/libs)
+
 target_link_libraries(
         typlyp
         PRIVATE
-        antlr4_static
+        ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/libs/antlr4-runtime.lib
         ${LLVM_LIBS}
 )
 
-# Include directories
 target_include_directories(typlyp PRIVATE
         ${LLVM_INCLUDE_DIRS}
-        ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-cpp-runtime/runtime/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/include
         ${CMAKE_CURRENT_SOURCE_DIR}/grammar
 )

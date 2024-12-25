@@ -336,13 +336,15 @@ Value *CodeBlockNode::Codegen() {
 }
 
 llvm::Value *ExternalFunctionNode::Codegen() { //Доделать, пока хз как точно
+    return nullptr;
 }
 
 llvm::Value *FunctionNode::Codegen() { //Доделать, пока хз как точно
-
+    return nullptr;
 }
 
 llvm::Value *ParameterNode::Codegen() { //Доделать, пока хз как точно
+    return nullptr;
 }
 
 

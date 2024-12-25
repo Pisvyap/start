@@ -1,7 +1,7 @@
 vneshnaya narisovatChislo(x: chislo): chislo;
-vneshnaya narisovatChisla(x: chislo[0]): chislo;
+vneshnaya narisovatChisla(x: chislo[6]): chislo;
 
-delo quickSort(arr: chislo[0], left: chislo, right: chislo): chislo[0] {
+delo quickSort(arr: chislo[0], left: chislo, right: chislo): chislo[] {
     esli (left >= right) {
         vernut arr;
     }
