@@ -42,7 +42,8 @@ public:
 
         this->type = get_type();
     }
-    virtual llvm::Value *Codegen();
+
+    llvm::Value *Codegen() override;
 private:
     Type get_type() const {
         switch (operation) {

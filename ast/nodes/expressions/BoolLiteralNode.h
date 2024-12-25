@@ -15,5 +15,6 @@ public:
     void print(const int indent) override {
         std::cout << (value ? "TRUE" : "FALSE");
     }
-    virtual llvm::Value *Codegen();
+
+    llvm::Value *Codegen() override;
 };

@@ -14,5 +14,6 @@ public:
     void semantic_check(SemanticTable& table) override {
         expression->semantic_check(table);
     }
-    virtual llvm::Value *Codegen();
+
+    llvm::Value *Codegen() override;
 };

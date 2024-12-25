@@ -27,5 +27,6 @@ public:
                 + std::to_string(value->type.type)
                 + "' to variable '" + name + "'(type " + std::to_string(var->type.type) + ")");
     }
-    virtual llvm::Value *Codegen();
+
+    llvm::Value *Codegen() override;
 };

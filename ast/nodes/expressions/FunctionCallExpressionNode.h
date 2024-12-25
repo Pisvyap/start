@@ -38,5 +38,6 @@ public:
         // Сохраняемый возвращаемый тип
         this->type = func->type;
     }
-    virtual llvm::Value *Codegen();
+
+    llvm::Value *Codegen() override;
 };

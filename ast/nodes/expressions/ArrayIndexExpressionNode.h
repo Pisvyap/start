@@ -27,5 +27,6 @@ public:
             this->type = TypeStruct(BOOL);
         }
     }
-    virtual llvm::Value *Codegen();
+
+    llvm::Value *Codegen() override;
 };

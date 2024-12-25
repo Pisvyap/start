@@ -22,7 +22,7 @@ delo eratosthenes(n: chislo): logika[] {
 }
 
 pust limit: chislo = 30;
-pust primes: chislo[] = eratosthenes(limit);
+pust primes: logika[30] = eratosthenes(limit);
 schitaem (pust i: chislo = 0 ; i<limit; i = i + 1;){
     esli (primes[i]){
     narisovatChislo(i);

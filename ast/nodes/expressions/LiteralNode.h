@@ -10,5 +10,6 @@ public:
     void print(const int indent) override {
         std::cout << type.type;
     }
-    virtual llvm::Value *Codegen() { }
+
+    llvm::Value *Codegen() override { return nullptr; }
 };
