@@ -4,11 +4,14 @@ project(typlyp VERSION 1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(LLVM_DIR "/Users/flowi0/Desktop/MyProjects/Pisvyap/start/llvm-project/build/lib/cmake/llvm")
+set(LLVM_DIR "${CMAKE_SOURCE_DIR}/llvm-project/lib/cmake/llvm")
+
 find_package(LLVM REQUIRED CONFIG)
+llvm_map_components_to_libnames(LLVM_LIBS support core irreader bitreader)
+
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-include_directories(${LLVM_INCLUDE_DIRS})
-add_definitions(${LLVM_DEFINITIONS})
+message(STATUS "LLVM include dir: ${LLVM_INCLUDE_DIRS}")
+message(STATUS "LLVM libraries: ${LLVM_LIBRARY_DIRS}")
 
 set(
         SOURCE_FILES
@@ -50,7 +53,14 @@ set(
         ast/CodeGeneration.cpp
 )
 
-add_subdirectory(antlr4-cpp-runtime)
+add_subdirectory(
+        antlr4-cpp-runtime
+        llvm-project
+)
+
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebug$<$<CONFIG:Debug>:>")
+endif()
 
 add_executable(
         typlyp
@@ -62,11 +72,12 @@ target_link_libraries(
         typlyp
         PRIVATE
         antlr4_static
-        ${LLVM_LIBRARIES}
+        ${LLVM_LIBS}
 )
 
 # Include directories
 target_include_directories(typlyp PRIVATE
+        ${LLVM_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-cpp-runtime/runtime/src
         ${CMAKE_CURRENT_SOURCE_DIR}/grammar
 )
