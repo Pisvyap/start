@@ -111,30 +111,42 @@ struct Symbol {
 
 class SemanticTable {
 private:
-    std::list<std::unordered_map<std::string, Symbol>> scopes;
-    int index = 0; // TODO вместо удаления скоупов сделать индекс для переиспользования
+    std::vector<std::unordered_map<std::string, Symbol>> scopes;
+    int index = 0;
 public:
+    SemanticTable() {
+        scopes.assign(32, {});
+    }
+
     void enterScope() {
-        scopes.push_back({});
+        index += 1;
     }
 
     void leaveScope() {
-        scopes.pop_back();
+        index -= 1;
     }
 
     void addSymbol(const std::string& name, const Symbol& symbol) {
-        if (scopes.empty())
+        if (index < 0)
             enterScope();
 
-        scopes.back()[name] = symbol;
+        scopes.at(index)[name] = symbol;
     }
 
     Symbol* lookup(const std::string& name) {
-        for (auto it = scopes.rbegin(); it != scopes.rend(); ++it)
-            if (it->count(name))
-                return &it->at(name);
+        for (auto i = index; i >= 0; --i)
+            if (scopes.at(i).count(name))
+                return &scopes.at(i)[name];
 
         return nullptr;
+    }
+
+    Symbol* findCurrentFunction() const {
+        if (index < 1)
+            return nullptr;
+
+        auto outer_scope = scopes.at(index - 1);
+        return &outer_scope.at("return");
     }
 };
 
