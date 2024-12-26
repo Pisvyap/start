@@ -4,7 +4,7 @@ project(typlyp VERSION 1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(LLVM_DIR "${CMAKE_SOURCE_DIR}/llvm/llvm-project/llvm/build/lib/cmake/llvm")
+set(LLVM_DIR "${CMAKE_SOURCE_DIR}/llvm-project/lib/cmake/llvm") #тут у меня путь другой, специально не меняю общей ветке
 
 find_package(LLVM REQUIRED CONFIG)
 llvm_map_components_to_libnames(LLVM_LIBS support core irreader bitreader executionengine mcjit)
@@ -50,7 +50,6 @@ set(
         ast/nodes/statements/ForStatementNode.h
         ast/semantics/SemanticTable.cpp
         ast/semantics/SemanticTable.h
-        ast/CodeGeneration.cpp
 )
 
 if(MSVC)

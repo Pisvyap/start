@@ -17,7 +17,7 @@
 #include "ast/nodes/expressions/UnaryOperationNode.h"
 
 std::string readFile(const std::string& fileName) {
-    const std::string path = "../../scratches/" + fileName;
+    const std::string path = "../scratches/" + fileName; //тут у меня путь другой, специально не меняю в общей ветке
 
     std::ifstream file(path);
     if (!file.is_open()) {
