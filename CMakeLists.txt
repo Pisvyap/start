@@ -77,6 +77,8 @@ target_link_libraries(
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/libs/antlr4-runtime.lib
         ${LLVM_LIBS}
+        LLVMX86CodeGen
+        LLVMX86AsmParser
 )
 
 target_include_directories(typlyp PRIVATE
@@ -84,4 +86,5 @@ target_include_directories(typlyp PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/include
         ${CMAKE_CURRENT_SOURCE_DIR}/grammar
 )
+
 add_definitions(${LLVM_DEFINITIONS})

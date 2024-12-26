@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 #include <iterator>
 #include <typlypParser.h>
 
@@ -12,14 +11,13 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Module.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/ExecutionEngine/MCJIT.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
 #include "ast/nodes/expressions/UnaryOperationNode.h"
 
 std::string readFile(const std::string& fileName) {
-    const std::string path = "../scratches/" + fileName;
+    const std::string path = "../../scratches/" + fileName;
 
     std::ifstream file(path);
     if (!file.is_open()) {
@@ -537,7 +535,6 @@ int main() {
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
     }
-
     // 6. Генерация LLVM IR с помощью Codegen каждой ноды
     try {
         llvm::FunctionType *mainType = llvm::FunctionType::get(llvm::Type::getInt32Ty(context), false);
