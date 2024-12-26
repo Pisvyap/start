@@ -12,7 +12,7 @@ public:
     void semantic_check(SemanticTable& table) override {
         // Проверка существования массива
         Symbol* arr = table.lookup(name);
-        if (arr == nullptr || arr->isFunction || (arr->type != INT_ARRAY && arr->type != BOOL_ARRAY))
+        if (arr == nullptr || arr->isFunction || !arr->type.is_array)
             throw std::runtime_error("Array '" + name + "' was not declared");
 
         // Проверка правильности индекса
@@ -21,10 +21,10 @@ public:
             throw std::runtime_error("Arrays support only 'chislo' indices");
         // TODO проверка что не вышли за пределы? и другие проверки (отрицательные числа)
 
-        if (arr->type.type == INT_ARRAY) {
-            this->type = TypeStruct(INT);
+        if (arr->type.type == INT) {
+            this->type = Type(INT);
         } else {
-            this->type = TypeStruct(BOOL);
+            this->type = Type(BOOL);
         }
     }
 

@@ -4,11 +4,11 @@
 
 class ExpressionNode : public ASTNode {
 public:
-    TypeStruct type;
+    Type type;
 
-    explicit ExpressionNode(const TypeStruct& type) : type(type) { }
+    explicit ExpressionNode(const Type& type) : type(type) { }
 
-    ExpressionNode() : type(TypeStruct(INT, 0)) { }
+    ExpressionNode() : type(Type(INT, 0)) { }
 
     explicit ExpressionNode(const std::string& type) : type(map_type(type)) { }
 

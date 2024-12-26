@@ -21,17 +21,16 @@ public:
 
         // Проверка на наличие массива
         Symbol* arr = table.lookup(name);
-        if (arr == nullptr || arr->isFunction || (arr->type != INT_ARRAY && arr->type != BOOL_ARRAY))
+        if (arr == nullptr || arr->isFunction || !arr->type.is_array)
             throw std::runtime_error("Array '" + name + "' was not declared");
 
         // Проверка индекса
         // TODO проверка, не вышли ли за пределы??
         if (index->type != INT)
-            throw std::runtime_error("Only 'chiclo' indices supported");
+            throw std::runtime_error("Only 'chislo' indices supported");
 
         // Проверка на правильность типов
-        if (arr->type == INT_ARRAY && value->type != INT
-            || arr->type == BOOL_ARRAY && value->type != BOOL)
+        if (arr->type.type != value->type.type)
             throw std::runtime_error("Type mismatch in array assignment");
     }
 

@@ -9,11 +9,11 @@ class FunctionNode : public ASTNode {
 public:
     std::string name;
     std::vector<Ptr<ParameterNode>> parameters; // pair<name, parameter>
-    TypeStruct returnType;
+    Type returnType;
     Ptr<CodeBlockNode> body;
     void print(const int indent) override {
         ASTNode::print(indent);
-        printf("Function %s -> %d\n", name.c_str(), returnType.type);
+        printf("Function %s -> %s\n", name.c_str(), to_string(returnType).c_str());
         for (auto& param: parameters)
             param->print(indent + 1);
         body->print(indent + 1);
@@ -34,6 +34,8 @@ public:
 
         // Проверяем тело функции и заполняем в новый скоуп
         table.enterScope();
+        Symbol function_return(returnType, true);
+        table.addSymbol("return", function_return);
         for (auto& parameter : parameters) {
             Symbol param(parameter->type, false);
             table.addSymbol(parameter->name, param);

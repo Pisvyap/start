@@ -4,7 +4,7 @@
 #pragma once
 
 
-#include <antlr4-runtime.h>
+#include "antlr4-runtime.h"
 #include "typlypParser.h"
 
 
@@ -73,6 +73,12 @@ public:
 
   virtual void enterType(typlypParser::TypeContext *ctx) = 0;
   virtual void exitType(typlypParser::TypeContext *ctx) = 0;
+
+  virtual void enterScalarType(typlypParser::ScalarTypeContext *ctx) = 0;
+  virtual void exitScalarType(typlypParser::ScalarTypeContext *ctx) = 0;
+
+  virtual void enterArrayType(typlypParser::ArrayTypeContext *ctx) = 0;
+  virtual void exitArrayType(typlypParser::ArrayTypeContext *ctx) = 0;
 
 
 };

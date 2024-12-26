@@ -68,7 +68,7 @@ expr
     | BOOL // done
     | '(' expr ')' // done
     | ID '(' argList? ')' // done
-    | 'new' type '[' expr ']' // Создание массива done
+    | 'new' scalarType '<' expr '>' // Создание массива done
     | 'extern' ID '(' argList? ')' // done?
     ;
 
@@ -78,18 +78,26 @@ argList : expr (',' expr)*;
 // Список выражений (для массивов)
 exprList : expr (',' expr)*;
 
-// Типы данных
+// Правила для типов
 type
-    : 'chislo'
-    | 'logika'
-    | 'chislo' '[' INT ']'
-    | 'logika' '[' INT ']'
+    : scalarType              // ScalarType
+    | arrayType               // ArrayType
+    ;
+
+scalarType
+    : 'chislo'                // ChisloType
+    | 'logika'                // LogikaType
+    ;
+
+arrayType
+    :
+    | scalarType '<' '>'      // UnknownSizeArray
     ;
 
 // Лексические правила
 BOOL : 'pravda' | 'lozh';               // Логические значения
-ID : [a-zA-Z_][a-zA-Z0-9_]*;           // Идентификаторы
 INT : [0-9]+;                          // Целые числа
+ID : [a-zA-Z_][a-zA-Z0-9_]*;           // Идентификаторы
 WS : [ \t\r\n]+ -> skip;               // Пропуск пробелов и новых строк
 COMMENT : '//' ~[\r\n]* -> skip;       // Однострочные комментарии
 LINE_COMMENT : '/*' .*? '*/' -> skip;  // Многострочные комментарии

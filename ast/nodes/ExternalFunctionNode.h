@@ -8,10 +8,10 @@ class ExternalFunctionNode : public ASTNode {
 public:
      std::string name;
      std::vector<Ptr<ParameterNode>> parameters;
-     TypeStruct returnType;
+     Type returnType;
      void print(const int indent) override {
           ASTNode::print(indent);
-          printf("ExternalFunction: %s -> %d\n", name.c_str(), returnType.type);
+          printf("ExternalFunction: %s -> %s\n", name.c_str(), to_string(returnType).c_str());
           for (auto& param : parameters)
                param->print(indent+1);
      }

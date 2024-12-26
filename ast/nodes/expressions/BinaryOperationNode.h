@@ -45,7 +45,7 @@ public:
 
     llvm::Value *Codegen() override;
 private:
-    Type get_type() const {
+    ScalarType get_type() const {
         switch (operation) {
             case Add:
             case Sub:

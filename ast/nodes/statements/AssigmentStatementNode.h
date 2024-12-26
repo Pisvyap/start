@@ -1,4 +1,6 @@
 #pragma once
+#include <support/CPPUtils.h>
+
 #include "StatementNode.h"
 
 class AssigmentStatementNode : public StatementNode {
@@ -26,6 +28,10 @@ public:
             throw std::runtime_error("Type mismatch. Can't assign "
                 + std::to_string(value->type.type)
                 + "' to variable '" + name + "'(type " + std::to_string(var->type.type) + ")");
+
+        if (var->type.is_array) {
+            var->type.array_size = value->type.array_size;
+        }
     }
 
     llvm::Value *Codegen() override;
