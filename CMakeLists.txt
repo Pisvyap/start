@@ -1,13 +1,13 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.23)
 project(typlyp VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(LLVM_DIR "${CMAKE_SOURCE_DIR}/llvm-project/lib/cmake/llvm")
+set(LLVM_DIR "${CMAKE_SOURCE_DIR}/llvm/llvm-project/llvm/build/lib/cmake/llvm")
 
 find_package(LLVM REQUIRED CONFIG)
-llvm_map_components_to_libnames(LLVM_LIBS support core irreader bitreader)
+llvm_map_components_to_libnames(LLVM_LIBS support core irreader bitreader executionengine mcjit)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "LLVM include dir: ${LLVM_INCLUDE_DIRS}")
@@ -70,7 +70,7 @@ add_executable(
         ${SOURCE_FILES}
 )
 
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/libs)
+link_directories(${LLVM_LIBRARY_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/libs)
 
 target_link_libraries(
         typlyp
@@ -84,3 +84,4 @@ target_include_directories(typlyp PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/include
         ${CMAKE_CURRENT_SOURCE_DIR}/grammar
 )
+add_definitions(${LLVM_DEFINITIONS})
