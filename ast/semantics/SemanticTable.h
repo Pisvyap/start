@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <list>
 #include <stdexcept>
 #include <string>
@@ -88,7 +89,7 @@ static std::string to_string(Type type) {
             if (!type.is_array)
                 return "bool";
             return "bool[" + (type.array_size == 0 ? "" : std::to_string(type.array_size)) + "]";
-        default: throw std::runtime_error("Unsupported type " + std::to_string(type.type));
+        default: throw std::runtime_error("Unsupported type (to_string) " + to_string(type.type));
     }
 }
 
@@ -112,7 +113,6 @@ struct Symbol {
 class SemanticTable {
 private:
     std::list<std::unordered_map<std::string, Symbol>> scopes;
-    int index = 0; // TODO вместо удаления скоупов сделать индекс для переиспользования
 public:
     void enterScope() {
         scopes.push_back({});

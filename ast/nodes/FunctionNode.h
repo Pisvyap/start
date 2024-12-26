@@ -34,6 +34,8 @@ public:
 
         // Проверяем тело функции и заполняем в новый скоуп
         table.enterScope();
+        Symbol function_return(returnType, true);
+        table.addSymbol("return", function_return);
         for (auto& parameter : parameters) {
             Symbol param(parameter->type, false);
             table.addSymbol(parameter->name, param);
