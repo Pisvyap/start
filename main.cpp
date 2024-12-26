@@ -231,7 +231,7 @@ Value* ForStatementNode::Codegen() { //Очень надо будет чекат
     step->Codegen();
     Builder.CreateBr(condBB);
     Builder.SetInsertPoint(afterBB);
-    return ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
+    return ConstantInt::get(llvm::Type::getInt128Ty(context), 0);
 }
 
 Value* IfStatementNode::Codegen() { //Очень надо будет чекать
@@ -277,7 +277,7 @@ Value* IfStatementNode::Codegen() { //Очень надо будет чекат�
     mergeBB->insertInto(TheFunction);
     Builder.SetInsertPoint(mergeBB);
 
-    return llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
+    return llvm::ConstantInt::get(llvm::Type::getInt128Ty(context), 0);
 }
 
 Value* ReturnStatementNode::Codegen() {
@@ -292,9 +292,9 @@ Value* VariableDeclarationNode::Codegen() {
         varType = llvm::Type::getInt128Ty(context);
     else if(type.type == BOOL)
         varType = llvm::Type::getInt1Ty(context);
-    else if (type.type == INT_ARRAY)
+    else if (type.type == INT && type.is_array)
         varType = llvm::ArrayType::get(llvm::Type::getInt128Ty(context), type.array_size);
-    else if (type.type == BOOL_ARRAY)
+    else if (type.type == BOOL && type.is_array)
         varType = llvm::ArrayType::get(llvm::Type::getInt1Ty(context), type.array_size);
     else {
         llvm::errs() << "Unknown type: " << type.type << "\n";
@@ -323,7 +323,7 @@ Value* WhileStatementNode::Codegen()  { //Очень надо будет чек�
     Builder.CreateBr(condBB);
     Builder.SetInsertPoint(afterBB);
 
-    return ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
+    return ConstantInt::get(llvm::Type::getInt128Ty(context), 0);
 }
 
 // Ноды остальные
@@ -337,15 +337,15 @@ Value *CodeBlockNode::Codegen() {
 
 llvm::Value *ExternalFunctionNode::Codegen() {
     llvm::Type *llvmReturnType = nullptr;
-    if (returnType.is_array()) {
-        if (returnType.type == INT_ARRAY) {
-            llvmReturnType = llvm::PointerType::get(llvm::Type::getInt32Ty(context), 0);
-        } else if (returnType.type == BOOL_ARRAY) {
+    if (returnType.is_array) {
+        if (returnType.type == INT && returnType.is_array) {
+            llvmReturnType = llvm::PointerType::get(llvm::Type::getInt128Ty(context), 0);
+        } else if (returnType.type == BOOL && returnType.is_array) {
             llvmReturnType = llvm::PointerType::get(llvm::Type::getInt1Ty(context), 0);
         }
     } else {
         llvmReturnType = (returnType.type == INT)
-                         ? llvm::Type::getInt32Ty(context)
+                         ? llvm::Type::getInt128Ty(context)
                          : llvm::Type::getInt1Ty(context);
     }
 
@@ -353,14 +353,14 @@ llvm::Value *ExternalFunctionNode::Codegen() {
     std::vector<llvm::Type *> paramTypes;
     for (const auto &param : parameters) {
         llvm::Type *paramType = nullptr;
-        if (param->type.is_array()) {
+        if (param->type.is_array) {
             paramType = llvm::PointerType::get(
-                    (param->type.type == INT_ARRAY ? llvm::Type::getInt32Ty(context)
-                                                   : llvm::Type::getInt1Ty(context)),
+                    (param->type.type == INT and param->type.is_array ? llvm::Type::getInt128Ty(context)
+                                                                      : llvm::Type::getInt1Ty(context)),
                     0);
         } else {
             paramType = (param->type.type == INT)
-                        ? llvm::Type::getInt32Ty(context)
+                        ? llvm::Type::getInt128Ty(context)
                         : llvm::Type::getInt1Ty(context);
         }
         paramTypes.push_back(paramType);
@@ -382,42 +382,33 @@ llvm::Value *ExternalFunctionNode::Codegen() {
 
 llvm::Value *FunctionNode::Codegen() {
     llvm::Type *llvmReturnType = nullptr;
-    switch (returnType.type) {
-        case INT:
-            llvmReturnType = llvm::Type::getInt32Ty(context);
-            break;
-        case BOOL:
-            llvmReturnType = llvm::Type::getInt1Ty(context);
-            break;
-        case INT_ARRAY:
-        case BOOL_ARRAY:
-            std::cerr << "Ошибка: функции не могут возвращать массивы" << std::endl;
-            return nullptr;
-        default:
-            std::cerr << "Неизвестный тип возвращаемого значения: " << returnType.type << std::endl;
-            return nullptr;
+    if (returnType.is_array) {
+        std::cerr << "Ошибка: функции не могут возвращать массивы" << std::endl;
+        return nullptr;
+    } else if (returnType.type == INT)
+        llvmReturnType = llvm::Type::getInt128Ty(context);
+    else if (returnType.type == BOOL) {
+        llvmReturnType = llvm::Type::getInt1Ty(context);
+    } else {
+        std::cerr << "Неизвестный тип возвращаемого значения: " << returnType.type << std::endl;
+        return nullptr;
     }
 
     // Определяем типы параметров
     std::vector<llvm::Type *> paramTypes;
     for (const auto &param : parameters) {
         llvm::Type *paramType = nullptr;
-        switch (param->type.type) {
-            case INT:
-                paramType = llvm::Type::getInt32Ty(context);
-                break;
-            case BOOL:
-                paramType = llvm::Type::getInt1Ty(context);
-                break;
-            case INT_ARRAY:
-                paramType = llvm::PointerType::get(llvm::Type::getInt32Ty(context), 0);
-                break;
-            case BOOL_ARRAY:
-                paramType = llvm::PointerType::get(llvm::Type::getInt1Ty(context), 0);
-                break;
-            default:
-                std::cerr << "Неизвестный тип параметра: " << param->type.type << std::endl;
-                return nullptr;
+        if (param->type.is_array and param->type.type == INT) {
+            paramType = llvm::PointerType::get(llvm::Type::getInt128Ty(context), 0);
+        } else if (param->type.is_array and param->type.type == BOOL) {
+            paramType = llvm::PointerType::get(llvm::Type::getInt1Ty(context), 0);
+        } else if (param->type.type == INT)
+            paramType = llvm::Type::getInt128Ty(context);
+        else if (param->type.type == BOOL) {
+            paramType = llvm::Type::getInt1Ty(context);
+        } else {
+            std::cerr << "Неизвестный тип параметра: " << param->type.type << std::endl;
+            return nullptr;
         }
         paramTypes.push_back(paramType);
     }
@@ -427,10 +418,10 @@ llvm::Value *FunctionNode::Codegen() {
 
     // Создаем функцию в модуле
     llvm::Function *function = llvm::Function::Create(
-        funcType,
-        llvm::Function::ExternalLinkage,
-        name,
-        module
+            funcType,
+            llvm::Function::ExternalLinkage,
+            name,
+            module
     );
 
     // Переходим в тело функции
@@ -459,7 +450,7 @@ llvm::Value *FunctionNode::Codegen() {
 
     // Если тело не заканчивается возвратом, добавляем возврат значения по умолчанию
     if (returnType.type == INT) {
-        Builder.CreateRet(llvm::ConstantInt::get(context, llvm::APInt(32, 0)));
+        Builder.CreateRet(llvm::ConstantInt::get(context, llvm::APInt(128, 0)));
     } else if (returnType.type == BOOL) {
         Builder.CreateRet(llvm::ConstantInt::get(context, llvm::APInt(1, 0)));
     }
@@ -476,22 +467,18 @@ llvm::Value *FunctionNode::Codegen() {
 
 llvm::Value *ParameterNode::Codegen() {
     llvm::Value *paramValue = NamedValues[name];
-    switch (type.type) {
-        case INT:
-        case BOOL:
-            return paramValue;
-        case INT_ARRAY:
-        case BOOL_ARRAY:
-            if (type.array_size <= 0) {
-                std::cerr << "Ошибка: массив " << name << " имеет некорректный размер: "
-                          << type.array_size << std::endl; // Или че у нас там за костыль с <-1>?
-                return nullptr;
-            }
-            return paramValue;
-
-        default:
-            std::cerr << "Неизвестный тип параметра: " << static_cast<int>(type.type) << std::endl;
+    if (type.is_array) {
+        if (type.array_size <= 0) {
+            std::cerr << "Ошибка: массив " << name << " имеет некорректный размер: "
+                      << type.array_size << std::endl; // Или че у нас там за костыль с <-1>?
             return nullptr;
+        }
+        return paramValue;
+    } else if (type.type == INT or type.type == BOOL) {
+        return paramValue;
+    } else {
+        std::cerr << "Неизвестный тип параметра: " << static_cast<int>(type.type) << std::endl;
+        return nullptr;
     }
 }
 
