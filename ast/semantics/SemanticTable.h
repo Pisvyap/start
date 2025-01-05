@@ -8,20 +8,24 @@
 
 enum ScalarType {
     INT,
-    BOOL
+    BOOL,
 };
 
 struct Type {
     ScalarType type;
+    bool is_void;
     bool is_array;
     int array_size;
     Type() { }
+    Type(bool is_void) : is_void(is_void), is_array(false), array_size(0) { }
     Type(ScalarType type) : type(type), is_array(false), array_size(0) { }
     Type(ScalarType type, bool is_array) : type(type), is_array(is_array), array_size(0) {}
     Type(ScalarType type, bool is_array, int size) : type(type), is_array(is_array), array_size(size) { }
 
     bool operator==(const Type& other) const {
-        return type == other.type && is_array == other.is_array;
+        return is_void
+            ? other.is_void
+            : type == other.type && is_array == other.is_array;
     }
 
     bool operator!=(const Type& other) const {
@@ -34,6 +38,8 @@ static Type map_type(const std::string& name, bool is_array) {
         return Type(INT, is_array);
     if (name == "logika")
         return Type(BOOL, is_array);
+    if (name == "nebytie")
+        return Type(true);
     throw std::runtime_error("Unknown type: " + name);
 }
 
@@ -68,6 +74,10 @@ static Type map_type(const std::string& name) {
         }
     }
 
+    if (name == "nebytie") {
+        return Type(true);
+    }
+
     throw std::runtime_error("Unsupported type " + name);
 }
 
@@ -89,7 +99,10 @@ static std::string to_string(Type type) {
             if (!type.is_array)
                 return "bool";
             return "bool[" + (type.array_size == 0 ? "" : std::to_string(type.array_size)) + "]";
-        default: throw std::runtime_error("Unsupported type (to_string) " + to_string(type.type));
+        default:
+            if (type.is_void)
+                return "void";
+            throw std::runtime_error("Unsupported type (to_string) " + to_string(type.type));
     }
 }
 

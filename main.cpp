@@ -1,6 +1,6 @@
 #include <iostream>
-#include <iterator>
 #include <typlypParser.h>
+#include <llvm/Target/TargetMachine.h>
 
 #include "antlr4-runtime.h"
 #include "ast/ASTBuilder.h"
@@ -12,47 +12,36 @@
 #include "llvm/IR/Module.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/Support/TargetSelect.h"
+#include "llvm/IR/Verifier.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
 #include "ast/nodes/expressions/UnaryOperationNode.h"
 
-std::string readFile(const std::string& fileName) {
-    const std::string path = "../scratches/" + fileName; //тут у меня путь другой, специально не меняю в общей ветке
-
-    std::ifstream file(path);
-    if (!file.is_open()) {
-        std::cerr << "File " << path << " does not exist" << std::endl;
-        return std::string();
-    }
-
-    std::string contents(std::istreambuf_iterator<char>{file}, {});
-    file.close();
-
-    return contents;
-}
+#include "utils/utils.h"
 
 using namespace llvm;
 
-static LLVMContext context;
-static llvm::Module* module = new llvm::Module("MyModule", context); //LLVM-конструкция, содержит все функции/глобалы в куске кода
-static IRBuilder<> Builder(context); //вспомогательный объект, помогает генерировать инструкции LLVM
-static std::map<std::string, llvm::AllocaInst*> NamedValues; //таблица символов
+constexpr Logger logger;
+LLVMContext context;
+auto module = std::make_unique<Module>("MyModule", context); // LLVM-конструкция, содержит все функции/глобалы в куске кода
+IRBuilder Builder(context);                          // вспомогательный объект, помогает генерировать инструкции LLVM
+std::map<std::string, AllocaInst*> NamedValues;         // таблица символов
 
 // Ноды EXPRESSIONS
 
-Value *NumberLiteralNode::Codegen() {
+Value* NumberLiteralNode::Codegen() {
     ConstantInt* constVal = ConstantInt::get(
-            context,
-            llvm::APInt(128, value, true)
+        context,
+        APInt(128, value, true)
     );
 
     return constVal;
 }
 
-Value *BoolLiteralNode::Codegen() {
-    llvm::ConstantInt* constVal = llvm::ConstantInt::get(
-            context,
-            llvm::APInt(1, value, true)
+Value* BoolLiteralNode::Codegen() {
+    ConstantInt* constVal = ConstantInt::get(
+        context,
+        APInt(1, value, true)
     );
 
     return constVal;
@@ -64,35 +53,37 @@ Value* BinaryOperationNode::Codegen() {
     if (!L || !R)
         return nullptr;
     switch (operation) {
-        case BinaryOperationType::Add:
+        case Add:
             return Builder.CreateAdd(L, R, "addtmp");
-        case BinaryOperationType::Sub:
+        case Sub:
             return Builder.CreateSub(L, R, "subtmp");
-        case BinaryOperationType::Mul:
+        case Mul:
             return Builder.CreateMul(L, R, "multmp");
-        case BinaryOperationType::Div:
+        case Div:
             return Builder.CreateSDiv(L, R, "divtmp");
-        case BinaryOperationType::Mod:
+        case Mod:
             return Builder.CreateSRem(L, R, "modtmp");
-        case BinaryOperationType::LT:
+        case LT:
             return Builder.CreateICmpSLT(L, R, "lttmp");
-        case BinaryOperationType::LE:
+        case LE:
             return Builder.CreateICmpSLE(L, R, "letmp");
-        case BinaryOperationType::GT:
+        case GT:
             return Builder.CreateICmpSGT(L, R, "gttmp");
-        case BinaryOperationType::GE:
+        case GE:
             return Builder.CreateICmpSGE(L, R, "getmp");
-        case BinaryOperationType::EQ:
+        case EQ:
             return Builder.CreateICmpEQ(L, R, "eqtmp");
-        case BinaryOperationType::NE:
+        case NE:
             return Builder.CreateICmpNE(L, R, "netmp");
+        default:
+            return nullptr;
     }
 }
 
 Value* UnaryOperationNode::Codegen() {
     switch (operation) {
         case NOT: {
-            llvm::Value* result = Builder.CreateNot(expression->Codegen(), "not_result");
+            Value* result = Builder.CreateNot(expression->Codegen(), "not_result");
             return result;
         }
         default:
@@ -103,27 +94,29 @@ Value* UnaryOperationNode::Codegen() {
 Value* IdentifierNode::Codegen() {
     auto it = NamedValues.find(name);
     if (it != NamedValues.end()) {
-
         return Builder.CreateLoad(
-                it->second->getAllocatedType(),
-                it->second,
-                name.c_str());
+            it->second->getAllocatedType(),
+            it->second,
+            name.c_str());
     }
     return nullptr;
 }
 
 Value* ArrayIndexExpressionNode::Codegen() {
-    llvm::Value* idxPtr = index->Codegen();
+    Value* idxPtr = index->Codegen();
     auto it = NamedValues.find(name);
     if (it != NamedValues.end()) {
-        llvm::Value* arrayPtr = it->second;
-        llvm::Value* idx128 = Builder.CreateSExt(idxPtr, llvm::Type::getInt128Ty(context), "index128");
+        Value* arrayPtr = it->second;
+        Value* idx128 = Builder.CreateSExt(idxPtr, llvm::Type::getInt128Ty(context), "index128");
         llvm::Type* elementType = arrayPtr->getType()->getArrayElementType();
 
-        llvm::Value* elementPtr = Builder.CreateGEP(elementType, arrayPtr,
-                                                    { llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0), idx128 }, "elementptr");
+        Value* elementPtr = Builder.CreateGEP(elementType, arrayPtr,
+                                                    {
+                                                        ConstantInt::get(llvm::Type::getInt64Ty(context), 0),
+                                                        idx128
+                                                    }, "elementptr");
 
-        llvm::Value* loadedValue = Builder.CreateLoad(elementType, elementPtr, "loadedval");
+        Value* loadedValue = Builder.CreateLoad(elementType, elementPtr, "loadedval");
 
         return loadedValue;
     }
@@ -131,97 +124,100 @@ Value* ArrayIndexExpressionNode::Codegen() {
 }
 
 Value* NewExpressionNode::Codegen() {
-    llvm::Value* sizeExpr = expression->Codegen();
+    Value* sizeExpr = expression->Codegen();
     llvm::Type* sizeType = llvm::Type::getInt128Ty(context);
-    llvm::Value* size128 = Builder.CreateZExtOrTrunc(sizeExpr, sizeType);
+    Value* size128 = Builder.CreateZExtOrTrunc(sizeExpr, sizeType);
 
 
-    auto* mallocFn = llvm::cast<llvm::Function>(
-            module->getOrInsertFunction(
-                    "malloc",
-                    llvm::FunctionType::get(
-                            llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(context)),
-                            {sizeType},
-                            false)
-            ).getCallee()
+    auto* mallocFn = llvm::cast<Function>(
+        module->getOrInsertFunction(
+            "malloc",
+            FunctionType::get(
+                PointerType::getUnqual(llvm::Type::getInt8Ty(context)),
+                {sizeType},
+                false)
+        ).getCallee()
     );
 
-    llvm::Value* allocatedMemory = Builder.CreateCall(mallocFn, {size128});
-    llvm::Type* ptrType = llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(context));
-    llvm::Value* castedPtr = Builder.CreateBitCast(allocatedMemory, ptrType);
+    Value* allocatedMemory = Builder.CreateCall(mallocFn, {size128});
+    llvm::Type* ptrType = PointerType::getUnqual(llvm::Type::getInt8Ty(context));
+    Value* castedPtr = Builder.CreateBitCast(allocatedMemory, ptrType);
     return castedPtr;
 }
 
 Value* FunctionCallExpressionNode::Codegen() {
     auto it = NamedValues.find(name);
-    llvm::Function* func = it->second->getFunction();
-    std::vector<llvm::Value*> argv;
-    for (const auto& arg : arguments) {
-        llvm::Value* argV = arg->Codegen();
+    Function* func = it->second->getFunction();
+    std::vector<Value*> argv;
+    for (const auto& arg: arguments) {
+        Value* argV = arg->Codegen();
         argv.push_back(argV);
     }
-    llvm::Value* res = Builder.CreateCall(func, argv); //Как я понял void у нас нет, поэтому пока так
+    Value* res = Builder.CreateCall(func, argv); //Как я понял void у нас нет, поэтому пока так
     return res;
 }
 
 // Ноды STATEMENTS
 
 Value* ArrayAssigmentNode::Codegen() {
-    llvm::Value* idxPtr = index->Codegen();
-    llvm::Value* valPtr = value->Codegen();
+    Value* idxPtr = index->Codegen();
+    Value* valPtr = value->Codegen();
     auto it = NamedValues.find(name);
-    llvm::Value* arrayPtr = it->second;
+    Value* arrayPtr = it->second;
     llvm::Type* elementType = arrayPtr->getType()->getArrayElementType();
-    llvm::Value* idx64 = Builder.CreateSExt(idxPtr, llvm::Type::getInt64Ty(context), "index64");
-    llvm::Value* elementPtr = Builder.CreateGEP(elementType,
+    Value* idx64 = Builder.CreateSExt(idxPtr, llvm::Type::getInt64Ty(context), "index64");
+    Value* elementPtr = Builder.CreateGEP(elementType,
                                                 arrayPtr,
-                                                {llvm::ConstantInt::get(llvm::Type::getInt64Ty(context),0),
-                                                 idx64},
+                                                {
+                                                    llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0),
+                                                    idx64
+                                                },
                                                 "elementptr");
     Builder.CreateStore(valPtr, elementPtr);
     return nullptr;
 }
 
 Value* AssigmentStatementNode::Codegen() {
-    llvm::Value* valPtr = value->Codegen();
+    Value* valPtr = value->Codegen();
     auto it = NamedValues.find(name);
     if (it == NamedValues.end()) {
         return nullptr;
     }
-    llvm::Value* varPtr = it->second;
+    Value* varPtr = it->second;
     Builder.CreateStore(valPtr, varPtr);
     return nullptr;
 }
 
 Value* ExpressionStatementNode::Codegen() {
-    llvm::BasicBlock* currentBlock = Builder.GetInsertBlock();
+    BasicBlock* currentBlock = Builder.GetInsertBlock();
     if (!currentBlock) {
-        llvm::errs() << "Error: No insertion point set in the builder\n";
+        errs() << "Error: No insertion point set in the builder\n";
         return nullptr;
     }
 
-    llvm::Value* exprValue = expression->Codegen();
+    Value* exprValue = expression->Codegen();
     if (!exprValue) {
-        llvm::errs() << "Error: failed to generate code for expression\n";
+        errs() << "Error: failed to generate code for expression\n";
         return nullptr;
     }
 
     return exprValue;
 }
 
-Value* ForStatementNode::Codegen() { //Очень надо будет чекать
-    BasicBlock *initBB = BasicBlock::Create(context, "for.init");
+Value* ForStatementNode::Codegen() {
+    //Очень надо будет чекать
+    BasicBlock* initBB = BasicBlock::Create(context, "for.init");
     Builder.CreateBr(initBB);
     Builder.SetInsertPoint(initBB);
     init->Codegen();
-    Function *TheFunction = Builder.GetInsertBlock()->getParent();
-    BasicBlock *condBB = BasicBlock::Create(context, "for.cond", TheFunction);
-    BasicBlock *bodyBB = BasicBlock::Create(context, "for.body", TheFunction);
-    BasicBlock *stepBB = BasicBlock::Create(context, "for.step", TheFunction);
-    BasicBlock *afterBB = BasicBlock::Create(context, "for.after", TheFunction);
+    Function* TheFunction = Builder.GetInsertBlock()->getParent();
+    BasicBlock* condBB = BasicBlock::Create(context, "for.cond", TheFunction);
+    BasicBlock* bodyBB = BasicBlock::Create(context, "for.body", TheFunction);
+    BasicBlock* stepBB = BasicBlock::Create(context, "for.step", TheFunction);
+    BasicBlock* afterBB = BasicBlock::Create(context, "for.after", TheFunction);
 
     Builder.CreateBr(condBB);
-    Value *condVal = condition->Codegen();
+    Value* condVal = condition->Codegen();
     Builder.CreateCondBr(condVal, bodyBB, afterBB);
     Builder.SetInsertPoint(bodyBB);
     body->Codegen();
@@ -234,31 +230,32 @@ Value* ForStatementNode::Codegen() { //Очень надо будет чекат
     return ConstantInt::get(llvm::Type::getInt128Ty(context), 0);
 }
 
-Value* IfStatementNode::Codegen() { //Очень надо будет чекать
-    llvm::Value* condVal = condition->Codegen();
+Value* IfStatementNode::Codegen() {
+    //Очень надо будет чекать
+    Value* condVal = condition->Codegen();
     if (!condVal) {
-        llvm::errs() << "Error: failed to generate condition for if statement\n";
+        errs() << "Error: failed to generate condition for if statement\n";
         return nullptr;
     }
 
     condVal = Builder.CreateICmpNE(
-            condVal,
-            llvm::ConstantInt::get(condVal->getType(), 0),
-            "ifcond"
+        condVal,
+        ConstantInt::get(condVal->getType(), 0),
+        "ifcond"
     );
 
-    llvm::Function* TheFunction = Builder.GetInsertBlock()->getParent();
+    Function* TheFunction = Builder.GetInsertBlock()->getParent();
 
-    llvm::BasicBlock* thenBB = llvm::BasicBlock::Create(context, "if.then", TheFunction);
-    llvm::BasicBlock* elseBB = llvm::BasicBlock::Create(context, "if.else");
-    llvm::BasicBlock* mergeBB = llvm::BasicBlock::Create(context, "if.merge");
+    BasicBlock* thenBB = BasicBlock::Create(context, "if.then", TheFunction);
+    BasicBlock* elseBB = BasicBlock::Create(context, "if.else");
+    BasicBlock* mergeBB = BasicBlock::Create(context, "if.merge");
 
     Builder.CreateCondBr(condVal, thenBB, elseBB);
 
     Builder.SetInsertPoint(thenBB);
     if (thenBlock) {
         if (!thenBlock->Codegen()) {
-            llvm::errs() << "Error: failed to generate code for then block\n";
+            errs() << "Error: failed to generate code for then block\n";
             return nullptr;
         }
     }
@@ -277,7 +274,7 @@ Value* IfStatementNode::Codegen() { //Очень надо будет чекат�
     mergeBB->insertInto(TheFunction);
     Builder.SetInsertPoint(mergeBB);
 
-    return llvm::ConstantInt::get(llvm::Type::getInt128Ty(context), 0);
+    return ConstantInt::get(llvm::Type::getInt128Ty(context), 0);
 }
 
 Value* ReturnStatementNode::Codegen() {
@@ -288,18 +285,21 @@ Value* ReturnStatementNode::Codegen() {
 
 Value* VariableDeclarationNode::Codegen() {
     llvm::Type* varType;
-    if (type.type == INT)
-        varType = llvm::Type::getInt128Ty(context);
-    else if(type.type == BOOL)
-        varType = llvm::Type::getInt1Ty(context);
-    else if (type.type == INT && type.is_array)
-        varType = llvm::ArrayType::get(llvm::Type::getInt128Ty(context), type.array_size);
-    else if (type.type == BOOL && type.is_array)
-        varType = llvm::ArrayType::get(llvm::Type::getInt1Ty(context), type.array_size);
-    else {
-        llvm::errs() << "Unknown type: " << type.type << "\n";
+    if (type.type == INT) {
+        if (type.is_array)
+            varType = ArrayType::get(llvm::Type::getInt128Ty(context), type.array_size);
+        else
+            varType = llvm::Type::getInt128Ty(context);
+    } else if (type.type == BOOL) {
+        if (type.is_array)
+            varType = ArrayType::get(llvm::Type::getInt1Ty(context), type.array_size);
+        else
+            varType = llvm::Type::getInt1Ty(context);
+    } else {
+        logger.error("Unknown type: ", type.type);
         return nullptr;
     }
+
     Value* initVal = initializer ? initializer->Codegen() : Constant::getNullValue(varType);
     AllocaInst* alloc = Builder.CreateAlloca(varType, nullptr, name);
     Builder.CreateStore(initVal, alloc);
@@ -307,15 +307,16 @@ Value* VariableDeclarationNode::Codegen() {
     return nullptr;
 }
 
-Value* WhileStatementNode::Codegen()  { //Очень надо будет чекать
-    Function *TheFunction = Builder.GetInsertBlock()->getParent();
-    BasicBlock *condBB = BasicBlock::Create(context, "while.cond", TheFunction);
-    BasicBlock *bodyBB = BasicBlock::Create(context, "while.body", TheFunction);
-    BasicBlock *afterBB = BasicBlock::Create(context, "while.after", TheFunction);
+Value* WhileStatementNode::Codegen() {
+    //Очень надо будет чекать
+    Function* TheFunction = Builder.GetInsertBlock()->getParent();
+    BasicBlock* condBB = BasicBlock::Create(context, "while.cond", TheFunction);
+    BasicBlock* bodyBB = BasicBlock::Create(context, "while.body", TheFunction);
+    BasicBlock* afterBB = BasicBlock::Create(context, "while.after", TheFunction);
 
     Builder.CreateBr(condBB);
     Builder.SetInsertPoint(condBB);
-    Value *condVal = condition->Codegen();
+    Value* condVal = condition->Codegen();
 
     Builder.CreateCondBr(condVal, bodyBB, afterBB);
     Builder.SetInsertPoint(bodyBB);
@@ -328,15 +329,15 @@ Value* WhileStatementNode::Codegen()  { //Очень надо будет чек�
 
 // Ноды остальные
 
-Value *CodeBlockNode::Codegen() {
-    for (auto &statement : statements) {
+Value* CodeBlockNode::Codegen() {
+    for (auto& statement: statements) {
         Value* result = statement->Codegen();
     }
     return nullptr;
 }
 
-llvm::Value *ExternalFunctionNode::Codegen() {
-    llvm::Type *llvmReturnType = nullptr;
+llvm::Value* ExternalFunctionNode::Codegen() {
+    llvm::Type* llvmReturnType = nullptr;
     if (returnType.is_array) {
         if (returnType.type == INT && returnType.is_array) {
             llvmReturnType = llvm::PointerType::get(llvm::Type::getInt128Ty(context), 0);
@@ -345,43 +346,44 @@ llvm::Value *ExternalFunctionNode::Codegen() {
         }
     } else {
         llvmReturnType = (returnType.type == INT)
-                         ? llvm::Type::getInt128Ty(context)
-                         : llvm::Type::getInt1Ty(context);
+                             ? llvm::Type::getInt128Ty(context)
+                             : llvm::Type::getInt1Ty(context);
     }
 
     // Определяем типы параметров
-    std::vector<llvm::Type *> paramTypes;
-    for (const auto &param : parameters) {
-        llvm::Type *paramType = nullptr;
+    std::vector<llvm::Type*> paramTypes;
+    for (const auto& param: parameters) {
+        llvm::Type* paramType = nullptr;
         if (param->type.is_array) {
             paramType = llvm::PointerType::get(
-                    (param->type.type == INT and param->type.is_array ? llvm::Type::getInt128Ty(context)
-                                                                      : llvm::Type::getInt1Ty(context)),
-                    0);
+                (param->type.type == INT and param->type.is_array
+                     ? llvm::Type::getInt128Ty(context)
+                     : llvm::Type::getInt1Ty(context)),
+                0);
         } else {
             paramType = (param->type.type == INT)
-                        ? llvm::Type::getInt128Ty(context)
-                        : llvm::Type::getInt1Ty(context);
+                            ? llvm::Type::getInt128Ty(context)
+                            : llvm::Type::getInt1Ty(context);
         }
         paramTypes.push_back(paramType);
     }
 
     // Создаем тип функции
-    llvm::FunctionType *funcType = llvm::FunctionType::get(llvmReturnType, paramTypes, false);
+    llvm::FunctionType* funcType = llvm::FunctionType::get(llvmReturnType, paramTypes, false);
 
     // Объявляем внешнюю функцию
-    llvm::Function *function = llvm::Function::Create(
-            funcType,
-            llvm::Function::ExternalLinkage, // External linkage означает, что функция определена вне текущего модуля
-            name,
-            module
+    llvm::Function* function = llvm::Function::Create(
+        funcType,
+        llvm::Function::ExternalLinkage, // External linkage означает, что функция определена вне текущего модуля
+        name,
+        module.get()
     );
 
     return function;
 }
 
-llvm::Value *FunctionNode::Codegen() {
-    llvm::Type *llvmReturnType = nullptr;
+llvm::Value* FunctionNode::Codegen() {
+    llvm::Type* llvmReturnType = nullptr;
     if (returnType.is_array) {
         std::cerr << "Ошибка: функции не могут возвращать массивы" << std::endl;
         return nullptr;
@@ -395,9 +397,9 @@ llvm::Value *FunctionNode::Codegen() {
     }
 
     // Определяем типы параметров
-    std::vector<llvm::Type *> paramTypes;
-    for (const auto &param : parameters) {
-        llvm::Type *paramType = nullptr;
+    std::vector<llvm::Type*> paramTypes;
+    for (const auto& param: parameters) {
+        llvm::Type* paramType = nullptr;
         if (param->type.is_array and param->type.type == INT) {
             paramType = llvm::PointerType::get(llvm::Type::getInt128Ty(context), 0);
         } else if (param->type.is_array and param->type.type == BOOL) {
@@ -414,34 +416,34 @@ llvm::Value *FunctionNode::Codegen() {
     }
 
     // Создаем тип функции
-    llvm::FunctionType *funcType = llvm::FunctionType::get(llvmReturnType, paramTypes, false);
+    llvm::FunctionType* funcType = llvm::FunctionType::get(llvmReturnType, paramTypes, false);
 
     // Создаем функцию в модуле
-    llvm::Function *function = llvm::Function::Create(
-            funcType,
-            llvm::Function::ExternalLinkage,
-            name,
-            module
+    llvm::Function* function = llvm::Function::Create(
+        funcType,
+        llvm::Function::ExternalLinkage,
+        name,
+        module.get()
     );
 
     // Переходим в тело функции
-    llvm::BasicBlock *entryBlock = llvm::BasicBlock::Create(context, "entry", function);
+    llvm::BasicBlock* entryBlock = llvm::BasicBlock::Create(context, "entry", function);
     Builder.SetInsertPoint(entryBlock);
 
     // Устанавливаем имена параметров и добавляем их в таблицу переменных
     NamedValues.clear(); // Сбрасываем текущую таблицу переменных
     auto paramIt = function->arg_begin();
-    for (const auto &param : parameters) {
-        llvm::Argument &llvmArg = *paramIt++;
+    for (const auto& param: parameters) {
+        llvm::Argument& llvmArg = *paramIt++;
         llvmArg.setName(param->name);
         llvm::IRBuilder<> tempBuilder(&function->getEntryBlock(), function->getEntryBlock().begin());
-        llvm::AllocaInst *alloca = tempBuilder.CreateAlloca(llvmArg.getType(), nullptr, param->name);
+        llvm::AllocaInst*alloca = tempBuilder.CreateAlloca(llvmArg.getType(), nullptr, param->name);
         Builder.CreateStore(&llvmArg, alloca);
         NamedValues[param->name] = alloca;
     }
 
     // Генерируем код для тела функции
-    llvm::Value *bodyValue = body->Codegen();
+    llvm::Value* bodyValue = body->Codegen();
     if (!bodyValue) {
         std::cerr << "Ошибка генерации кода для тела функции " << name << std::endl;
         function->eraseFromParent();
@@ -455,22 +457,22 @@ llvm::Value *FunctionNode::Codegen() {
         Builder.CreateRet(llvm::ConstantInt::get(context, llvm::APInt(1, 0)));
     }
 
-//    // Проверяем корректность функции
-//    if (llvm::verifyFunction(*function, &llvm::errs())) {
-//        std::cerr << "Ошибка: в функции " << name << " обнаружены ошибки!" << std::endl;
-//        function->eraseFromParent();
-//        return nullptr;
-//    }
+    // Проверяем корректность функции
+    if (llvm::verifyFunction(*function, &llvm::errs())) {
+        std::cerr << "Ошибка: в функции " << name << " обнаружены ошибки!" << std::endl;
+        function->eraseFromParent();
+        return nullptr;
+    }
 
     return function;
 }
 
-llvm::Value *ParameterNode::Codegen() {
-    llvm::Value *paramValue = NamedValues[name];
+llvm::Value* ParameterNode::Codegen() {
+    llvm::Value* paramValue = NamedValues[name];
     if (type.is_array) {
         if (type.array_size <= 0) {
             std::cerr << "Ошибка: массив " << name << " имеет некорректный размер: "
-                      << type.array_size << std::endl; // Или че у нас там за костыль с <-1>?
+                    << type.array_size << std::endl; // Или че у нас там за костыль с <-1>?
             return nullptr;
         }
         return paramValue;
@@ -483,25 +485,24 @@ llvm::Value *ParameterNode::Codegen() {
 }
 
 
-llvm::Value *ProgramNode::Codegen() {
-    for (auto &extFunc: externalFunctions) {
+Value* ProgramNode::Codegen() {
+    for (auto& extFunc: externalFunctions) {
         extFunc->Codegen();
     }
-    for (auto &func: functions) {
+    for (auto& func: functions) {
         func->Codegen();
     }
-    for (auto &stmt: statements) {
+    for (auto& stmt: statements) {
         stmt->Codegen();
     }
+
     return nullptr;
 }
 
 
-int main() {
-    const std::string input = readFile("test.typlyp");
-
+Ptr<ProgramNode> build_ast(const std::string& code) {
     // Создание ANTLR потока
-    antlr4::ANTLRInputStream inputStream(input);
+    antlr4::ANTLRInputStream inputStream(code);
     auto lexer = typlypLexer(&inputStream);
     antlr4::CommonTokenStream tokenStream(&lexer);
     auto parser = typlypParser(&tokenStream);
@@ -514,70 +515,98 @@ int main() {
     Ptr<ProgramNode> ast;
     try {
         auto ast_any = builder.visitProgram(tree);
-        ast = std::any_cast<Ptr<ProgramNode>>(ast_any);
+        ast = std::any_cast<Ptr<ProgramNode> >(ast_any);
         ast->print(0);
 
         SemanticTable table;
         ast->semantic_check(table);
+
+        return ast;
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
+        return nullptr;
     }
-    // 6. Генерация LLVM IR с помощью Codegen каждой ноды
+}
+
+Function* create_main_function() {
+    FunctionType* funcType = FunctionType::get(llvm::Type::getVoidTy(context), false);
+    Function* mainFunc = Function::Create(funcType, Function::ExternalLinkage, "main", module.get());
+    BasicBlock* entry = BasicBlock::Create(context, "entry", mainFunc);
+
+    Builder.SetInsertPoint(entry);
+
+    return mainFunc;
+}
+
+#include "llvm/ExecutionEngine/Orc/LLJIT.h"
+
+int main() {
+    logger.info("Hello, World!");
+    const std::string input = readFile("test.typlyp");
+
+    auto AST = build_ast(input);
+
+    Function* mainFunc = create_main_function();
+
+    if (AST == nullptr) {
+        logger.error("Error. AST build failure.");
+        return 1;
+    }
+
     try {
-        llvm::FunctionType *mainType = llvm::FunctionType::get(llvm::Type::getInt32Ty(context), false);
-        llvm::Function *mainFunc = llvm::Function::Create(mainType, llvm::Function::ExternalLinkage, "main", module);
-
-        llvm::BasicBlock *entry = llvm::BasicBlock::Create(context, "entry", mainFunc);
-        Builder.SetInsertPoint(entry);
-
-        // Генерация кода для AST
-        llvm::Value *result = ast->Codegen();
-
-        // Возврат результата из main
-        Builder.CreateRet(result);
-
+        AST->Codegen();
     } catch (const std::exception& e) {
-        std::cerr << "Error during Codegen: " << e.what() << std::endl;
+        logger.error(e.what());
         return 1;
     }
 
-    // 7. Сохранение IR в файл
-    std::error_code EC;
-    llvm::raw_fd_ostream outFile("output.ll", EC, llvm::sys::fs::OF_None);
-    if (EC) {
-        std::cerr << "Could not open output file: " << EC.message() << std::endl;
+    Builder.CreateRetVoid();
+
+    if (verifyModule(*module, &errs())) {
+        logger.error("Error. Module verification failed.");
         return 1;
     }
+    logger.info("module verification successful.");
+
+    // Сохранение IR в файл
+    std::error_code EC;
+    raw_fd_ostream outFile("output.ll", EC, llvm::sys::fs::OF_None);
+    if (EC) {
+        logger.error("Could not open output file: ", EC.message());
+        return 1;
+    }
+
     module->print(outFile, nullptr);
     outFile.close();
-    std::cout << "LLVM IR written to output.ll" << std::endl;
+    logger.info("LLVM IR written to output.ll");
 
-    // 8. JIT-исполнение
-    llvm::InitializeNativeTarget();
-    llvm::InitializeNativeTargetAsmPrinter();
-    llvm::InitializeNativeTargetAsmParser();
+    // JIT-исполнение
+    InitializeNativeTarget();
+    InitializeNativeTargetAsmPrinter();
+    InitializeNativeTargetAsmParser();
 
     std::string errorStr;
-    llvm::ExecutionEngine *engine = llvm::EngineBuilder(static_cast<std::unique_ptr<Module>>(module))
+    ExecutionEngine* engine = EngineBuilder(std::move(module))
             .setErrorStr(&errorStr)
-            .setOptLevel(llvm::CodeGenOptLevel::Default)
+            .setOptLevel(CodeGenOptLevel::Default)
+            .setEngineKind(EngineKind::JIT)
             .create();
 
     if (!engine) {
-        std::cerr << "Failed to create ExecutionEngine: " << errorStr << std::endl;
+        logger.error("Failed to create ExecutionEngine: ", errorStr);
         return 1;
     }
 
     // Выполнение main
-    auto mainFunc = engine->FindFunctionNamed("main");
+    auto mainFuncEng = engine->FindFunctionNamed("main");
     if (!mainFunc) {
-        std::cerr << "No main function found in generated code" << std::endl;
+        logger.error("Failed to find main function in ExecutionEngine");
         return 1;
     }
 
-    auto mainPtr = (int (*)())engine->getPointerToFunction(mainFunc);
-    int result = mainPtr();
-    std::cout << "Program exited with code: " << result << std::endl;
+    auto mainEngPtr = (int (*)()) engine->getPointerToFunction(mainFuncEng);
+    int result = mainEngPtr();
+    logger.info("Program exited with code: ", result);
 
     return 0;
 }

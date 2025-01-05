@@ -15,7 +15,7 @@ public:
     }
 
     virtual void semantic_check(SemanticTable& table) { }
-    virtual llvm::Value* Codegen() { return nullptr;}
+    virtual llvm::Value* Codegen() { return nullptr; }
 };
 
 template<typename T>

@@ -4,10 +4,21 @@ project(typlyp VERSION 1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+
 set(LLVM_DIR "${CMAKE_SOURCE_DIR}/llvm-project/lib/cmake/llvm") #тут у меня путь другой, специально не меняю общей ветке
 
 find_package(LLVM REQUIRED CONFIG)
-llvm_map_components_to_libnames(LLVM_LIBS support core irreader bitreader executionengine mcjit)
+llvm_map_components_to_libnames(
+        LLVM_LIBS
+        support
+        core
+        irreader
+        bitreader
+        x86codegen
+        x86asmparser
+        executionengine
+        orcjit
+)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "LLVM include dir: ${LLVM_INCLUDE_DIRS}")
@@ -50,6 +61,7 @@ set(
         ast/nodes/statements/ForStatementNode.h
         ast/semantics/SemanticTable.cpp
         ast/semantics/SemanticTable.h
+        utils/utils.h
 )
 
 if(MSVC)
@@ -74,10 +86,8 @@ link_directories(${LLVM_LIBRARY_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime
 target_link_libraries(
         typlyp
         PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/libs/antlr4-runtime.lib
         ${LLVM_LIBS}
-        LLVMX86CodeGen
-        LLVMX86AsmParser
+        ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/libs/antlr4-runtime.lib
 )
 
 target_include_directories(typlyp PRIVATE
@@ -85,5 +95,3 @@ target_include_directories(typlyp PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/include
         ${CMAKE_CURRENT_SOURCE_DIR}/grammar
 )
-
-add_definitions(${LLVM_DEFINITIONS})
