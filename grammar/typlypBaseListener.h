@@ -76,6 +76,9 @@ public:
   virtual void enterType(typlypParser::TypeContext * /*ctx*/) override { }
   virtual void exitType(typlypParser::TypeContext * /*ctx*/) override { }
 
+  virtual void enterVoidType(typlypParser::VoidTypeContext * /*ctx*/) override { }
+  virtual void exitVoidType(typlypParser::VoidTypeContext * /*ctx*/) override { }
+
   virtual void enterScalarType(typlypParser::ScalarTypeContext * /*ctx*/) override { }
   virtual void exitScalarType(typlypParser::ScalarTypeContext * /*ctx*/) override { }
 

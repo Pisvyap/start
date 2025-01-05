@@ -74,6 +74,9 @@ public:
   virtual void enterType(typlypParser::TypeContext *ctx) = 0;
   virtual void exitType(typlypParser::TypeContext *ctx) = 0;
 
+  virtual void enterVoidType(typlypParser::VoidTypeContext *ctx) = 0;
+  virtual void exitVoidType(typlypParser::VoidTypeContext *ctx) = 0;
+
   virtual void enterScalarType(typlypParser::ScalarTypeContext *ctx) = 0;
   virtual void exitScalarType(typlypParser::ScalarTypeContext *ctx) = 0;
 

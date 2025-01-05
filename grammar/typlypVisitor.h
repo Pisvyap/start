@@ -59,6 +59,8 @@ public:
 
     virtual std::any visitType(typlypParser::TypeContext *context) = 0;
 
+    virtual std::any visitVoidType(typlypParser::VoidTypeContext *context) = 0;
+
     virtual std::any visitScalarType(typlypParser::ScalarTypeContext *context) = 0;
 
     virtual std::any visitArrayType(typlypParser::ArrayTypeContext *context) = 0;

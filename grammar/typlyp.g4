@@ -82,6 +82,11 @@ exprList : expr (',' expr)*;
 type
     : scalarType              // ScalarType
     | arrayType               // ArrayType
+    | voidType
+    ;
+
+voidType
+    : 'nebytie'
     ;
 
 scalarType

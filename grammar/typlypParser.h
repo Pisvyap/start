@@ -13,12 +13,12 @@ class  typlypParser : public antlr4::Parser {
 public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
-    T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, BOOL = 14, 
-    INT = 15, ID = 16, WS = 17, COMMENT = 18, LINE_COMMENT = 19, PLUS = 20, 
-    MINUS = 21, MULT = 22, DIV = 23, MOD = 24, LT = 25, LE = 26, GT = 27, 
-    GE = 28, EQ = 29, NEQ = 30, AND = 31, OR = 32, NOT = 33, ASSIGN = 34, 
-    LBRACKET = 35, RBRACKET = 36, LPAREN = 37, RPAREN = 38, LBRACE = 39, 
-    RBRACE = 40, SEMICOLON = 41, COMMA = 42
+    T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
+    BOOL = 15, INT = 16, ID = 17, WS = 18, COMMENT = 19, LINE_COMMENT = 20, 
+    PLUS = 21, MINUS = 22, MULT = 23, DIV = 24, MOD = 25, LT = 26, LE = 27, 
+    GT = 28, GE = 29, EQ = 30, NEQ = 31, AND = 32, OR = 33, NOT = 34, ASSIGN = 35, 
+    LBRACKET = 36, RBRACKET = 37, LPAREN = 38, RPAREN = 39, LBRACE = 40, 
+    RBRACE = 41, SEMICOLON = 42, COMMA = 43
   };
 
   enum {
@@ -26,8 +26,8 @@ public:
     RuleParam = 4, RuleBlock = 5, RuleStatement = 6, RuleVarDecl = 7, RuleAssignment = 8, 
     RuleArrayAssignment = 9, RuleReturnStatement = 10, RuleIfStatement = 11, 
     RuleWhileStatement = 12, RuleForStatement = 13, RuleForInit = 14, RuleForUpdate = 15, 
-    RuleExpr = 16, RuleArgList = 17, RuleExprList = 18, RuleType = 19, RuleScalarType = 20, 
-    RuleArrayType = 21
+    RuleExpr = 16, RuleArgList = 17, RuleExprList = 18, RuleType = 19, RuleVoidType = 20, 
+    RuleScalarType = 21, RuleArrayType = 22
   };
 
   explicit typlypParser(antlr4::TokenStream *input);
@@ -67,6 +67,7 @@ public:
   class ArgListContext;
   class ExprListContext;
   class TypeContext;
+  class VoidTypeContext;
   class ScalarTypeContext;
   class ArrayTypeContext; 
 
@@ -448,6 +449,7 @@ public:
     virtual size_t getRuleIndex() const override;
     ScalarTypeContext *scalarType();
     ArrayTypeContext *arrayType();
+    VoidTypeContext *voidType();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -457,6 +459,20 @@ public:
   };
 
   TypeContext* type();
+
+  class  VoidTypeContext : public antlr4::ParserRuleContext {
+  public:
+    VoidTypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  VoidTypeContext* voidType();
 
   class  ScalarTypeContext : public antlr4::ParserRuleContext {
   public:
