@@ -50,8 +50,11 @@ Value* BoolLiteralNode::Codegen() {
 Value* BinaryOperationNode::Codegen() {
     Value* L = left->Codegen();
     Value* R = right->Codegen();
-    if (!L || !R)
-        return nullptr;
+
+    // по идее когда все на исключениях, эта проверка не нужна
+    // if (!L || !R)
+        // return nullptr;
+
     switch (operation) {
         case Add:
             return Builder.CreateAdd(L, R, "addtmp");
@@ -76,7 +79,8 @@ Value* BinaryOperationNode::Codegen() {
         case NE:
             return Builder.CreateICmpNE(L, R, "netmp");
         default:
-            return nullptr;
+            // тут было return nullptr
+            throw CodegenException("Unsupported operation in BinaryOperationNode::Codegen");
     }
 }
 
@@ -87,47 +91,50 @@ Value* UnaryOperationNode::Codegen() {
             return result;
         }
         default:
-            return nullptr;
+            // тут было return nullptr
+            throw CodegenException("Unsupported operation in UnaryOperationNode::Codegen");
     }
 }
 
 Value* IdentifierNode::Codegen() {
     auto it = NamedValues.find(name);
-    if (it != NamedValues.end()) {
-        return Builder.CreateLoad(
-            it->second->getAllocatedType(),
-            it->second,
-            name.c_str());
-    }
-    return nullptr;
+    if (it == NamedValues.end())
+        // тут было return nullptr
+        throw CodegenException("Identifier not found: " + name);
+
+    return Builder.CreateLoad(
+        it->second->getAllocatedType(),
+        it->second,
+        name.c_str());
 }
 
 Value* ArrayIndexExpressionNode::Codegen() {
     Value* idxPtr = index->Codegen();
+
     auto it = NamedValues.find(name);
-    if (it != NamedValues.end()) {
-        Value* arrayPtr = it->second;
-        Value* idx128 = Builder.CreateSExt(idxPtr, llvm::Type::getInt128Ty(context), "index128");
-        llvm::Type* elementType = arrayPtr->getType()->getArrayElementType();
+    if (it == NamedValues.end())
+        // тут было return nullptr
+        throw CodegenException("Array not found: " + name);
 
-        Value* elementPtr = Builder.CreateGEP(elementType, arrayPtr,
-                                                    {
-                                                        ConstantInt::get(llvm::Type::getInt64Ty(context), 0),
-                                                        idx128
-                                                    }, "elementptr");
+    Value* arrayPtr = it->second;
+    Value* idx128 = Builder.CreateSExt(idxPtr, llvm::Type::getInt128Ty(context), "index128");
+    llvm::Type* elementType = arrayPtr->getType()->getArrayElementType();
 
-        Value* loadedValue = Builder.CreateLoad(elementType, elementPtr, "loadedval");
+    Value* elementPtr = Builder.CreateGEP(elementType, arrayPtr,
+                                                {
+                                                    ConstantInt::get(llvm::Type::getInt64Ty(context), 0),
+                                                    idx128
+                                                }, "elementptr");
 
-        return loadedValue;
-    }
-    return nullptr;
+    Value* loadedValue = Builder.CreateLoad(elementType, elementPtr, "loadedval");
+
+    return loadedValue;
 }
 
 Value* NewExpressionNode::Codegen() {
     Value* sizeExpr = expression->Codegen();
     llvm::Type* sizeType = llvm::Type::getInt128Ty(context);
     Value* size128 = Builder.CreateZExtOrTrunc(sizeExpr, sizeType);
-
 
     auto* mallocFn = llvm::cast<Function>(
         module->getOrInsertFunction(
@@ -159,11 +166,14 @@ Value* FunctionCallExpressionNode::Codegen() {
 }
 
 // Ноды STATEMENTS
-
 Value* ArrayAssigmentNode::Codegen() {
     Value* idxPtr = index->Codegen();
     Value* valPtr = value->Codegen();
     auto it = NamedValues.find(name);
+
+    if (it == NamedValues.end())
+        throw CodegenException("Array not found: " + name);
+
     Value* arrayPtr = it->second;
     llvm::Type* elementType = arrayPtr->getType()->getArrayElementType();
     Value* idx64 = Builder.CreateSExt(idxPtr, llvm::Type::getInt64Ty(context), "index64");
@@ -180,10 +190,11 @@ Value* ArrayAssigmentNode::Codegen() {
 
 Value* AssigmentStatementNode::Codegen() {
     Value* valPtr = value->Codegen();
+
     auto it = NamedValues.find(name);
-    if (it == NamedValues.end()) {
-        return nullptr;
-    }
+    if (it == NamedValues.end())
+        throw CodegenException("Variable not found: " + name);
+
     Value* varPtr = it->second;
     Builder.CreateStore(valPtr, varPtr);
     return nullptr;
@@ -191,16 +202,14 @@ Value* AssigmentStatementNode::Codegen() {
 
 Value* ExpressionStatementNode::Codegen() {
     BasicBlock* currentBlock = Builder.GetInsertBlock();
-    if (!currentBlock) {
-        logger.error("No insertion point set in the builder");
-        return nullptr;
-    }
+
+    if (!currentBlock)
+        throw CodegenException("No insertion point set in the builder");
 
     Value* exprValue = expression->Codegen();
-    if (!exprValue) {
-        logger.error("Failed to generate code for expression");
-        return nullptr;
-    }
+
+    if (!exprValue)
+        throw CodegenException("Failed to generate code for expression");
 
     return exprValue;
 }
@@ -234,10 +243,8 @@ Value* ForStatementNode::Codegen() {
 Value* IfStatementNode::Codegen() {
     //Очень надо будет чекать
     Value* condVal = condition->Codegen();
-    if (!condVal) {
-        logger.error("Failed to generate condition for if statement");
-        return nullptr;
-    }
+    if (!condVal)
+        throw CodegenException("Failed to generate condition for if statement");
 
     condVal = Builder.CreateICmpNE(
         condVal,
@@ -254,22 +261,17 @@ Value* IfStatementNode::Codegen() {
     Builder.CreateCondBr(condVal, thenBB, elseBB);
 
     Builder.SetInsertPoint(thenBB);
-    if (thenBlock) {
-        if (!thenBlock->Codegen()) {
-            logger.error("Failed to generate code for then block");
-            return nullptr;
-        }
-    }
+
+    if (thenBlock)
+        thenBlock->Codegen();
+
     Builder.CreateBr(mergeBB);
 
     elseBB->insertInto(TheFunction);
     Builder.SetInsertPoint(elseBB);
-    if (elseBlock) {
-        if (!elseBlock->Codegen()) {
-            logger.error("Failed to generate code for else block");
-            return nullptr;
-        }
-    }
+
+    if (elseBlock)
+        elseBlock->Codegen();
     Builder.CreateBr(mergeBB);
 
     mergeBB->insertInto(TheFunction);
@@ -297,8 +299,7 @@ Value* VariableDeclarationNode::Codegen() {
         else
             varType = llvm::Type::getInt1Ty(context);
     } else {
-        logger.error("Unknown type: ", type.type);
-        return nullptr;
+        throw CodegenException("Unknown type: " + to_string(type.type));
     }
 
     Value* initVal = initializer ? initializer->Codegen() : Constant::getNullValue(varType);
@@ -330,9 +331,9 @@ Value* WhileStatementNode::Codegen() {
 
 // Ноды остальные
 Value* CodeBlockNode::Codegen() {
-    for (auto& statement: statements) {
-        Value* result = statement->Codegen();
-    }
+    for (auto& statement: statements)
+        statement->Codegen();
+
     return nullptr;
 }
 
@@ -384,18 +385,16 @@ Value* ExternalFunctionNode::Codegen() {
 
 Value* FunctionNode::Codegen() {
     llvm::Type* llvmReturnType = nullptr;
-    if (returnType.is_array) {
-        logger.error("Error. Functions cannot return arrays"); // TODO чзх?
-        return nullptr;
-    }
+
+    if (returnType.is_array)
+        throw CodegenException("Error. Functions cannot return arrays"); // TODO чзх?
 
     if (returnType.type == INT)
         llvmReturnType = llvm::Type::getInt128Ty(context);
     else if (returnType.type == BOOL) {
         llvmReturnType = llvm::Type::getInt1Ty(context);
     } else {
-        logger.error("Unknown return type: ", returnType.type);
-        return nullptr;
+        throw CodegenException("Unknown return type: " + to_string(returnType.type));
     }
 
     // Определяем типы параметров
@@ -411,8 +410,7 @@ Value* FunctionNode::Codegen() {
         else if (param->type.type == BOOL) {
             paramType = llvm::Type::getInt1Ty(context);
         } else {
-            logger.error("Unknown parameter type: ", param->type.type);
-            return nullptr;
+            throw CodegenException("Unknown parameter type: " + to_string(param->type.type));
         }
         paramTypes.push_back(paramType);
     }
@@ -446,24 +444,22 @@ Value* FunctionNode::Codegen() {
 
     // Генерируем код для тела функции
     Value* bodyValue = body->Codegen();
-    if (!bodyValue) {
-        logger.error("Error while generation function body"); // TODO вот тут проблема из-за того, что возвращается nullptr в некоторых нодах
-        function->eraseFromParent();
-        return nullptr;
+    if (!bodyValue) { // TODO а нужен ли вообще этот блок?
+        throw CodegenException("Error while generation function body"); // TODO вот тут проблема из-за того, что возвращается nullptr в некоторых нодах
+        function->eraseFromParent(); // А надо ли это, если вроде аварийно завершаемся
     }
 
     // Если тело не заканчивается возвратом, добавляем возврат значения по умолчанию
     if (returnType.type == INT) {
-        Builder.CreateRet(llvm::ConstantInt::get(context, llvm::APInt(128, 0)));
-    } else if (returnType.type == BOOL) {
-        Builder.CreateRet(llvm::ConstantInt::get(context, llvm::APInt(1, 0)));
+        Builder.CreateRet(ConstantInt::get(context, llvm::APInt(128, 0)));
+    } else {
+        Builder.CreateRet(ConstantInt::get(context, llvm::APInt(1, 0)));
     }
 
     // Проверяем корректность функции
     if (verifyFunction(*function, &llvm::errs())) {
-        logger.error("Ошибка: в функции ", name, " обнаружены ошибки!");
-        function->eraseFromParent();
-        return nullptr;
+        throw CodegenException("Ошибка: в функции " + name + " обнаружены ошибки!");
+        function->eraseFromParent(); // а надо ли?
     }
 
     return function;
@@ -472,10 +468,9 @@ Value* FunctionNode::Codegen() {
 Value* ParameterNode::Codegen() {
     Value* paramValue = NamedValues[name];
     if (type.is_array) {
-        if (type.array_size <= 0) {
-            logger.error("Error: array ", name, " has invalid size: ", type.array_size);
-            return nullptr;
-        }
+        if (type.array_size <= 0)
+            throw CodegenException("Error: array " + name + " has invalid size: " + to_string(type.array_size));
+
         return paramValue;
     }
 
@@ -483,8 +478,7 @@ Value* ParameterNode::Codegen() {
         return paramValue;
     }
 
-    logger.error("Unknown parameter type: ", type.type);
-    return nullptr;
+    throw CodegenException("Unknown parameter type: " + to_string(type.type));
 }
 
 
@@ -541,8 +535,6 @@ Function* create_main_function() {
     return mainFunc;
 }
 
-#include "llvm/ExecutionEngine/Orc/LLJIT.h"
-
 int main() {
     logger.info("Hello, World!");
     const std::string input = readFile("test.typlyp");
@@ -558,7 +550,7 @@ int main() {
 
     try {
         AST->Codegen();
-    } catch (const std::exception& e) {
+    } catch (const CodegenException& e) {
         logger.error(e.what());
         return 1;
     }

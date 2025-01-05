@@ -2,6 +2,17 @@
 #include <iostream>
 #include <string>
 
+class CodegenException final : public std::runtime_error {
+public:
+    explicit CodegenException(const std::string& _Message)
+        : runtime_error(_Message) {
+    }
+
+    explicit CodegenException(const char* _Message)
+        : runtime_error(_Message) {
+    }
+};
+
 class Logger {
 public:
     void log(const std::string& messages...) const {
