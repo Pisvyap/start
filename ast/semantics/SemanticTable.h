@@ -1,5 +1,4 @@
 #pragma once
-#include <iostream>
 #include <list>
 #include <stdexcept>
 #include <string>
@@ -18,9 +17,9 @@ struct Type {
     int array_size;
     Type() { }
     Type(bool is_void) : is_void(is_void), is_array(false), array_size(0) { }
-    Type(ScalarType type) : type(type), is_array(false), array_size(0) { }
-    Type(ScalarType type, bool is_array) : type(type), is_array(is_array), array_size(0) {}
-    Type(ScalarType type, bool is_array, int size) : type(type), is_array(is_array), array_size(size) { }
+    Type(ScalarType type) : type(type), is_array(false), array_size(0), is_void(false) { }
+    Type(ScalarType type, bool is_array) : type(type), is_array(is_array), array_size(0), is_void(false) { }
+    Type(ScalarType type, bool is_array, int size) : type(type), is_array(is_array), array_size(size), is_void(false) { }
 
     bool operator==(const Type& other) const {
         return is_void

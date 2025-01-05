@@ -385,14 +385,16 @@ llvm::Value* ExternalFunctionNode::Codegen() {
 llvm::Value* FunctionNode::Codegen() {
     llvm::Type* llvmReturnType = nullptr;
     if (returnType.is_array) {
-        std::cerr << "Ошибка: функции не могут возвращать массивы" << std::endl;
+        logger.error("Error. Functions cannot return arrays"); // TODO чзх?
         return nullptr;
-    } else if (returnType.type == INT)
+    }
+
+    if (returnType.type == INT)
         llvmReturnType = llvm::Type::getInt128Ty(context);
     else if (returnType.type == BOOL) {
         llvmReturnType = llvm::Type::getInt1Ty(context);
     } else {
-        std::cerr << "Неизвестный тип возвращаемого значения: " << returnType.type << std::endl;
+        logger.error("Unknown return type: ", returnType.type);
         return nullptr;
     }
 
@@ -409,7 +411,7 @@ llvm::Value* FunctionNode::Codegen() {
         else if (param->type.type == BOOL) {
             paramType = llvm::Type::getInt1Ty(context);
         } else {
-            std::cerr << "Неизвестный тип параметра: " << param->type.type << std::endl;
+            logger.error("Неизвестный тип параметра: ", param->type.type);
             return nullptr;
         }
         paramTypes.push_back(paramType);
@@ -443,9 +445,9 @@ llvm::Value* FunctionNode::Codegen() {
     }
 
     // Генерируем код для тела функции
-    llvm::Value* bodyValue = body->Codegen();
+    Value* bodyValue = body->Codegen();
     if (!bodyValue) {
-        std::cerr << "Ошибка генерации кода для тела функции " << name << std::endl;
+        logger.error("Error while generation function body"); // TODO вот тут проблема из-за того, что возвращается nullptr в некоторых нодах
         function->eraseFromParent();
         return nullptr;
     }
@@ -459,7 +461,7 @@ llvm::Value* FunctionNode::Codegen() {
 
     // Проверяем корректность функции
     if (llvm::verifyFunction(*function, &llvm::errs())) {
-        std::cerr << "Ошибка: в функции " << name << " обнаружены ошибки!" << std::endl;
+        logger.error("Ошибка: в функции ", name, " обнаружены ошибки!");
         function->eraseFromParent();
         return nullptr;
     }
@@ -467,21 +469,22 @@ llvm::Value* FunctionNode::Codegen() {
     return function;
 }
 
-llvm::Value* ParameterNode::Codegen() {
-    llvm::Value* paramValue = NamedValues[name];
+Value* ParameterNode::Codegen() {
+    Value* paramValue = NamedValues[name];
     if (type.is_array) {
         if (type.array_size <= 0) {
-            std::cerr << "Ошибка: массив " << name << " имеет некорректный размер: "
-                    << type.array_size << std::endl; // Или че у нас там за костыль с <-1>?
+            logger.error("Error: array ", name, " has invalid size: ", type.array_size);
             return nullptr;
         }
         return paramValue;
-    } else if (type.type == INT or type.type == BOOL) {
-        return paramValue;
-    } else {
-        std::cerr << "Неизвестный тип параметра: " << static_cast<int>(type.type) << std::endl;
-        return nullptr;
     }
+
+    if (type.type == INT or type.type == BOOL) {
+        return paramValue;
+    }
+
+    logger.error("Unknown parameter type: ", type.type);
+    return nullptr;
 }
 
 
