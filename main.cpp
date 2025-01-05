@@ -153,6 +153,7 @@ Value* FunctionCallExpressionNode::Codegen() {
         Value* argV = arg->Codegen();
         argv.push_back(argV);
     }
+    // TODO void появился, надо переделать
     Value* res = Builder.CreateCall(func, argv); //Как я понял void у нас нет, поэтому пока так
     return res;
 }
@@ -191,13 +192,13 @@ Value* AssigmentStatementNode::Codegen() {
 Value* ExpressionStatementNode::Codegen() {
     BasicBlock* currentBlock = Builder.GetInsertBlock();
     if (!currentBlock) {
-        errs() << "Error: No insertion point set in the builder\n";
+        logger.error("No insertion point set in the builder");
         return nullptr;
     }
 
     Value* exprValue = expression->Codegen();
     if (!exprValue) {
-        errs() << "Error: failed to generate code for expression\n";
+        logger.error("Failed to generate code for expression");
         return nullptr;
     }
 
@@ -234,7 +235,7 @@ Value* IfStatementNode::Codegen() {
     //Очень надо будет чекать
     Value* condVal = condition->Codegen();
     if (!condVal) {
-        errs() << "Error: failed to generate condition for if statement\n";
+        logger.error("Failed to generate condition for if statement");
         return nullptr;
     }
 
@@ -255,7 +256,7 @@ Value* IfStatementNode::Codegen() {
     Builder.SetInsertPoint(thenBB);
     if (thenBlock) {
         if (!thenBlock->Codegen()) {
-            errs() << "Error: failed to generate code for then block\n";
+            logger.error("Failed to generate code for then block");
             return nullptr;
         }
     }
@@ -265,7 +266,7 @@ Value* IfStatementNode::Codegen() {
     Builder.SetInsertPoint(elseBB);
     if (elseBlock) {
         if (!elseBlock->Codegen()) {
-            llvm::errs() << "Error: failed to generate code for else block\n";
+            logger.error("Failed to generate code for else block");
             return nullptr;
         }
     }
@@ -328,7 +329,6 @@ Value* WhileStatementNode::Codegen() {
 }
 
 // Ноды остальные
-
 Value* CodeBlockNode::Codegen() {
     for (auto& statement: statements) {
         Value* result = statement->Codegen();
@@ -336,16 +336,16 @@ Value* CodeBlockNode::Codegen() {
     return nullptr;
 }
 
-llvm::Value* ExternalFunctionNode::Codegen() {
+Value* ExternalFunctionNode::Codegen() {
     llvm::Type* llvmReturnType = nullptr;
     if (returnType.is_array) {
-        if (returnType.type == INT && returnType.is_array) {
-            llvmReturnType = llvm::PointerType::get(llvm::Type::getInt128Ty(context), 0);
-        } else if (returnType.type == BOOL && returnType.is_array) {
-            llvmReturnType = llvm::PointerType::get(llvm::Type::getInt1Ty(context), 0);
+        if (returnType.type == INT) {
+            llvmReturnType = PointerType::get(llvm::Type::getInt128Ty(context), 0);
+        } else if (returnType.type == BOOL) {
+            llvmReturnType = PointerType::get(llvm::Type::getInt1Ty(context), 0);
         }
     } else {
-        llvmReturnType = (returnType.type == INT)
+        llvmReturnType = returnType.type == INT
                              ? llvm::Type::getInt128Ty(context)
                              : llvm::Type::getInt1Ty(context);
     }
@@ -355,13 +355,13 @@ llvm::Value* ExternalFunctionNode::Codegen() {
     for (const auto& param: parameters) {
         llvm::Type* paramType = nullptr;
         if (param->type.is_array) {
-            paramType = llvm::PointerType::get(
-                (param->type.type == INT and param->type.is_array
-                     ? llvm::Type::getInt128Ty(context)
-                     : llvm::Type::getInt1Ty(context)),
+            paramType = PointerType::get(
+                param->type.type == INT and param->type.is_array
+                    ? llvm::Type::getInt128Ty(context)
+                    : llvm::Type::getInt1Ty(context),
                 0);
         } else {
-            paramType = (param->type.type == INT)
+            paramType = param->type.type == INT
                             ? llvm::Type::getInt128Ty(context)
                             : llvm::Type::getInt1Ty(context);
         }
@@ -369,12 +369,12 @@ llvm::Value* ExternalFunctionNode::Codegen() {
     }
 
     // Создаем тип функции
-    llvm::FunctionType* funcType = llvm::FunctionType::get(llvmReturnType, paramTypes, false);
+    FunctionType* funcType = FunctionType::get(llvmReturnType, paramTypes, false);
 
     // Объявляем внешнюю функцию
-    llvm::Function* function = llvm::Function::Create(
+    Function* function = Function::Create(
         funcType,
-        llvm::Function::ExternalLinkage, // External linkage означает, что функция определена вне текущего модуля
+        Function::ExternalLinkage, // External linkage означает, что функция определена вне текущего модуля
         name,
         module.get()
     );
@@ -382,7 +382,7 @@ llvm::Value* ExternalFunctionNode::Codegen() {
     return function;
 }
 
-llvm::Value* FunctionNode::Codegen() {
+Value* FunctionNode::Codegen() {
     llvm::Type* llvmReturnType = nullptr;
     if (returnType.is_array) {
         logger.error("Error. Functions cannot return arrays"); // TODO чзх?
@@ -403,43 +403,43 @@ llvm::Value* FunctionNode::Codegen() {
     for (const auto& param: parameters) {
         llvm::Type* paramType = nullptr;
         if (param->type.is_array and param->type.type == INT) {
-            paramType = llvm::PointerType::get(llvm::Type::getInt128Ty(context), 0);
+            paramType = PointerType::get(llvm::Type::getInt128Ty(context), 0);
         } else if (param->type.is_array and param->type.type == BOOL) {
-            paramType = llvm::PointerType::get(llvm::Type::getInt1Ty(context), 0);
+            paramType = PointerType::get(llvm::Type::getInt1Ty(context), 0);
         } else if (param->type.type == INT)
             paramType = llvm::Type::getInt128Ty(context);
         else if (param->type.type == BOOL) {
             paramType = llvm::Type::getInt1Ty(context);
         } else {
-            logger.error("Неизвестный тип параметра: ", param->type.type);
+            logger.error("Unknown parameter type: ", param->type.type);
             return nullptr;
         }
         paramTypes.push_back(paramType);
     }
 
     // Создаем тип функции
-    llvm::FunctionType* funcType = llvm::FunctionType::get(llvmReturnType, paramTypes, false);
+    FunctionType* funcType = FunctionType::get(llvmReturnType, paramTypes, false);
 
     // Создаем функцию в модуле
-    llvm::Function* function = llvm::Function::Create(
+    Function* function = Function::Create(
         funcType,
-        llvm::Function::ExternalLinkage,
+        Function::InternalLinkage, // TODO тут было ExternalLinkage, не должно быть Internal?
         name,
         module.get()
     );
 
     // Переходим в тело функции
-    llvm::BasicBlock* entryBlock = llvm::BasicBlock::Create(context, "entry", function);
+    BasicBlock* entryBlock = BasicBlock::Create(context, "entry", function);
     Builder.SetInsertPoint(entryBlock);
 
     // Устанавливаем имена параметров и добавляем их в таблицу переменных
     NamedValues.clear(); // Сбрасываем текущую таблицу переменных
     auto paramIt = function->arg_begin();
     for (const auto& param: parameters) {
-        llvm::Argument& llvmArg = *paramIt++;
+        Argument& llvmArg = *paramIt++;
         llvmArg.setName(param->name);
-        llvm::IRBuilder<> tempBuilder(&function->getEntryBlock(), function->getEntryBlock().begin());
-        llvm::AllocaInst*alloca = tempBuilder.CreateAlloca(llvmArg.getType(), nullptr, param->name);
+        IRBuilder tempBuilder(&function->getEntryBlock(), function->getEntryBlock().begin());
+        AllocaInst*alloca = tempBuilder.CreateAlloca(llvmArg.getType(), nullptr, param->name);
         Builder.CreateStore(&llvmArg, alloca);
         NamedValues[param->name] = alloca;
     }
@@ -460,7 +460,7 @@ llvm::Value* FunctionNode::Codegen() {
     }
 
     // Проверяем корректность функции
-    if (llvm::verifyFunction(*function, &llvm::errs())) {
+    if (verifyFunction(*function, &llvm::errs())) {
         logger.error("Ошибка: в функции ", name, " обнаружены ошибки!");
         function->eraseFromParent();
         return nullptr;
@@ -582,6 +582,8 @@ int main() {
     module->print(outFile, nullptr);
     outFile.close();
     logger.info("LLVM IR written to output.ll");
+
+    return 0;
 
     // JIT-исполнение
     InitializeNativeTarget();
