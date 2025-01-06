@@ -9,3 +9,4 @@ delo factorial(n: chislo): chislo {
 }
 
 pust result: chislo = factorial(20);
+result -> glaza;

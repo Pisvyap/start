@@ -18,14 +18,15 @@ block : '{' statement* '}';
 
 // Операторы
 statement
-    : varDecl // done
-    | assignment // done
-    | arrayAssignment // done
-    | returnStatement // done
-    | ifStatement // done
-    | whileStatement // done
-    | forStatement // done
-    | expr ';' // done
+    : varDecl
+    | printStatement
+    | assignment
+    | arrayAssignment
+    | returnStatement
+    | ifStatement
+    | whileStatement
+    | forStatement
+    | expr ';'
     ;
 
 // Объявление переменной
@@ -54,6 +55,9 @@ forInit : varDecl | assignment;
 
 // Обновление переменной в цикле for
 forUpdate : assignment;
+
+// Вывод на экран
+printStatement : expr '->' 'glaza' ';';
 
 // Выражения
 expr

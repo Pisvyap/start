@@ -334,6 +334,11 @@ Value* WhileStatementNode::Codegen() {
     return ConstantInt::get(llvm::Type::getInt128Ty(context), 0);
 }
 
+Value* PrintStatementNode::Codegen() {
+    return nullptr; // TODO печать всего
+}
+
+
 // Ноды остальные
 Value* CodeBlockNode::Codegen() {
     for (auto& statement: statements)
@@ -551,7 +556,7 @@ Function* create_main_function() {
 
 int main() {
     logger.info("Hello, World!");
-    const std::string input = readFile("factorial.typlyp");
+    const std::string input = readFile("test.typlyp");
 
     auto AST = build_ast(input);
 
