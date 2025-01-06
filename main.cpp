@@ -335,6 +335,11 @@ Value* WhileStatementNode::Codegen() {
     return ConstantInt::get(llvm::Type::getInt128Ty(*context), 0);
 }
 
+Value* PrintStatementNode::Codegen() {
+    return nullptr; // TODO печать всего
+}
+
+
 // Ноды остальные
 Value* CodeBlockNode::Codegen() {
     for (auto& statement: statements)

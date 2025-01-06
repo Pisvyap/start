@@ -51,6 +51,8 @@ public:
 
     virtual std::any visitForUpdate(typlypParser::ForUpdateContext *context) = 0;
 
+    virtual std::any visitPrintStatement(typlypParser::PrintStatementContext *context) = 0;
+
     virtual std::any visitExpr(typlypParser::ExprContext *context) = 0;
 
     virtual std::any visitArgList(typlypParser::ArgListContext *context) = 0;

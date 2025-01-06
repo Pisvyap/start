@@ -25,6 +25,7 @@
 #include "nodes/statements/AssigmentStatementNode.h"
 #include "nodes/statements/ExpressionStatementNode.h"
 #include "nodes/statements/ForStatementNode.h"
+#include "nodes/statements/PrintStatementNode.h"
 #include "nodes/statements/VariableDecalrationNode.h"
 #include "nodes/statements/WhileStatementNode.h"
 
@@ -121,9 +122,20 @@ public:
         if (context->forStatement())
             return std::any_cast<Ptr<StatementNode>>(visitForStatement(context->forStatement()));
 
+        if (context->printStatement())
+            return std::any_cast<Ptr<StatementNode>>(visitPrintStatement(context->printStatement()));
+
         // Если ничего конкретного, то это statement в виде `expr;`
         auto node = std::make_shared<ExpressionStatementNode>();
         node->expression = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
+        return static_cast<Ptr<StatementNode>>(node);
+    }
+
+    std::any visitPrintStatement(typlypParser::PrintStatementContext* context) override {
+        auto node = std::make_shared<PrintStatementNode>();
+
+        node->expression = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
+
         return static_cast<Ptr<StatementNode>>(node);
     }
 
@@ -206,8 +218,7 @@ public:
     }
 
     std::any visitExpr(typlypParser::ExprContext* context) override {
-        if (context->ID() && context->LPAREN() && context->RPAREN()) { // Есть имя и скобки () -> вызов функции
-            // TODO проверка на вызов внешней функции? Или не нужна
+        if (context->ID() && context->LPAREN() && context->RPAREN()) {
             auto node = std::make_shared<FunctionCallExpressionNode>();
             node->name = context->ID()->getText();
             if (context->argList())

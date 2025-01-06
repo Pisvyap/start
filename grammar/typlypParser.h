@@ -14,11 +14,11 @@ public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
-    BOOL = 15, INT = 16, ID = 17, WS = 18, COMMENT = 19, LINE_COMMENT = 20, 
-    PLUS = 21, MINUS = 22, MULT = 23, DIV = 24, MOD = 25, LT = 26, LE = 27, 
-    GT = 28, GE = 29, EQ = 30, NEQ = 31, AND = 32, OR = 33, NOT = 34, ASSIGN = 35, 
-    LBRACKET = 36, RBRACKET = 37, LPAREN = 38, RPAREN = 39, LBRACE = 40, 
-    RBRACE = 41, SEMICOLON = 42, COMMA = 43
+    T__14 = 15, T__15 = 16, BOOL = 17, INT = 18, ID = 19, WS = 20, COMMENT = 21, 
+    LINE_COMMENT = 22, PLUS = 23, MINUS = 24, MULT = 25, DIV = 26, MOD = 27, 
+    LT = 28, LE = 29, GT = 30, GE = 31, EQ = 32, NEQ = 33, AND = 34, OR = 35, 
+    NOT = 36, ASSIGN = 37, LBRACKET = 38, RBRACKET = 39, LPAREN = 40, RPAREN = 41, 
+    LBRACE = 42, RBRACE = 43, SEMICOLON = 44, COMMA = 45
   };
 
   enum {
@@ -26,8 +26,8 @@ public:
     RuleParam = 4, RuleBlock = 5, RuleStatement = 6, RuleVarDecl = 7, RuleAssignment = 8, 
     RuleArrayAssignment = 9, RuleReturnStatement = 10, RuleIfStatement = 11, 
     RuleWhileStatement = 12, RuleForStatement = 13, RuleForInit = 14, RuleForUpdate = 15, 
-    RuleExpr = 16, RuleArgList = 17, RuleExprList = 18, RuleType = 19, RuleVoidType = 20, 
-    RuleScalarType = 21, RuleArrayType = 22
+    RulePrintStatement = 16, RuleExpr = 17, RuleArgList = 18, RuleExprList = 19, 
+    RuleType = 20, RuleVoidType = 21, RuleScalarType = 22, RuleArrayType = 23
   };
 
   explicit typlypParser(antlr4::TokenStream *input);
@@ -63,6 +63,7 @@ public:
   class ForStatementContext;
   class ForInitContext;
   class ForUpdateContext;
+  class PrintStatementContext;
   class ExprContext;
   class ArgListContext;
   class ExprListContext;
@@ -189,6 +190,7 @@ public:
     StatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     VarDeclContext *varDecl();
+    PrintStatementContext *printStatement();
     AssignmentContext *assignment();
     ArrayAssignmentContext *arrayAssignment();
     ReturnStatementContext *returnStatement();
@@ -369,6 +371,22 @@ public:
   };
 
   ForUpdateContext* forUpdate();
+
+  class  PrintStatementContext : public antlr4::ParserRuleContext {
+  public:
+    PrintStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ExprContext *expr();
+    antlr4::tree::TerminalNode *SEMICOLON();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  PrintStatementContext* printStatement();
 
   class  ExprContext : public antlr4::ParserRuleContext {
   public:

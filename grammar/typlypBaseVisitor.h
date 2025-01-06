@@ -79,6 +79,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitPrintStatement(typlypParser::PrintStatementContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitExpr(typlypParser::ExprContext *ctx) override {
     return visitChildren(ctx);
   }

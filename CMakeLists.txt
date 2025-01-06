@@ -62,6 +62,7 @@ set(
         ast/semantics/SemanticTable.cpp
         ast/semantics/SemanticTable.h
         utils/utils.h
+        ast/nodes/statements/PrintStatementNode.h
 )
 
 if(MSVC)

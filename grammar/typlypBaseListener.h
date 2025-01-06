@@ -64,6 +64,9 @@ public:
   virtual void enterForUpdate(typlypParser::ForUpdateContext * /*ctx*/) override { }
   virtual void exitForUpdate(typlypParser::ForUpdateContext * /*ctx*/) override { }
 
+  virtual void enterPrintStatement(typlypParser::PrintStatementContext * /*ctx*/) override { }
+  virtual void exitPrintStatement(typlypParser::PrintStatementContext * /*ctx*/) override { }
+
   virtual void enterExpr(typlypParser::ExprContext * /*ctx*/) override { }
   virtual void exitExpr(typlypParser::ExprContext * /*ctx*/) override { }
 
