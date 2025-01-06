@@ -381,8 +381,9 @@ Value* ExternalFunctionNode::Codegen() {
     Function* function = Function::Create(
         funcType,
         Function::ExternalLinkage, // External linkage означает, что функция определена вне текущего модуля
+        // todo кажется стоит переопределять имена на стандартные сишные, например narisovat -> printf, + добавить функцию случайной генерации массива чисел, для программы сортировки
         name,
-        module.get()
+        *module
     );
 
     return function;
