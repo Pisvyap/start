@@ -1,2 +1,6 @@
-pust n: chislo = 20;
+delo factorial(n: chislo): chislo {
+    vernut n;
+}
+
+pust n: chislo = factorial(3);
 n = 40;

@@ -79,7 +79,6 @@ Value* BinaryOperationNode::Codegen() {
         case NE:
             return Builder.CreateICmpNE(L, R, "netmp");
         default:
-            // тут было return nullptr
             throw CodegenException("Unsupported operation in BinaryOperationNode::Codegen");
     }
 }
@@ -91,7 +90,6 @@ Value* UnaryOperationNode::Codegen() {
             return result;
         }
         default:
-            // тут было return nullptr
             throw CodegenException("Unsupported operation in UnaryOperationNode::Codegen");
     }
 }
@@ -99,7 +97,6 @@ Value* UnaryOperationNode::Codegen() {
 Value* IdentifierNode::Codegen() {
     auto it = NamedValues.find(name);
     if (it == NamedValues.end())
-        // тут было return nullptr
         throw CodegenException("Identifier not found: " + name);
 
     return Builder.CreateLoad(
@@ -113,7 +110,6 @@ Value* ArrayIndexExpressionNode::Codegen() {
 
     auto it = NamedValues.find(name);
     if (it == NamedValues.end())
-        // тут было return nullptr
         throw CodegenException("Array not found: " + name);
 
     Value* arrayPtr = it->second;
@@ -185,7 +181,7 @@ Value* ArrayAssigmentNode::Codegen() {
                                                 },
                                                 "elementptr");
     Builder.CreateStore(valPtr, elementPtr);
-    return nullptr;
+    return elementPtr;
 }
 
 Value* AssigmentStatementNode::Codegen() {
@@ -197,7 +193,7 @@ Value* AssigmentStatementNode::Codegen() {
 
     Value* varPtr = it->second;
     Builder.CreateStore(valPtr, varPtr);
-    return nullptr;
+    return varPtr;
 }
 
 Value* ExpressionStatementNode::Codegen() {
@@ -282,8 +278,12 @@ Value* IfStatementNode::Codegen() {
 
 Value* ReturnStatementNode::Codegen() {
     Value* retVal = expression ? expression->Codegen() : nullptr;
+    if (retVal == nullptr) {
+        throw CodegenException("Return statement not found");
+    }
+
     Builder.CreateRet(retVal);
-    return nullptr;
+    return retVal;
 }
 
 Value* VariableDeclarationNode::Codegen() {
@@ -306,7 +306,7 @@ Value* VariableDeclarationNode::Codegen() {
     AllocaInst* alloc = Builder.CreateAlloca(varType, nullptr, name);
     Builder.CreateStore(initVal, alloc);
     NamedValues[name] = alloc;
-    return nullptr;
+    return alloc;
 }
 
 Value* WhileStatementNode::Codegen() {
@@ -334,7 +334,7 @@ Value* CodeBlockNode::Codegen() {
     for (auto& statement: statements)
         statement->Codegen();
 
-    return nullptr;
+    return llvm::Constant::getNullValue(llvm::Type::getInt32Ty(context));
 }
 
 Value* ExternalFunctionNode::Codegen() {
@@ -446,7 +446,6 @@ Value* FunctionNode::Codegen() {
     Value* bodyValue = body->Codegen();
     if (!bodyValue) { // TODO а нужен ли вообще этот блок?
         throw CodegenException("Error while generation function body"); // TODO вот тут проблема из-за того, что возвращается nullptr в некоторых нодах
-        function->eraseFromParent(); // А надо ли это, если вроде аварийно завершаемся
     }
 
     // Если тело не заканчивается возвратом, добавляем возврат значения по умолчанию
@@ -459,7 +458,6 @@ Value* FunctionNode::Codegen() {
     // Проверяем корректность функции
     if (verifyFunction(*function, &llvm::errs())) {
         throw CodegenException("Ошибка: в функции " + name + " обнаружены ошибки!");
-        function->eraseFromParent(); // а надо ли?
     }
 
     return function;
@@ -493,7 +491,7 @@ Value* ProgramNode::Codegen() {
         stmt->Codegen();
     }
 
-    return nullptr;
+    return llvm::Constant::getNullValue(llvm::Type::getInt32Ty(context));
 }
 
 
@@ -552,6 +550,7 @@ int main() {
         AST->Codegen();
     } catch (const CodegenException& e) {
         logger.error(e.what());
+        module->print(llvm::outs(), nullptr);
         return 1;
     }
 
