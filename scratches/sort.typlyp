@@ -25,15 +25,13 @@ delo partition(arr: chislo<>, left: chislo, right: chislo, pivot: chislo): chisl
 }
 
 delo quickSort(arr: chislo<>, left: chislo, right: chislo): chislo<> {
-    esli (left >= right) {
-        vernut arr;
+    esli (left < right) {
+        pust pivot: chislo = arr[(left + right) / 2];
+        pust index: chislo = partition(arr, left, right, pivot);
+
+        arr = quickSort(arr, left, index - 1);
+        arr = quickSort(arr, index, right);
     }
-
-    pust pivot: chislo = arr[(left + right) / 2];
-    pust index: chislo = partition(arr, left, right, pivot);
-
-    arr = quickSort(arr, left, index - 1);
-    arr = quickSort(arr, index, right);
 
     vernut arr;
 }

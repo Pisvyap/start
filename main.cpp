@@ -26,6 +26,7 @@ LLVMContext context;
 auto module = std::make_unique<Module>("MyModule", context); // LLVM-конструкция, содержит все функции/глобалы в куске кода
 IRBuilder Builder(context);                          // вспомогательный объект, помогает генерировать инструкции LLVM
 std::map<std::string, AllocaInst*> NamedValues;         // таблица символов
+std::map<std::string, Function*> Functions;
 
 // Ноды EXPRESSIONS
 
@@ -149,11 +150,12 @@ Value* NewExpressionNode::Codegen() {
 }
 
 Value* FunctionCallExpressionNode::Codegen() {
-    auto it = NamedValues.find(name);
-    if (it == NamedValues.end())
+    auto it = Functions.find(name);
+
+    if (it == Functions.end())
         throw CodegenException("Function not found: " + name);
 
-    Function* func = it->second->getFunction();
+    Function* func = it->second;
     std::vector<Value*> argv;
     for (const auto& arg: arguments) {
         Value* argV = arg->Codegen();
@@ -429,6 +431,8 @@ Value* FunctionNode::Codegen() {
         module.get()
     );
 
+    Functions[name] = function;
+
     // Сохраняем текущую точку вставки
     llvm::BasicBlock* originalInsertBlock = Builder.GetInsertBlock();
 
@@ -437,7 +441,6 @@ Value* FunctionNode::Codegen() {
     Builder.SetInsertPoint(entryBlock);
 
     // Устанавливаем имена параметров и добавляем их в таблицу переменных
-    NamedValues.clear();
     auto paramIt = function->arg_begin();
     for (const auto& param : parameters) {
         Argument& llvmArg = *paramIt++;
@@ -473,6 +476,7 @@ Value* FunctionNode::Codegen() {
 
     return function;
 }
+
 Value* ParameterNode::Codegen() {
     Value* paramValue = NamedValues[name];
     if (type.is_array) {
@@ -545,7 +549,7 @@ Function* create_main_function() {
 
 int main() {
     logger.info("Hello, World!");
-    const std::string input = readFile("test.typlyp");
+    const std::string input = readFile("factorial.typlyp");
 
     auto AST = build_ast(input);
 

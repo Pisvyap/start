@@ -1,11 +1,14 @@
 vneshnaya narisovatChislo(x: chislo): chislo;
 
 delo factorial(n: chislo): chislo {
+    pust k: chislo = 0;
     esli (n == 0) {
-        vernut 1;
+        k = 1;
     } inache {
-        vernut n * factorial(n - 1);
+        k = n * factorial(n - 1);
     }
+
+    vernut k;
 }
 
 pust number: chislo = 20;
