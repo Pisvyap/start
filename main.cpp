@@ -337,7 +337,7 @@ Value* PrintStatementNode::Codegen() {
     if (!printfFunc) {
         // Создаем прототип printf: declare i32 @printf(i8*, ...)
         FunctionType* printfType = FunctionType::get(
-            IntegerType::getInt128Ty(*context), // Возвращает i32
+            IntegerType::getInt128Ty(*context), // Возвращает i128
             PointerType::getUnqual(llvm::Type::getInt8Ty(*context)), // i8*
             true // Variadic function
         );
