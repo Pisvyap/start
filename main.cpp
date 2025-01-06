@@ -193,7 +193,7 @@ Value* AssigmentStatementNode::Codegen() {
 
     Value* varPtr = it->second;
     Builder.CreateStore(valPtr, varPtr);
-    return varPtr;
+    return nullptr;
 }
 
 Value* ExpressionStatementNode::Codegen() {
@@ -387,7 +387,7 @@ Value* FunctionNode::Codegen() {
     llvm::Type* llvmReturnType = nullptr;
 
     if (returnType.is_array)
-        throw CodegenException("Error. Functions cannot return arrays"); // TODO чзх?
+        throw CodegenException("Error. Functions cannot return arrays");
 
     if (returnType.type == INT)
         llvmReturnType = llvm::Type::getInt128Ty(context);
@@ -399,11 +399,11 @@ Value* FunctionNode::Codegen() {
 
     // Определяем типы параметров
     std::vector<llvm::Type*> paramTypes;
-    for (const auto& param: parameters) {
+    for (const auto& param : parameters) {
         llvm::Type* paramType = nullptr;
-        if (param->type.is_array and param->type.type == INT) {
+        if (param->type.is_array && param->type.type == INT) {
             paramType = PointerType::get(llvm::Type::getInt128Ty(context), 0);
-        } else if (param->type.is_array and param->type.type == BOOL) {
+        } else if (param->type.is_array && param->type.type == BOOL) {
             paramType = PointerType::get(llvm::Type::getInt1Ty(context), 0);
         } else if (param->type.type == INT)
             paramType = llvm::Type::getInt128Ty(context);
@@ -421,48 +421,55 @@ Value* FunctionNode::Codegen() {
     // Создаем функцию в модуле
     Function* function = Function::Create(
         funcType,
-        Function::InternalLinkage, // TODO тут было ExternalLinkage, не должно быть Internal?
+        Function::InternalLinkage, // ExternalLinkage, если функция вызывается извне
         name,
         module.get()
     );
+
+    // Сохраняем текущую точку вставки
+    llvm::BasicBlock* originalInsertBlock = Builder.GetInsertBlock();
 
     // Переходим в тело функции
     BasicBlock* entryBlock = BasicBlock::Create(context, "entry", function);
     Builder.SetInsertPoint(entryBlock);
 
     // Устанавливаем имена параметров и добавляем их в таблицу переменных
-    NamedValues.clear(); // Сбрасываем текущую таблицу переменных
+    NamedValues.clear();
     auto paramIt = function->arg_begin();
-    for (const auto& param: parameters) {
+    for (const auto& param : parameters) {
         Argument& llvmArg = *paramIt++;
         llvmArg.setName(param->name);
-        IRBuilder tempBuilder(&function->getEntryBlock(), function->getEntryBlock().begin());
-        AllocaInst*alloca = tempBuilder.CreateAlloca(llvmArg.getType(), nullptr, param->name);
+        IRBuilder<> tempBuilder(&function->getEntryBlock(), function->getEntryBlock().begin());
+        AllocaInst* alloca = tempBuilder.CreateAlloca(llvmArg.getType(), nullptr, param->name);
         Builder.CreateStore(&llvmArg, alloca);
         NamedValues[param->name] = alloca;
     }
 
     // Генерируем код для тела функции
     Value* bodyValue = body->Codegen();
-    if (!bodyValue) { // TODO а нужен ли вообще этот блок?
-        throw CodegenException("Error while generation function body"); // TODO вот тут проблема из-за того, что возвращается nullptr в некоторых нодах
+    if (!bodyValue) {
+        throw CodegenException("Error while generating function body");
     }
 
     // Если тело не заканчивается возвратом, добавляем возврат значения по умолчанию
-    if (returnType.type == INT) {
-        Builder.CreateRet(ConstantInt::get(context, llvm::APInt(128, 0)));
-    } else {
-        Builder.CreateRet(ConstantInt::get(context, llvm::APInt(1, 0)));
+    if (function->doesNotReturn()) {
+        if (returnType.type == INT) {
+            Builder.CreateRet(ConstantInt::get(context, llvm::APInt(128, 0)));
+        } else {
+            Builder.CreateRet(ConstantInt::get(context, llvm::APInt(1, 0)));
+        }
     }
 
     // Проверяем корректность функции
     if (verifyFunction(*function, &llvm::errs())) {
-        throw CodegenException("Ошибка: в функции " + name + " обнаружены ошибки!");
+        throw CodegenException("Error: Function " + name + " contains errors!");
     }
+
+    // Восстанавливаем точку вставки
+    Builder.SetInsertPoint(originalInsertBlock);
 
     return function;
 }
-
 Value* ParameterNode::Codegen() {
     Value* paramValue = NamedValues[name];
     if (type.is_array) {
