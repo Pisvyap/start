@@ -1,11 +1,5 @@
 delo factorial(n: chislo): chislo {
-    pust k: chislo = 0;
-    esli (n == 0) {
-        k = 1;
-    } inache {
-        k = n * factorial(n - 1);
-    }
-    vernut k;
+    vernut 1;
 }
 
 pust result: chislo = factorial(20);

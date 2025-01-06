@@ -16,15 +16,16 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
 #include "ast/nodes/expressions/UnaryOperationNode.h"
+#include "llvm/ExecutionEngine/Orc/LLJIT.h"
 
 #include "utils/utils.h"
 
 using namespace llvm;
 
 constexpr Logger logger;
-LLVMContext context;
-auto module = std::make_unique<Module>("MyModule", context); // LLVM-конструкция, содержит все функции/глобалы в куске кода
-IRBuilder Builder(context);                          // вспомогательный объект, помогает генерировать инструкции LLVM
+auto context = std::make_unique<LLVMContext>();
+auto module = std::make_unique<Module>("MyModule", *context); // LLVM-конструкция, содержит все функции/глобалы в куске кода
+IRBuilder Builder(*context);                          // вспомогательный объект, помогает генерировать инструкции LLVM
 std::map<std::string, AllocaInst*> NamedValues;         // таблица символов
 std::map<std::string, Function*> Functions;
 
@@ -32,7 +33,7 @@ std::map<std::string, Function*> Functions;
 
 Value* NumberLiteralNode::Codegen() {
     ConstantInt* constVal = ConstantInt::get(
-        context,
+        *context,
         APInt(128, value, true)
     );
 
@@ -41,7 +42,7 @@ Value* NumberLiteralNode::Codegen() {
 
 Value* BoolLiteralNode::Codegen() {
     ConstantInt* constVal = ConstantInt::get(
-        context,
+        *context,
         APInt(1, value, true)
     );
 
@@ -114,12 +115,12 @@ Value* ArrayIndexExpressionNode::Codegen() {
         throw CodegenException("Array not found: " + name);
 
     Value* arrayPtr = it->second;
-    Value* idx128 = Builder.CreateSExt(idxPtr, llvm::Type::getInt128Ty(context), "index128");
+    Value* idx128 = Builder.CreateSExt(idxPtr, llvm::Type::getInt128Ty(*context), "index128");
     llvm::Type* elementType = arrayPtr->getType()->getArrayElementType();
 
     Value* elementPtr = Builder.CreateGEP(elementType, arrayPtr,
                                                 {
-                                                    ConstantInt::get(llvm::Type::getInt64Ty(context), 0),
+                                                    ConstantInt::get(llvm::Type::getInt64Ty(*context), 0),
                                                     idx128
                                                 }, "elementptr");
 
@@ -130,21 +131,21 @@ Value* ArrayIndexExpressionNode::Codegen() {
 
 Value* NewExpressionNode::Codegen() {
     Value* sizeExpr = expression->Codegen();
-    llvm::Type* sizeType = llvm::Type::getInt128Ty(context);
+    llvm::Type* sizeType = llvm::Type::getInt128Ty(*context);
     Value* size128 = Builder.CreateZExtOrTrunc(sizeExpr, sizeType);
 
     auto* mallocFn = llvm::cast<Function>(
         module->getOrInsertFunction(
             "malloc",
             FunctionType::get(
-                PointerType::getUnqual(llvm::Type::getInt8Ty(context)),
+                PointerType::getUnqual(llvm::Type::getInt8Ty(*context)),
                 {sizeType},
                 false)
         ).getCallee()
     );
 
     Value* allocatedMemory = Builder.CreateCall(mallocFn, {size128});
-    llvm::Type* ptrType = PointerType::getUnqual(llvm::Type::getInt8Ty(context));
+    llvm::Type* ptrType = PointerType::getUnqual(llvm::Type::getInt8Ty(*context));
     Value* castedPtr = Builder.CreateBitCast(allocatedMemory, ptrType);
     return castedPtr;
 }
@@ -177,11 +178,11 @@ Value* ArrayAssigmentNode::Codegen() {
 
     Value* arrayPtr = it->second;
     llvm::Type* elementType = arrayPtr->getType()->getArrayElementType();
-    Value* idx64 = Builder.CreateSExt(idxPtr, llvm::Type::getInt64Ty(context), "index64");
+    Value* idx64 = Builder.CreateSExt(idxPtr, llvm::Type::getInt64Ty(*context), "index64");
     Value* elementPtr = Builder.CreateGEP(elementType,
                                                 arrayPtr,
                                                 {
-                                                    llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0),
+                                                    llvm::ConstantInt::get(llvm::Type::getInt64Ty(*context), 0),
                                                     idx64
                                                 },
                                                 "elementptr");
@@ -217,15 +218,15 @@ Value* ExpressionStatementNode::Codegen() {
 
 Value* ForStatementNode::Codegen() {
     //Очень надо будет чекать
-    BasicBlock* initBB = BasicBlock::Create(context, "for.init");
+    BasicBlock* initBB = BasicBlock::Create(*context, "for.init");
     Builder.CreateBr(initBB);
     Builder.SetInsertPoint(initBB);
     init->Codegen();
     Function* TheFunction = Builder.GetInsertBlock()->getParent();
-    BasicBlock* condBB = BasicBlock::Create(context, "for.cond", TheFunction);
-    BasicBlock* bodyBB = BasicBlock::Create(context, "for.body", TheFunction);
-    BasicBlock* stepBB = BasicBlock::Create(context, "for.step", TheFunction);
-    BasicBlock* afterBB = BasicBlock::Create(context, "for.after", TheFunction);
+    BasicBlock* condBB = BasicBlock::Create(*context, "for.cond", TheFunction);
+    BasicBlock* bodyBB = BasicBlock::Create(*context, "for.body", TheFunction);
+    BasicBlock* stepBB = BasicBlock::Create(*context, "for.step", TheFunction);
+    BasicBlock* afterBB = BasicBlock::Create(*context, "for.after", TheFunction);
 
     Builder.CreateBr(condBB);
     Value* condVal = condition->Codegen();
@@ -238,7 +239,7 @@ Value* ForStatementNode::Codegen() {
     step->Codegen();
     Builder.CreateBr(condBB);
     Builder.SetInsertPoint(afterBB);
-    return ConstantInt::get(llvm::Type::getInt128Ty(context), 0);
+    return ConstantInt::get(llvm::Type::getInt128Ty(*context), 0);
 }
 
 Value* IfStatementNode::Codegen() {
@@ -255,9 +256,9 @@ Value* IfStatementNode::Codegen() {
 
     Function* TheFunction = Builder.GetInsertBlock()->getParent();
 
-    BasicBlock* thenBB = BasicBlock::Create(context, "if.then", TheFunction);
-    BasicBlock* elseBB = BasicBlock::Create(context, "if.else");
-    BasicBlock* mergeBB = BasicBlock::Create(context, "if.merge");
+    BasicBlock* thenBB = BasicBlock::Create(*context, "if.then", TheFunction);
+    BasicBlock* elseBB = BasicBlock::Create(*context, "if.else");
+    BasicBlock* mergeBB = BasicBlock::Create(*context, "if.merge");
 
     Builder.CreateCondBr(condVal, thenBB, elseBB);
 
@@ -278,7 +279,7 @@ Value* IfStatementNode::Codegen() {
     mergeBB->insertInto(TheFunction);
     Builder.SetInsertPoint(mergeBB);
 
-    return ConstantInt::get(llvm::Type::getInt128Ty(context), 0);
+    return ConstantInt::get(llvm::Type::getInt128Ty(*context), 0);
 }
 
 Value* ReturnStatementNode::Codegen() {
@@ -295,14 +296,14 @@ Value* VariableDeclarationNode::Codegen() {
     llvm::Type* varType;
     if (type.type == INT) {
         if (type.is_array)
-            varType = ArrayType::get(llvm::Type::getInt128Ty(context), type.array_size);
+            varType = ArrayType::get(llvm::Type::getInt128Ty(*context), type.array_size);
         else
-            varType = llvm::Type::getInt128Ty(context);
+            varType = llvm::Type::getInt128Ty(*context);
     } else if (type.type == BOOL) {
         if (type.is_array)
-            varType = ArrayType::get(llvm::Type::getInt1Ty(context), type.array_size);
+            varType = ArrayType::get(llvm::Type::getInt1Ty(*context), type.array_size);
         else
-            varType = llvm::Type::getInt1Ty(context);
+            varType = llvm::Type::getInt1Ty(*context);
     } else {
         throw CodegenException("Unknown type: " + to_string(type.type));
     }
@@ -317,9 +318,9 @@ Value* VariableDeclarationNode::Codegen() {
 Value* WhileStatementNode::Codegen() {
     //Очень надо будет чекать
     Function* TheFunction = Builder.GetInsertBlock()->getParent();
-    BasicBlock* condBB = BasicBlock::Create(context, "while.cond", TheFunction);
-    BasicBlock* bodyBB = BasicBlock::Create(context, "while.body", TheFunction);
-    BasicBlock* afterBB = BasicBlock::Create(context, "while.after", TheFunction);
+    BasicBlock* condBB = BasicBlock::Create(*context, "while.cond", TheFunction);
+    BasicBlock* bodyBB = BasicBlock::Create(*context, "while.body", TheFunction);
+    BasicBlock* afterBB = BasicBlock::Create(*context, "while.after", TheFunction);
 
     Builder.CreateBr(condBB);
     Builder.SetInsertPoint(condBB);
@@ -331,7 +332,7 @@ Value* WhileStatementNode::Codegen() {
     Builder.CreateBr(condBB);
     Builder.SetInsertPoint(afterBB);
 
-    return ConstantInt::get(llvm::Type::getInt128Ty(context), 0);
+    return ConstantInt::get(llvm::Type::getInt128Ty(*context), 0);
 }
 
 // Ноды остальные
@@ -339,21 +340,22 @@ Value* CodeBlockNode::Codegen() {
     for (auto& statement: statements)
         statement->Codegen();
 
-    return llvm::Constant::getNullValue(llvm::Type::getInt32Ty(context));
+    return llvm::Constant::getNullValue(llvm::Type::getInt32Ty(*context));
 }
 
+// todo замена на просто print функцию, вообще убрать external объявление
 Value* ExternalFunctionNode::Codegen() {
     llvm::Type* llvmReturnType = nullptr;
     if (returnType.is_array) {
         if (returnType.type == INT) {
-            llvmReturnType = PointerType::get(llvm::Type::getInt128Ty(context), 0);
+            llvmReturnType = PointerType::get(llvm::Type::getInt128Ty(*context), 0);
         } else if (returnType.type == BOOL) {
-            llvmReturnType = PointerType::get(llvm::Type::getInt1Ty(context), 0);
+            llvmReturnType = PointerType::get(llvm::Type::getInt1Ty(*context), 0);
         }
     } else {
         llvmReturnType = returnType.type == INT
-                             ? llvm::Type::getInt128Ty(context)
-                             : llvm::Type::getInt1Ty(context);
+                             ? llvm::Type::getInt128Ty(*context)
+                             : llvm::Type::getInt1Ty(*context);
     }
 
     // Определяем типы параметров
@@ -363,13 +365,13 @@ Value* ExternalFunctionNode::Codegen() {
         if (param->type.is_array) {
             paramType = PointerType::get(
                 param->type.type == INT and param->type.is_array
-                    ? llvm::Type::getInt128Ty(context)
-                    : llvm::Type::getInt1Ty(context),
+                    ? llvm::Type::getInt128Ty(*context)
+                    : llvm::Type::getInt1Ty(*context),
                 0);
         } else {
             paramType = param->type.type == INT
-                            ? llvm::Type::getInt128Ty(context)
-                            : llvm::Type::getInt1Ty(context);
+                            ? llvm::Type::getInt128Ty(*context)
+                            : llvm::Type::getInt1Ty(*context);
         }
         paramTypes.push_back(paramType);
     }
@@ -397,9 +399,9 @@ Value* FunctionNode::Codegen() {
         throw CodegenException("Error. Functions cannot return arrays");
 
     if (returnType.type == INT)
-        llvmReturnType = llvm::Type::getInt128Ty(context);
+        llvmReturnType = llvm::Type::getInt128Ty(*context);
     else if (returnType.type == BOOL) {
-        llvmReturnType = llvm::Type::getInt1Ty(context);
+        llvmReturnType = llvm::Type::getInt1Ty(*context);
     } else {
         throw CodegenException("Unknown return type: " + to_string(returnType.type));
     }
@@ -409,13 +411,13 @@ Value* FunctionNode::Codegen() {
     for (const auto& param : parameters) {
         llvm::Type* paramType = nullptr;
         if (param->type.is_array && param->type.type == INT) {
-            paramType = PointerType::get(llvm::Type::getInt128Ty(context), 0);
+            paramType = PointerType::get(llvm::Type::getInt128Ty(*context), 0);
         } else if (param->type.is_array && param->type.type == BOOL) {
-            paramType = PointerType::get(llvm::Type::getInt1Ty(context), 0);
+            paramType = PointerType::get(llvm::Type::getInt1Ty(*context), 0);
         } else if (param->type.type == INT)
-            paramType = llvm::Type::getInt128Ty(context);
+            paramType = llvm::Type::getInt128Ty(*context);
         else if (param->type.type == BOOL) {
-            paramType = llvm::Type::getInt1Ty(context);
+            paramType = llvm::Type::getInt1Ty(*context);
         } else {
             throw CodegenException("Unknown parameter type: " + to_string(param->type.type));
         }
@@ -439,7 +441,7 @@ Value* FunctionNode::Codegen() {
     llvm::BasicBlock* originalInsertBlock = Builder.GetInsertBlock();
 
     // Переходим в тело функции
-    BasicBlock* entryBlock = BasicBlock::Create(context, "entry", function);
+    BasicBlock* entryBlock = BasicBlock::Create(*context, "entry", function);
     Builder.SetInsertPoint(entryBlock);
 
     // Устанавливаем имена параметров и добавляем их в таблицу переменных
@@ -462,9 +464,9 @@ Value* FunctionNode::Codegen() {
     // Если тело не заканчивается возвратом, добавляем возврат значения по умолчанию
     if (function->doesNotReturn()) {
         if (returnType.type == INT) {
-            Builder.CreateRet(ConstantInt::get(context, llvm::APInt(128, 0)));
+            Builder.CreateRet(ConstantInt::get(*context, llvm::APInt(128, 0)));
         } else {
-            Builder.CreateRet(ConstantInt::get(context, llvm::APInt(1, 0)));
+            Builder.CreateRet(ConstantInt::get(*context, llvm::APInt(1, 0)));
         }
     }
 
@@ -507,7 +509,7 @@ Value* ProgramNode::Codegen() {
         stmt->Codegen();
     }
 
-    return llvm::Constant::getNullValue(llvm::Type::getInt32Ty(context));
+    return llvm::Constant::getNullValue(llvm::Type::getInt32Ty(*context));
 }
 
 
@@ -540,18 +542,30 @@ Ptr<ProgramNode> build_ast(const std::string& code) {
 }
 
 Function* create_main_function() {
-    FunctionType* funcType = FunctionType::get(llvm::Type::getVoidTy(context), false);
+    FunctionType* funcType = FunctionType::get(llvm::Type::getVoidTy(*context), false);
     Function* mainFunc = Function::Create(funcType, Function::ExternalLinkage, "main", module.get());
-    BasicBlock* entry = BasicBlock::Create(context, "entry", mainFunc);
+    BasicBlock* entry = BasicBlock::Create(*context, "entry", mainFunc);
 
     Builder.SetInsertPoint(entry);
 
     return mainFunc;
 }
 
+std::unique_ptr<orc::LLJIT> createJIT() {
+    // Фабричный метод для создания JIT
+    Expected<std::unique_ptr<orc::LLJIT>> jit = orc::LLJITBuilder().create();
+    if (!jit) {
+        errs() << "Failed to create JIT: " << toString(jit.takeError()) << "\n";
+        return nullptr;
+    }
+
+    return std::move(*jit);
+}
+
+
 int main() {
     logger.info("Hello, World!");
-    const std::string input = readFile("factorial.typlyp");
+    const std::string input = readFile("test.typlyp");
 
     auto AST = build_ast(input);
 
@@ -590,35 +604,43 @@ int main() {
     outFile.close();
     logger.info("LLVM IR written to output.ll");
 
-    return 0;
+    //return 0;
 
     // JIT-исполнение
     InitializeNativeTarget();
     InitializeNativeTargetAsmPrinter();
     InitializeNativeTargetAsmParser();
 
-    std::string errorStr;
-    ExecutionEngine* engine = EngineBuilder(std::move(module))
-            .setErrorStr(&errorStr)
-            .setOptLevel(CodeGenOptLevel::Default)
-            .setEngineKind(EngineKind::JIT)
-            .create();
+    auto jitOrError = orc::LLJITBuilder().create();
+    if (!jitOrError) {
+        errs() << "Failed to create JIT: " << toString(jitOrError.takeError()) << "\n";
+        return 1;
+    }
+    auto jit = std::move(*jitOrError);
 
-    if (!engine) {
-        logger.error("Failed to create ExecutionEngine: ", errorStr);
+    // 4. Добавление модуля в JIT
+
+    orc::ThreadSafeModule tsm(std::move(module), std::move(context));
+
+    if (auto err = jit->addIRModule(std::move(tsm))) {
+        errs() << "Failed to add module to JIT: " << toString(std::move(err)) << "\n";
         return 1;
     }
 
-    // Выполнение main
-    auto mainFuncEng = engine->FindFunctionNamed("main");
-    if (!mainFunc) {
-        logger.error("Failed to find main function in ExecutionEngine");
+
+    // 5. Найти функцию, которую вы хотите выполнить
+    auto symbolOrError = jit->lookup("main");
+    if (!symbolOrError) {
+        errs() << "Failed to find symbol '" << "main" << "': " << toString(symbolOrError.takeError()) << "\n";
         return 1;
     }
 
-    auto mainEngPtr = (int (*)()) engine->getPointerToFunction(mainFuncEng);
-    int result = mainEngPtr();
-    logger.info("Program exited with code: ", result);
+    // 6. Получить адрес функции и вызвать её
+    auto functionPointer = symbolOrError->getValue();
+    auto function = (int (*)())functionPointer;
+
+    // 7. Выполнить функцию
+    function();
 
     return 0;
 }
