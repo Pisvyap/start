@@ -13,5 +13,5 @@ public:
         expression->semantic_check(table);
     }
 
-    llvm::Value* Codegen() override;
+    llvm::Value *Codegen() override;
 };

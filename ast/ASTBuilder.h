@@ -1,13 +1,10 @@
 #pragma once
 
-#include <typlypLexer.h>
-
 #include "ASTNode.h"
 #include "nodes/CodeBlockNode.h"
 #include "nodes/expressions/ExpressionNode.h"
 #include "nodes/FunctionNode.h"
 #include "nodes/statements/StatementNode.h"
-#include "nodes/ExternalFunctionNode.h"
 #include "nodes/ProgramNode.h"
 #include "nodes/statements/IfStatementNode.h"
 #include "nodes/ParameterNode.h"
@@ -39,10 +36,6 @@ public:
     std::any visitProgram(typlypParser::ProgramContext *context) override {
         auto programNode = std::make_shared<ProgramNode>();
 
-        for (auto& func : context->externalDecl()) {
-            programNode->externalFunctions.push_back(std::any_cast<Ptr<ExternalFunctionNode>>(visitExternalDecl(func)));
-        }
-
         for (auto& func : context->functionDecl()) {
             programNode->functions.push_back(std::any_cast<Ptr<FunctionNode>>(visitFunctionDecl(func)));
         }
@@ -52,20 +45,6 @@ public:
         }
 
         return programNode;
-    }
-
-    std::any visitExternalDecl(typlypParser::ExternalDeclContext* context) override {
-        auto node = std::make_shared<ExternalFunctionNode>();
-
-        node->name = context->ID()->getText();
-        node->returnType = map_type(context->type()->getText());
-        if (context->paramList()) {
-            for (auto& param : context->paramList()->param()) {
-                node->parameters.push_back(std::any_cast<Ptr<ParameterNode>>(visitParam(param)));
-            }
-        }
-
-        return node;
     }
 
     std::any visitFunctionDecl(typlypParser::FunctionDeclContext* context) override {

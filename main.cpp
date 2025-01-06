@@ -53,10 +53,6 @@ Value* BinaryOperationNode::Codegen() {
     Value* L = left->Codegen();
     Value* R = right->Codegen();
 
-    // по идее когда все на исключениях, эта проверка не нужна
-    // if (!L || !R)
-        // return nullptr;
-
     switch (operation) {
         case Add:
             return Builder.CreateAdd(L, R, "addtmp");
@@ -336,7 +332,59 @@ Value* WhileStatementNode::Codegen() {
 }
 
 Value* PrintStatementNode::Codegen() {
-    return nullptr; // TODO печать всего
+    // Проверяем, существует ли уже функция printf
+    Function* printfFunc = module->getFunction("printf");
+    if (!printfFunc) {
+        // Создаем прототип printf: declare i32 @printf(i8*, ...)
+        FunctionType* printfType = FunctionType::get(
+            IntegerType::getInt128Ty(*context), // Возвращает i32
+            PointerType::getUnqual(llvm::Type::getInt8Ty(*context)), // i8*
+            true // Variadic function
+        );
+        printfFunc = Function::Create(
+            printfType,
+            Function::ExternalLinkage,
+            "printf",
+            *module
+        );
+    }
+
+    // Генерируем код для выражения
+    Value* value = expression->Codegen();
+    if (!value) {
+        throw std::runtime_error("Codegen for expression in PrintStatementNode failed");
+    }
+
+    // Определяем тип значения
+    llvm::Type* valueType = value->getType();
+
+    if (valueType->isIntegerTy()) {
+        Value* formatStrPtr = nullptr;
+        // Для целого числа создаем строку формата "%d\n"
+        Constant* formatStrConst = ConstantDataArray::getString(*context, "%d\n");
+        auto formatStrVar = new GlobalVariable(
+            *module,
+            formatStrConst->getType(), // Тип: [N x i8]
+            true, // Is constant
+            GlobalValue::PrivateLinkage, // Скрытая видимость
+            formatStrConst,
+            ".str" // Имя переменной
+        );
+        formatStrPtr = Builder.CreateInBoundsGEP(
+            formatStrVar->getValueType(),
+            formatStrVar,
+            { llvm::ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+              llvm::ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+        );
+
+        // Вызываем printf для целого числа
+        Builder.CreateCall(printfFunc, { formatStrPtr, value });
+    } else {
+        throw std::runtime_error("Unsupported type for PrintStatementNode");
+    }
+
+    // Возврат nullptr, так как print не возвращает значения
+    return nullptr;
 }
 
 
@@ -346,55 +394,6 @@ Value* CodeBlockNode::Codegen() {
         statement->Codegen();
 
     return llvm::Constant::getNullValue(llvm::Type::getInt32Ty(*context));
-}
-
-// todo замена на просто print функцию, вообще убрать external объявление
-Value* ExternalFunctionNode::Codegen() {
-    llvm::Type* llvmReturnType = nullptr;
-    if (returnType.is_array) {
-        if (returnType.type == INT) {
-            llvmReturnType = PointerType::get(llvm::Type::getInt128Ty(*context), 0);
-        } else if (returnType.type == BOOL) {
-            llvmReturnType = PointerType::get(llvm::Type::getInt1Ty(*context), 0);
-        }
-    } else {
-        llvmReturnType = returnType.type == INT
-                             ? llvm::Type::getInt128Ty(*context)
-                             : llvm::Type::getInt1Ty(*context);
-    }
-
-    // Определяем типы параметров
-    std::vector<llvm::Type*> paramTypes;
-    for (const auto& param: parameters) {
-        llvm::Type* paramType = nullptr;
-        if (param->type.is_array) {
-            paramType = PointerType::get(
-                param->type.type == INT and param->type.is_array
-                    ? llvm::Type::getInt128Ty(*context)
-                    : llvm::Type::getInt1Ty(*context),
-                0);
-        } else {
-            paramType = param->type.type == INT
-                            ? llvm::Type::getInt128Ty(*context)
-                            : llvm::Type::getInt1Ty(*context);
-        }
-        paramTypes.push_back(paramType);
-    }
-
-    // Создаем тип функции
-    FunctionType* funcType = FunctionType::get(llvmReturnType, paramTypes, false);
-
-    // Объявляем внешнюю функцию
-    Function* function = Function::Create(
-        funcType,
-        Function::ExternalLinkage, // External linkage означает, что функция определена вне текущего модуля
-        // todo кажется стоит переопределять имена на стандартные сишные, например narisovat -> printf, + добавить функцию случайной генерации массива чисел, для программы сортировки
-        // плюс все-таки придется линковать с clang, чтобы получить его дефолтные функции
-        name,
-        *module
-    );
-
-    return function;
 }
 
 Value* FunctionNode::Codegen() {
@@ -504,9 +503,6 @@ Value* ParameterNode::Codegen() {
 
 
 Value* ProgramNode::Codegen() {
-    for (auto& extFunc: externalFunctions) {
-        extFunc->Codegen();
-    }
     for (auto& func: functions) {
         func->Codegen();
     }
@@ -514,7 +510,7 @@ Value* ProgramNode::Codegen() {
         stmt->Codegen();
     }
 
-    return llvm::Constant::getNullValue(llvm::Type::getInt32Ty(*context));
+    return Constant::getNullValue(llvm::Type::getInt32Ty(*context));
 }
 
 
@@ -529,9 +525,9 @@ Ptr<ProgramNode> build_ast(const std::string& code) {
     auto tree = parser.program();
 
     // Строим AST
-    ASTBuilder builder;
-    Ptr<ProgramNode> ast;
     try {
+        Ptr<ProgramNode> ast;
+        ASTBuilder builder;
         auto ast_any = builder.visitProgram(tree);
         ast = std::any_cast<Ptr<ProgramNode> >(ast_any);
         ast->print(0);
@@ -574,7 +570,7 @@ int main() {
 
     auto AST = build_ast(input);
 
-    Function* mainFunc = create_main_function();
+    create_main_function();
 
     if (AST == nullptr) {
         logger.error("Error. AST build failure.");
@@ -609,8 +605,6 @@ int main() {
     outFile.close();
     logger.info("LLVM IR written to output.ll");
 
-    //return 0;
-
     // JIT-исполнение
     InitializeNativeTarget();
     InitializeNativeTargetAsmPrinter();
@@ -642,10 +636,9 @@ int main() {
 
     // 6. Получить адрес функции и вызвать её
     auto functionPointer = symbolOrError->getValue();
-    auto function = (int (*)())functionPointer;
+    auto function = reinterpret_cast<int (*)()>(functionPointer);
 
     // 7. Выполнить функцию
-    function();
-
+    std::cout << function() << std::endl;
     return 0;
 }
