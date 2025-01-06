@@ -150,6 +150,9 @@ Value* NewExpressionNode::Codegen() {
 
 Value* FunctionCallExpressionNode::Codegen() {
     auto it = NamedValues.find(name);
+    if (it == NamedValues.end())
+        throw CodegenException("Function not found: " + name);
+
     Function* func = it->second->getFunction();
     std::vector<Value*> argv;
     for (const auto& arg: arguments) {
