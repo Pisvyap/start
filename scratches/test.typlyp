@@ -7,8 +7,7 @@ delo factorial(n: chislo): chislo {
         }
 
         vernut k;
-
 }
 
-pust result: chislo = factorial(13);
+pust result: chislo = factorial(20);
 result -> glaza;

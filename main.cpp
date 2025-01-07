@@ -358,7 +358,74 @@ Value* PrintStatementNode::Codegen() {
     // Определяем тип значения
     llvm::Type* valueType = value->getType();
 
-    if (valueType->isIntegerTy()) {
+    if (valueType->isIntegerTy(128)) {
+        // Разбиваем 128-битное число на старшую и младшую части
+        llvm::Value* lowPart = Builder.CreateTrunc(value, llvm::Type::getInt64Ty(*context), "lowPart");
+        llvm::Value* highPart = Builder.CreateLShr(value, llvm::ConstantInt::get(valueType, 64));
+        highPart = Builder.CreateTrunc(highPart, llvm::Type::getInt64Ty(*context), "highPart");
+
+        // Создаем строку формата для вывода одной или двух частей
+        llvm::Constant* singlePartFormatConst = llvm::ConstantDataArray::getString(*context, "%llu\n");
+        auto singlePartFormatVar = new llvm::GlobalVariable(
+            *module,
+            singlePartFormatConst->getType(),
+            true,
+            llvm::GlobalValue::PrivateLinkage,
+            singlePartFormatConst,
+            ".strSinglePart"
+        );
+
+        llvm::Constant* dualPartFormatConst = llvm::ConstantDataArray::getString(*context, "High: %llu Low: %llu\n");
+        auto* dualPartFormatVar = new llvm::GlobalVariable(
+            *module,
+            dualPartFormatConst->getType(),
+            true,
+            llvm::GlobalValue::PrivateLinkage,
+            dualPartFormatConst,
+            ".strDualPart"
+        );
+
+        // Адреса строк
+        llvm::Value* singlePartFormatPtr = Builder.CreateInBoundsGEP(
+            singlePartFormatVar->getValueType(),
+            singlePartFormatVar,
+            { llvm::ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+              llvm::ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+        );
+
+        llvm::Value* dualPartFormatPtr = Builder.CreateInBoundsGEP(
+            dualPartFormatVar->getValueType(),
+            dualPartFormatVar,
+            { llvm::ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+              llvm::ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+        );
+
+        // Проверяем, равна ли старшая часть нулю
+        llvm::Value* isHighZero = Builder.CreateICmpEQ(highPart, llvm::ConstantInt::get(llvm::Type::getInt64Ty(*context), 0));
+
+        // Создаем блоки для ветвлений
+        llvm::Function* parentFunction = Builder.GetInsertBlock()->getParent();
+        llvm::BasicBlock* printLowPartBlock = llvm::BasicBlock::Create(*context, "printLowPart", parentFunction);
+        llvm::BasicBlock* printDualPartBlock = llvm::BasicBlock::Create(*context, "printDualPart", parentFunction);
+        llvm::BasicBlock* afterPrintBlock = llvm::BasicBlock::Create(*context, "afterPrint", parentFunction);
+
+        // Условное ветвление
+        Builder.CreateCondBr(isHighZero, printLowPartBlock, printDualPartBlock);
+
+        // Если старшая часть равна нулю, печатаем только младшую часть
+        Builder.SetInsertPoint(printLowPartBlock);
+        Builder.CreateCall(printfFunc, { singlePartFormatPtr, lowPart });
+        Builder.CreateBr(afterPrintBlock);
+
+        // Если старшая часть не равна нулю, печатаем обе части
+        Builder.SetInsertPoint(printDualPartBlock);
+        Builder.CreateCall(printfFunc, { dualPartFormatPtr, highPart, lowPart });
+        Builder.CreateBr(afterPrintBlock);
+
+        // Возвращаемся в основной поток
+        Builder.SetInsertPoint(afterPrintBlock);
+    }
+    else if (valueType->isIntegerTy()) {
         Value* formatStrPtr = nullptr;
         // Для целого числа создаем строку формата "%d\n"
         Constant* formatStrConst = ConstantDataArray::getString(*context, "%d\n");
