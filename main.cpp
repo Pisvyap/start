@@ -103,27 +103,45 @@ Value* IdentifierNode::Codegen() {
         name.c_str());
 }
 
-Value* ArrayIndexExpressionNode::Codegen() {
-    Value* idxPtr = index->Codegen();
+llvm::Value* ArrayIndexExpressionNode::Codegen() {
+    // Проверяем, существует ли массив с таким именем
+    AllocaInst* arrayAlloc = NamedValues[name];
+    if (!arrayAlloc)
+        throw CodegenException("Array '" + name + "' was not declared");
 
-    auto it = NamedValues.find(name);
-    if (it == NamedValues.end())
-        throw CodegenException("Array not found: " + name);
+    // Генерация кода для индекса
+    llvm::Value* indexValue = index->Codegen();
+    if (!indexValue->getType()->isIntegerTy())
+        throw CodegenException("Array index must be of integer type");
 
-    Value* arrayPtr = it->second;
-    Value* idx128 = Builder.CreateSExt(idxPtr, llvm::Type::getInt128Ty(*context), "index128");
-    llvm::Type* elementType = arrayPtr->getType()->getArrayElementType();
+    // Приведение индекса к `i32`, если он не соответствует
+    llvm::Type* indexType = llvm::Type::getInt32Ty(*context);
+    if (indexValue->getType() != indexType) {
+        indexValue = Builder.CreateIntCast(indexValue, indexType, true, "indexCast");
+    }
 
-    Value* elementPtr = Builder.CreateGEP(elementType, arrayPtr,
-                                                {
-                                                    ConstantInt::get(llvm::Type::getInt64Ty(*context), 0),
-                                                    idx128
-                                                }, "elementptr");
+    // Получение указателя на элемент массива
+    llvm::Value* elementPtr = Builder.CreateGEP(
+            arrayAlloc->getAllocatedType(), // Тип массива
+            arrayAlloc,                     // Указатель на массив
+            {Builder.getInt32(0), indexValue}, // Индекс
+            name + "_element_ptr"           // Имя (опционально)
+    );
 
-    Value* loadedValue = Builder.CreateLoad(elementType, elementPtr, "loadedval");
+    // Получение типа элемента массива
+    llvm::Type* elementType = arrayAlloc->getAllocatedType()->getArrayElementType();
 
-    return loadedValue;
+    // Загрузка значения элемента массива
+    llvm::Value* elementValue = Builder.CreateLoad(
+            elementType, // Тип элемента массива
+            elementPtr,  // Указатель
+            name + "_element_value" // Имя для отладочной информации
+    );
+
+    return elementValue; // Возвращаем значение элемента
 }
+
+
 
 Value* NewExpressionNode::Codegen() {
     Value* sizeExpr = expression->Codegen();
@@ -164,26 +182,44 @@ Value* FunctionCallExpressionNode::Codegen() {
 }
 
 // Ноды STATEMENTS
-Value* ArrayAssigmentNode::Codegen() {
-    Value* idxPtr = index->Codegen();
-    Value* valPtr = value->Codegen();
-    auto it = NamedValues.find(name);
+llvm::Value* ArrayAssigmentNode::Codegen() {
+    // Проверяем, существует ли массив с таким именем
+    AllocaInst* arrayAlloc = NamedValues[name];
+    if (!arrayAlloc)
+        throw CodegenException("Array '" + name + "' was not declared");
 
-    if (it == NamedValues.end())
-        throw CodegenException("Array not found: " + name);
+    // Генерация кода для вычисления индекса
+    llvm::Value* indexValue = index->Codegen();
+    if (!indexValue->getType()->isIntegerTy())
+        throw CodegenException("Array index must be of integer type");
 
-    Value* arrayPtr = it->second;
-    llvm::Type* elementType = arrayPtr->getType()->getArrayElementType();
-    Value* idx64 = Builder.CreateSExt(idxPtr, llvm::Type::getInt64Ty(*context), "index64");
-    Value* elementPtr = Builder.CreateGEP(elementType,
-                                                arrayPtr,
-                                                {
-                                                    llvm::ConstantInt::get(llvm::Type::getInt64Ty(*context), 0),
-                                                    idx64
-                                                },
-                                                "elementptr");
-    Builder.CreateStore(valPtr, elementPtr);
-    return elementPtr;
+    // Приведение индекса к необходимому типу, если требуется
+    llvm::Type* indexType = llvm::Type::getInt32Ty(*context);
+    if (indexValue->getType() != indexType) {
+        indexValue = Builder.CreateIntCast(indexValue, indexType, true, "indexCast");
+    }
+
+    // Получение указателя на элемент массива
+    llvm::Value* elementPtr = Builder.CreateGEP(
+            arrayAlloc->getAllocatedType(), // Тип массива
+            arrayAlloc,                     // Указатель на массив
+            {Builder.getInt32(0), indexValue}, // Индекс
+            name + "_element_ptr"           // Имя (опционально)
+    );
+
+    // Генерация кода для значения, которое будет записано
+    llvm::Value* valueToStore = value->Codegen();
+
+    // Проверка типа: должны быть совместимы типы элемента массива и значения
+    llvm::Type* elementType = arrayAlloc->getAllocatedType()->getArrayElementType();
+    if (valueToStore->getType() != elementType) {
+        throw CodegenException("Type mismatch: cannot assign value to array element");
+    }
+
+    // Создаем инструкцию записи (store)
+    Builder.CreateStore(valueToStore, elementPtr);
+
+    return valueToStore;
 }
 
 Value* AssigmentStatementNode::Codegen() {
@@ -291,8 +327,9 @@ Value* ReturnStatementNode::Codegen() {
 Value* VariableDeclarationNode::Codegen() {
     llvm::Type* varType;
     if (type.type == INT) {
-        if (type.is_array)
+        if (type.is_array) {
             varType = ArrayType::get(llvm::Type::getInt128Ty(*context), type.array_size);
+        }
         else
             varType = llvm::Type::getInt128Ty(*context);
     } else if (type.type == BOOL) {
@@ -664,7 +701,7 @@ int main() {
     std::error_code EC;
     raw_fd_ostream outFile("output.ll", EC, llvm::sys::fs::OF_None);
     if (EC) {
-        logger.error("Could not open output file: ", EC.message());
+        //logger.error("Could not open output file: ", EC.message());
         return 1;
     }
 
