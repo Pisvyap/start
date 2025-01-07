@@ -639,6 +639,6 @@ int main() {
     auto function = reinterpret_cast<int (*)()>(functionPointer);
 
     // 7. Выполнить функцию
-    std::cout << function() << std::endl;
+    function();
     return 0;
 }
