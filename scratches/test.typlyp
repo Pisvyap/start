@@ -1,20 +1,20 @@
-pust result: chislo = 1;
-pust temp: chislo = 1 + 2;
-result = result + 2;
-pust dead: chislo = result + 3;
-pust numbers: chislo<> = new chislo<6>;
-numbers[0] = 3;
-numbers[1] = 2;
-numbers[2] = 1;
-numbers[3] = 8;
-numbers[4] = 6;
-numbers[5] = 10;
-pust result: chislo = numbers[1];
-numbers[1] -> glaza;
-result -> glaza;
-numbers[0] -> glaza;
-numbers[1] -> glaza;
-numbers[2] -> glaza;
-numbers[3] -> glaza;
-numbers[4] -> glaza;
-numbers[5] -> glaza;
+pust n: chislo = 100000;
+pust primes: logika<> = new logika<n>;
+
+primes[0] = lozh;
+primes[1] = lozh;
+
+schitaem (pust p: chislo = 2; p * p <= n; p = p + 1;) {
+    esli (primes[p] == pravda) {
+        schitaem (pust i: chislo = p * p; i < n; i = i + p;){
+            primes[i] = lozh;
+            i = i + p;
+        }
+    }
+}
+
+schitaem (pust j: chislo = 0 ; j < limit; j = j + 1;){
+    esli (primes[j]){
+        j -> glaza;
+    }
+}

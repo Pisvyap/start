@@ -1,29 +1,20 @@
-vneshnaya narisovatChislo(x: chislo): chislo;
+pust n: chislo = 100000;
+pust primes: logika<> = new logika<n>;
 
-delo eratosthenes(n: chislo): chislo {
-    pust primes: logika<> = new logika<n+1>;
+primes[0] = lozh;
+primes[1] = lozh;
 
-    primes[0] = lozh;
-    primes[1] = lozh;
-
-    pust p: chislo = 2;
-    poka (p * p <= n) {
-        esli (primes[p] == pravda) {
-            pust i: chislo = p * p;
-            poka (i <= n) {
-                primes[i] = lozh;
-                i = i + p;
-            }
-        }
-        p = p + 1;
-    }
-    schitaem (pust i: chislo = 0 ; i < limit; i = i + 1;){
-        esli (primes[i]){
-            narisovatChislo(i);
+schitaem (pust p: chislo = 2; p * p <= n; p = p + 1;) {
+    esli (primes[p] == pravda) {
+        schitaem (pust i: chislo = p * p; i < n; i = i + p;){
+            primes[i] = lozh;
+            i = i + p;
         }
     }
-
-    vernut 1;
 }
 
-eratosthenes(30);
+schitaem (pust j: chislo = 0 ; j < limit; j = j + 1;){
+    esli (primes[j]){
+        j -> glaza;
+    }
+}

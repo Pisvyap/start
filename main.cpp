@@ -735,9 +735,9 @@ int main() {
     logger.info("LLVM IR written to output.ll");
 
     // Добавление оптимизаций
-    module->print(llvm::outs(), nullptr);
-    optimize();
-    module->print(llvm::outs(), nullptr);
+    //module->print(llvm::outs(), nullptr);
+    //optimize();
+    //module->print(llvm::outs(), nullptr);
 
     // JIT-исполнение
     InitializeNativeTarget();
