@@ -670,24 +670,27 @@ std::unique_ptr<orc::LLJIT> createJIT() {
 #include "llvm/IR/PassManager.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Bitcode/BitcodeReader.h"
-#include "llvm/Transforms/IPO/ConstantMerge.h"
 #include "llvm/Support/Error.h"
 #include "llvm/Transforms/IPO/GlobalDCE.h"
-
+#include "llvm/Transforms/Scalar/GVN.h"          // Для GVNPass
+#include "llvm/Transforms/IPO/DeadArgumentElimination.h"
+#include "llvm/Transforms/Scalar/DeadStoreElimination.h"
 void optimize(){
     // Создаем PassBuilder
-    llvm::PassBuilder passBuilder;
+    PassBuilder passBuilder;
 
     // Создаем ModulePassManager
-    llvm::ModulePassManager passManager;
+    ModulePassManager passManager;
 
     // Регистрируем анализы для модуля
-    llvm::ModuleAnalysisManager analysisManager;
+    ModuleAnalysisManager analysisManager;
     passBuilder.registerModuleAnalyses(analysisManager);
 
-    // Добавляем пассы для оптимизаций (например, удаление dead-end кода и свертка констант)
-    passManager.addPass(llvm::ConstantMergePass());
-    passManager.addPass(llvm::GlobalDCEPass());
+    // Добавляем пассы для оптимизаций (Тут удаление неиспользуемых функций, например)
+    //passManager.addPass(createModuleToFunctionPassAdaptor(DSEPass()));
+    passManager.addPass(GlobalDCEPass());
+
+    //passManager.addPass(DeadArgumentEliminationPass());
 
     // Применяем оптимизации
     passManager.run(*module, analysisManager);
@@ -735,9 +738,9 @@ int main() {
     logger.info("LLVM IR written to output.ll");
 
     // Добавление оптимизаций
-    //module->print(llvm::outs(), nullptr);
-    //optimize();
-    //module->print(llvm::outs(), nullptr);
+    module->print(llvm::outs(), nullptr);
+    optimize();
+    module->print(llvm::errs(), nullptr);
 
     // JIT-исполнение
     InitializeNativeTarget();

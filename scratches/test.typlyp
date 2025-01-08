@@ -1,20 +1,6 @@
-pust n: chislo = 100000;
-pust primes: logika<> = new logika<n>;
-
-primes[0] = lozh;
-primes[1] = lozh;
-
-schitaem (pust p: chislo = 2; p * p <= n; p = p + 1;) {
-    esli (primes[p] == pravda) {
-        schitaem (pust i: chislo = p * p; i < n; i = i + p;){
-            primes[i] = lozh;
-            i = i + p;
-        }
-    }
+delo factorial(n: chislo, k: chislo): chislo {
+        vernut n;
 }
 
-schitaem (pust j: chislo = 0 ; j < limit; j = j + 1;){
-    esli (primes[j]){
-        j -> glaza;
-    }
-}
+pust result: chislo = 1;
+result -> glaza;
