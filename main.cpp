@@ -352,7 +352,7 @@ Value* PrintStatementNode::Codegen() {
     // Генерируем код для выражения
     Value* value = expression->Codegen();
     if (!value) {
-        throw std::runtime_error("Codegen for expression in PrintStatementNode failed");
+        throw CodegenException("Codegen for expression in PrintStatementNode failed");
     }
 
     // Определяем тип значения
@@ -360,54 +360,54 @@ Value* PrintStatementNode::Codegen() {
 
     if (valueType->isIntegerTy(128)) {
         // Разбиваем 128-битное число на старшую и младшую части
-        llvm::Value* lowPart = Builder.CreateTrunc(value, llvm::Type::getInt64Ty(*context), "lowPart");
-        llvm::Value* highPart = Builder.CreateLShr(value, llvm::ConstantInt::get(valueType, 64));
+        Value* lowPart = Builder.CreateTrunc(value, llvm::Type::getInt64Ty(*context), "lowPart");
+        Value* highPart = Builder.CreateLShr(value, llvm::ConstantInt::get(valueType, 64));
         highPart = Builder.CreateTrunc(highPart, llvm::Type::getInt64Ty(*context), "highPart");
 
         // Создаем строку формата для вывода одной или двух частей
-        llvm::Constant* singlePartFormatConst = llvm::ConstantDataArray::getString(*context, "%llu\n");
-        auto singlePartFormatVar = new llvm::GlobalVariable(
+        Constant* singlePartFormatConst = ConstantDataArray::getString(*context, "%llu\n");
+        auto singlePartFormatVar = new GlobalVariable(
             *module,
             singlePartFormatConst->getType(),
             true,
-            llvm::GlobalValue::PrivateLinkage,
+            GlobalValue::PrivateLinkage,
             singlePartFormatConst,
             ".strSinglePart"
         );
 
-        llvm::Constant* dualPartFormatConst = llvm::ConstantDataArray::getString(*context, "High: %llu Low: %llu\n");
-        auto* dualPartFormatVar = new llvm::GlobalVariable(
+        Constant* dualPartFormatConst = ConstantDataArray::getString(*context, "%llu%llu\n");
+        auto* dualPartFormatVar = new GlobalVariable(
             *module,
             dualPartFormatConst->getType(),
             true,
-            llvm::GlobalValue::PrivateLinkage,
+            GlobalValue::PrivateLinkage,
             dualPartFormatConst,
             ".strDualPart"
         );
 
         // Адреса строк
-        llvm::Value* singlePartFormatPtr = Builder.CreateInBoundsGEP(
+        Value* singlePartFormatPtr = Builder.CreateInBoundsGEP(
             singlePartFormatVar->getValueType(),
             singlePartFormatVar,
-            { llvm::ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
-              llvm::ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+            { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+              ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
         );
 
-        llvm::Value* dualPartFormatPtr = Builder.CreateInBoundsGEP(
+        Value* dualPartFormatPtr = Builder.CreateInBoundsGEP(
             dualPartFormatVar->getValueType(),
             dualPartFormatVar,
-            { llvm::ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
-              llvm::ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+            { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+              ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
         );
 
         // Проверяем, равна ли старшая часть нулю
-        llvm::Value* isHighZero = Builder.CreateICmpEQ(highPart, llvm::ConstantInt::get(llvm::Type::getInt64Ty(*context), 0));
+        Value* isHighZero = Builder.CreateICmpEQ(highPart, ConstantInt::get(llvm::Type::getInt64Ty(*context), 0));
 
         // Создаем блоки для ветвлений
-        llvm::Function* parentFunction = Builder.GetInsertBlock()->getParent();
-        llvm::BasicBlock* printLowPartBlock = llvm::BasicBlock::Create(*context, "printLowPart", parentFunction);
-        llvm::BasicBlock* printDualPartBlock = llvm::BasicBlock::Create(*context, "printDualPart", parentFunction);
-        llvm::BasicBlock* afterPrintBlock = llvm::BasicBlock::Create(*context, "afterPrint", parentFunction);
+        Function* parentFunction = Builder.GetInsertBlock()->getParent();
+        BasicBlock* printLowPartBlock = BasicBlock::Create(*context, "printLowPart", parentFunction);
+        BasicBlock* printDualPartBlock = BasicBlock::Create(*context, "printDualPart", parentFunction);
+        BasicBlock* afterPrintBlock = BasicBlock::Create(*context, "afterPrint", parentFunction);
 
         // Условное ветвление
         Builder.CreateCondBr(isHighZero, printLowPartBlock, printDualPartBlock);
@@ -630,6 +630,31 @@ std::unique_ptr<orc::LLJIT> createJIT() {
     return std::move(*jit);
 }
 
+#include "llvm/IR/PassManager.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Bitcode/BitcodeReader.h"
+#include "llvm/Transforms/IPO/ConstantMerge.h"
+#include "llvm/Support/Error.h"
+#include "llvm/Transforms/IPO/GlobalDCE.h"
+
+void optimize(){
+    // Создаем PassBuilder
+    llvm::PassBuilder passBuilder;
+
+    // Создаем ModulePassManager
+    llvm::ModulePassManager passManager;
+
+    // Регистрируем анализы для модуля
+    llvm::ModuleAnalysisManager analysisManager;
+    passBuilder.registerModuleAnalyses(analysisManager);
+
+    // Добавляем пассы для оптимизаций (например, удаление dead-end кода и свертка констант)
+    passManager.addPass(llvm::ConstantMergePass());
+    passManager.addPass(llvm::GlobalDCEPass());
+
+    // Применяем оптимизации
+    passManager.run(*module, analysisManager);
+}
 
 int main() {
     logger.info("Hello, World!");
@@ -672,17 +697,19 @@ int main() {
     outFile.close();
     logger.info("LLVM IR written to output.ll");
 
+    // Добавление оптимизаций
+    module->print(llvm::outs(), nullptr);
+    optimize();
+    module->print(llvm::outs(), nullptr);
+
     // JIT-исполнение
     InitializeNativeTarget();
     InitializeNativeTargetAsmPrinter();
     InitializeNativeTargetAsmParser();
 
-    auto jitOrError = orc::LLJITBuilder().create();
-    if (!jitOrError) {
-        errs() << "Failed to create JIT: " << toString(jitOrError.takeError()) << "\n";
-        return 1;
-    }
-    auto jit = std::move(*jitOrError);
+    auto jitOrError = createJIT();
+
+    auto jit = std::move(jitOrError);
 
     // 4. Добавление модуля в JIT
 
@@ -702,8 +729,8 @@ int main() {
     }
 
     // 6. Получить адрес функции и вызвать её
-    auto functionPointer = symbolOrError->getValue();
-    auto function = reinterpret_cast<int (*)()>(functionPointer);
+    const auto functionPointer = symbolOrError->getValue();
+    const auto function = reinterpret_cast<int (*)()>(functionPointer);
 
     // 7. Выполнить функцию
     function();

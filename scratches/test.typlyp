@@ -1,13 +1,4 @@
-delo factorial(n: chislo): chislo {
-        pust k: chislo = n;
-        esli (n == 0) {
-            k = 1;
-        } inache {
-            k = k * factorial(k - 1);
-        }
-
-        vernut k;
-}
-
-pust result: chislo = factorial(20);
-result -> glaza;
+pust result: chislo = 1;
+pust temp: chislo = 1 + 2;
+result = result + 2;
+pust dead: chislo = result + 3;
