@@ -369,14 +369,13 @@ Value* WhileStatementNode::Codegen() {
 }
 
 Value* PrintStatementNode::Codegen() {
-    // Проверяем, существует ли уже функция printf
     Function* printfFunc = module->getFunction("printf");
     if (!printfFunc) {
-        // Создаем прототип printf: declare i32 @printf(i8*, ...)
+
         FunctionType* printfType = FunctionType::get(
-            IntegerType::getInt128Ty(*context), // Возвращает i128
-            PointerType::getUnqual(llvm::Type::getInt8Ty(*context)), // i8*
-            true // Variadic function
+            IntegerType::getInt128Ty(*context),
+            PointerType::getUnqual(llvm::Type::getInt8Ty(*context)),
+            true
         );
         printfFunc = Function::Create(
             printfType,
@@ -386,22 +385,21 @@ Value* PrintStatementNode::Codegen() {
         );
     }
 
-    // Генерируем код для выражения
+
     Value* value = expression->Codegen();
     if (!value) {
         throw CodegenException("Codegen for expression in PrintStatementNode failed");
     }
 
-    // Определяем тип значения
+
     llvm::Type* valueType = value->getType();
 
     if (valueType->isIntegerTy(128)) {
-        // Разбиваем 128-битное число на старшую и младшую части
+
         Value* lowPart = Builder.CreateTrunc(value, llvm::Type::getInt64Ty(*context), "lowPart");
         Value* highPart = Builder.CreateLShr(value, llvm::ConstantInt::get(valueType, 64));
         highPart = Builder.CreateTrunc(highPart, llvm::Type::getInt64Ty(*context), "highPart");
 
-        // Создаем строку формата для вывода одной или двух частей
         Constant* singlePartFormatConst = ConstantDataArray::getString(*context, "%llu\n");
         auto singlePartFormatVar = new GlobalVariable(
             *module,
@@ -422,7 +420,6 @@ Value* PrintStatementNode::Codegen() {
             ".strDualPart"
         );
 
-        // Адреса строк
         Value* singlePartFormatPtr = Builder.CreateInBoundsGEP(
             singlePartFormatVar->getValueType(),
             singlePartFormatVar,
@@ -437,57 +434,49 @@ Value* PrintStatementNode::Codegen() {
               ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
         );
 
-        // Проверяем, равна ли старшая часть нулю
         Value* isHighZero = Builder.CreateICmpEQ(highPart, ConstantInt::get(llvm::Type::getInt64Ty(*context), 0));
 
-        // Создаем блоки для ветвлений
         Function* parentFunction = Builder.GetInsertBlock()->getParent();
         BasicBlock* printLowPartBlock = BasicBlock::Create(*context, "printLowPart", parentFunction);
         BasicBlock* printDualPartBlock = BasicBlock::Create(*context, "printDualPart", parentFunction);
         BasicBlock* afterPrintBlock = BasicBlock::Create(*context, "afterPrint", parentFunction);
 
-        // Условное ветвление
         Builder.CreateCondBr(isHighZero, printLowPartBlock, printDualPartBlock);
 
-        // Если старшая часть равна нулю, печатаем только младшую часть
         Builder.SetInsertPoint(printLowPartBlock);
         Builder.CreateCall(printfFunc, { singlePartFormatPtr, lowPart });
         Builder.CreateBr(afterPrintBlock);
 
-        // Если старшая часть не равна нулю, печатаем обе части
         Builder.SetInsertPoint(printDualPartBlock);
         Builder.CreateCall(printfFunc, { dualPartFormatPtr, highPart, lowPart });
         Builder.CreateBr(afterPrintBlock);
 
-        // Возвращаемся в основной поток
         Builder.SetInsertPoint(afterPrintBlock);
     }
     else if (valueType->isIntegerTy()) {
         Value* formatStrPtr = nullptr;
-        // Для целого числа создаем строку формата "%d\n"
+
         Constant* formatStrConst = ConstantDataArray::getString(*context, "%d\n");
         auto formatStrVar = new GlobalVariable(
             *module,
-            formatStrConst->getType(), // Тип: [N x i8]
-            true, // Is constant
-            GlobalValue::PrivateLinkage, // Скрытая видимость
+            formatStrConst->getType(),
+            true,
+            GlobalValue::PrivateLinkage,
             formatStrConst,
-            ".str" // Имя переменной
+            ".str"
         );
         formatStrPtr = Builder.CreateInBoundsGEP(
             formatStrVar->getValueType(),
             formatStrVar,
-            { llvm::ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
-              llvm::ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+            { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+              ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
         );
 
-        // Вызываем printf для целого числа
         Builder.CreateCall(printfFunc, { formatStrPtr, value });
     } else {
         throw std::runtime_error("Unsupported type for PrintStatementNode");
     }
 
-    // Возврат nullptr, так как print не возвращает значения
     return nullptr;
 }
 
@@ -657,7 +646,6 @@ Function* create_main_function() {
 }
 
 std::unique_ptr<orc::LLJIT> createJIT() {
-    // Фабричный метод для создания JIT
     Expected<std::unique_ptr<orc::LLJIT>> jit = orc::LLJITBuilder().create();
     if (!jit) {
         errs() << "Failed to create JIT: " << toString(jit.takeError()) << "\n";
@@ -669,35 +657,24 @@ std::unique_ptr<orc::LLJIT> createJIT() {
 
 #include "llvm/IR/PassManager.h"
 #include "llvm/Passes/PassBuilder.h"
-#include "llvm/Bitcode/BitcodeReader.h"
-#include "llvm/Support/Error.h"
 #include "llvm/Transforms/IPO/GlobalDCE.h"
-#include "llvm/Transforms/Scalar/GVN.h"          // Для GVNPass
 #include "llvm/Transforms/IPO/DeadArgumentElimination.h"
-#include "llvm/Transforms/Scalar/DeadStoreElimination.h"
 void optimize(){
-    // Создаем PassBuilder
     PassBuilder passBuilder;
 
-    // Создаем ModulePassManager
-    ModulePassManager passManager;
+    ModuleAnalysisManager mam;
+    passBuilder.registerModuleAnalyses(mam);
 
-    // Регистрируем анализы для модуля
-    ModuleAnalysisManager analysisManager;
-    passBuilder.registerModuleAnalyses(analysisManager);
+    ModulePassManager modulePassManager;
 
-    // Добавляем пассы для оптимизаций (Тут удаление неиспользуемых функций, например)
-    //passManager.addPass(createModuleToFunctionPassAdaptor(DSEPass()));
-    passManager.addPass(GlobalDCEPass());
+    // Удаление глобального dead code и удаление лишних аргументов в функции
+    modulePassManager.addPass(GlobalDCEPass());
+    modulePassManager.addPass(DeadArgumentEliminationPass());
 
-    //passManager.addPass(DeadArgumentEliminationPass());
-
-    // Применяем оптимизации
-    passManager.run(*module, analysisManager);
+    modulePassManager.run(*module, mam);
 }
 
 int main() {
-    logger.info("Hello, World!");
     const std::string input = readFile("test.typlyp");
 
     auto AST = build_ast(input);
@@ -725,11 +702,10 @@ int main() {
     }
     logger.info("module verification successful.");
 
-    // Сохранение IR в файл
     std::error_code EC;
-    raw_fd_ostream outFile("output.ll", EC, llvm::sys::fs::OF_None);
+    raw_fd_ostream outFile("output.ll", EC, sys::fs::OF_None);
     if (EC) {
-        //logger.error("Could not open output file: ", EC.message());
+        logger.error("Could not open output file: ", EC.message());
         return 1;
     }
 
@@ -737,12 +713,11 @@ int main() {
     outFile.close();
     logger.info("LLVM IR written to output.ll");
 
-    // Добавление оптимизаций
-    module->print(llvm::outs(), nullptr);
+    // Оптимизации
+    //module->print(outs(), nullptr);
     optimize();
-    module->print(llvm::errs(), nullptr);
+    //module->print(errs(), nullptr);
 
-    // JIT-исполнение
     InitializeNativeTarget();
     InitializeNativeTargetAsmPrinter();
     InitializeNativeTargetAsmParser();
@@ -751,8 +726,6 @@ int main() {
 
     auto jit = std::move(jitOrError);
 
-    // 4. Добавление модуля в JIT
-
     orc::ThreadSafeModule tsm(std::move(module), std::move(context));
 
     if (auto err = jit->addIRModule(std::move(tsm))) {
@@ -760,19 +733,16 @@ int main() {
         return 1;
     }
 
-
-    // 5. Найти функцию, которую вы хотите выполнить
     auto symbolOrError = jit->lookup("main");
     if (!symbolOrError) {
         errs() << "Failed to find symbol '" << "main" << "': " << toString(symbolOrError.takeError()) << "\n";
         return 1;
     }
 
-    // 6. Получить адрес функции и вызвать её
     const auto functionPointer = symbolOrError->getValue();
     const auto function = reinterpret_cast<int (*)()>(functionPointer);
 
-    // 7. Выполнить функцию
     function();
+
     return 0;
 }

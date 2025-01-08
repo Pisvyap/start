@@ -1,6 +1,10 @@
-delo factorial(n: chislo, k: chislo): chislo {
+delo factorial(n: chislo): chislo {
+        esli (n == 0) {
+            n = 1;
+        } inache {
+            n = n * factorial(n - 1);
+        }
         vernut n;
 }
-
-pust result: chislo = 1;
+pust result: chislo = factorial(20);
 result -> glaza;
