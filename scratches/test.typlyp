@@ -1,8 +1,8 @@
-pust k: chislo = 1;
+pust k: chislo = 0;
 poka (k < 50) {
- esli (k > 20){
+    esli (k > 20)
+    {
         k -> glaza;
     }
     k = k + 1;
-
 }

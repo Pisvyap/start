@@ -343,6 +343,8 @@ Value* VariableDeclarationNode::Codegen() {
 
     Value* initVal = initializer ? initializer->Codegen() : Constant::getNullValue(varType);
     AllocaInst* alloc = Builder.CreateAlloca(varType, nullptr, name);
+    alloc->setAlignment(Align(16));
+
     Builder.CreateStore(initVal, alloc);
     NamedValues[name] = alloc;
     return alloc;
@@ -399,66 +401,66 @@ Value* PrintStatementNode::Codegen() {
 
     llvm::Type* valueType = value->getType();
 
-    // if (valueType->isIntegerTy(128)) {
-    //
-    //     Value* lowPart = Builder.CreateTrunc(value, llvm::Type::getInt64Ty(*context), "lowPart");
-    //     Value* highPart = Builder.CreateLShr(value, llvm::ConstantInt::get(valueType, 64));
-    //     highPart = Builder.CreateTrunc(highPart, llvm::Type::getInt64Ty(*context), "highPart");
-    //
-    //     Constant* singlePartFormatConst = ConstantDataArray::getString(*context, "%llu\n");
-    //     auto singlePartFormatVar = new GlobalVariable(
-    //         *module,
-    //         singlePartFormatConst->getType(),
-    //         true,
-    //         GlobalValue::PrivateLinkage,
-    //         singlePartFormatConst,
-    //         ".strSinglePart"
-    //     );
-    //
-    //     Constant* dualPartFormatConst = ConstantDataArray::getString(*context, "%llu%llu\n");
-    //     auto* dualPartFormatVar = new GlobalVariable(
-    //         *module,
-    //         dualPartFormatConst->getType(),
-    //         true,
-    //         GlobalValue::PrivateLinkage,
-    //         dualPartFormatConst,
-    //         ".strDualPart"
-    //     );
-    //
-    //     Value* singlePartFormatPtr = Builder.CreateInBoundsGEP(
-    //         singlePartFormatVar->getValueType(),
-    //         singlePartFormatVar,
-    //         { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
-    //           ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
-    //     );
-    //
-    //     Value* dualPartFormatPtr = Builder.CreateInBoundsGEP(
-    //         dualPartFormatVar->getValueType(),
-    //         dualPartFormatVar,
-    //         { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
-    //           ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
-    //     );
-    //
-    //     Value* isHighZero = Builder.CreateICmpEQ(highPart, ConstantInt::get(llvm::Type::getInt64Ty(*context), 0));
-    //
-    //     Function* parentFunction = Builder.GetInsertBlock()->getParent();
-    //     BasicBlock* printLowPartBlock = BasicBlock::Create(*context, "printLowPart", parentFunction);
-    //     BasicBlock* printDualPartBlock = BasicBlock::Create(*context, "printDualPart", parentFunction);
-    //     BasicBlock* afterPrintBlock = BasicBlock::Create(*context, "afterPrint", parentFunction);
-    //
-    //     Builder.CreateCondBr(isHighZero, printLowPartBlock, printDualPartBlock);
-    //
-    //     Builder.SetInsertPoint(printLowPartBlock);
-    //     Builder.CreateCall(printfFunc, { singlePartFormatPtr, lowPart });
-    //     Builder.CreateBr(afterPrintBlock);
-    //
-    //     Builder.SetInsertPoint(printDualPartBlock);
-    //     Builder.CreateCall(printfFunc, { dualPartFormatPtr, highPart, lowPart });
-    //     Builder.CreateBr(afterPrintBlock);
-    //
-    //     Builder.SetInsertPoint(afterPrintBlock);
-    // }
-    if (valueType->isIntegerTy()) {
+    if (valueType->isIntegerTy(128)) {
+
+        Value* lowPart = Builder.CreateTrunc(value, llvm::Type::getInt64Ty(*context), "lowPart");
+        Value* highPart = Builder.CreateLShr(value, llvm::ConstantInt::get(valueType, 64));
+        highPart = Builder.CreateTrunc(highPart, llvm::Type::getInt64Ty(*context), "highPart");
+
+        Constant* singlePartFormatConst = ConstantDataArray::getString(*context, "%llu\n");
+        auto singlePartFormatVar = new GlobalVariable(
+            *module,
+            singlePartFormatConst->getType(),
+            true,
+            GlobalValue::PrivateLinkage,
+            singlePartFormatConst,
+            ".strSinglePart"
+        );
+
+        Constant* dualPartFormatConst = ConstantDataArray::getString(*context, "%llu%llu\n");
+        auto* dualPartFormatVar = new GlobalVariable(
+            *module,
+            dualPartFormatConst->getType(),
+            true,
+            GlobalValue::PrivateLinkage,
+            dualPartFormatConst,
+            ".strDualPart"
+        );
+
+        Value* singlePartFormatPtr = Builder.CreateInBoundsGEP(
+            singlePartFormatVar->getValueType(),
+            singlePartFormatVar,
+            { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+              ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+        );
+
+        Value* dualPartFormatPtr = Builder.CreateInBoundsGEP(
+            dualPartFormatVar->getValueType(),
+            dualPartFormatVar,
+            { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+              ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+        );
+
+        Value* isHighZero = Builder.CreateICmpEQ(highPart, ConstantInt::get(llvm::Type::getInt64Ty(*context), 0));
+
+        Function* parentFunction = Builder.GetInsertBlock()->getParent();
+        BasicBlock* printLowPartBlock = BasicBlock::Create(*context, "printLowPart", parentFunction);
+        BasicBlock* printDualPartBlock = BasicBlock::Create(*context, "printDualPart", parentFunction);
+        BasicBlock* afterPrintBlock = BasicBlock::Create(*context, "afterPrint", parentFunction);
+
+        Builder.CreateCondBr(isHighZero, printLowPartBlock, printDualPartBlock);
+
+        Builder.SetInsertPoint(printLowPartBlock);
+        Builder.CreateCall(printfFunc, { singlePartFormatPtr, lowPart });
+        Builder.CreateBr(afterPrintBlock);
+
+        Builder.SetInsertPoint(printDualPartBlock);
+        Builder.CreateCall(printfFunc, { dualPartFormatPtr, highPart, lowPart });
+        Builder.CreateBr(afterPrintBlock);
+
+        Builder.SetInsertPoint(afterPrintBlock);
+    }
+    else if (valueType->isIntegerTy()) {
         Value* formatStrPtr = nullptr;
 
         Constant* formatStrConst = ConstantDataArray::getString(*context, "%d\n");
