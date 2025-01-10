@@ -144,25 +144,36 @@ llvm::Value* ArrayIndexExpressionNode::Codegen() {
 
 
 Value* NewExpressionNode::Codegen() {
+    // Генерируем код для выражения, которое задает размер массива
     Value* sizeExpr = expression->Codegen();
     llvm::Type* sizeType = llvm::Type::getInt128Ty(*context);
     Value* size128 = Builder.CreateZExtOrTrunc(sizeExpr, sizeType);
 
-    auto* mallocFn = llvm::cast<Function>(
-        module->getOrInsertFunction(
-            "malloc",
-            FunctionType::get(
-                PointerType::getUnqual(llvm::Type::getInt8Ty(*context)),
-                {sizeType},
-                false)
-        ).getCallee()
-    );
+    auto* constantSize = llvm::dyn_cast<ConstantInt>(size128);
+    if (!constantSize) {
+        throw CodegenException("Array size must be a constant value for stack allocation.");
+    }
 
-    Value* allocatedMemory = Builder.CreateCall(mallocFn, {size128});
-    llvm::Type* ptrType = PointerType::getUnqual(llvm::Type::getInt8Ty(*context));
-    Value* castedPtr = Builder.CreateBitCast(allocatedMemory, ptrType);
-    return castedPtr;
+    uint64_t arraySize = constantSize->getZExtValue();
+    llvm::Type* elementType;
+
+    // Определяем тип элемента массива
+    if (type.type == BOOL) {
+        elementType = llvm::Type::getInt1Ty(*context);
+    } else if (type.type == INT) {
+        elementType = llvm::Type::getInt128Ty(*context); // chislo
+    } else {
+        throw CodegenException("Unsupported array type in NewExpressionNode.");
+    }
+
+    llvm::ArrayType* arrayType = llvm::ArrayType::get(elementType, arraySize);
+    AllocaInst* alloc = Builder.CreateAlloca(arrayType, nullptr, "array_alloc");
+    alloc->setAlignment(Align(16));
+
+    return alloc;
 }
+
+
 
 Value* FunctionCallExpressionNode::Codegen() {
     auto it = Functions.find(name);
@@ -326,29 +337,48 @@ Value* ReturnStatementNode::Codegen() {
 
 Value* VariableDeclarationNode::Codegen() {
     llvm::Type* varType;
+
     if (type.type == INT) {
         if (type.is_array) {
-            varType = ArrayType::get(llvm::Type::getInt128Ty(*context), type.array_size);
-        }
-        else
+            varType = PointerType::getUnqual(llvm::Type::getInt128Ty(*context));
+        } else {
             varType = llvm::Type::getInt128Ty(*context);
+        }
     } else if (type.type == BOOL) {
-        if (type.is_array)
-            varType = ArrayType::get(llvm::Type::getInt1Ty(*context), type.array_size);
-        else
+        if (type.is_array) {
+            varType = PointerType::getUnqual(llvm::Type::getInt1Ty(*context));
+        } else {
             varType = llvm::Type::getInt1Ty(*context);
+        }
     } else {
         throw CodegenException("Unknown type: " + to_string(type.type));
     }
 
-    Value* initVal = initializer ? initializer->Codegen() : Constant::getNullValue(varType);
+    Value* initVal = nullptr;
+
+    if (initializer) {
+        initVal = initializer->Codegen();
+
+        // Если это массив, инициализатор уже содержит правильный alloca
+        if (type.is_array && llvm::isa<AllocaInst>(initVal)) {
+            NamedValues[name] = llvm::cast<AllocaInst>(initVal);
+            return initVal;
+        }
+    }
+
+    // Если инициализатор отсутствует, создаем новую alloca
+    if (!initVal) {
+        initVal = Constant::getNullValue(varType);
+    }
+
     AllocaInst* alloc = Builder.CreateAlloca(varType, nullptr, name);
     alloc->setAlignment(Align(16));
-
     Builder.CreateStore(initVal, alloc);
+
     NamedValues[name] = alloc;
     return alloc;
 }
+
 
 Value* WhileStatementNode::Codegen() {
     //Очень надо будет чекать
@@ -711,10 +741,10 @@ int main() {
 
     std::error_code EC;
     raw_fd_ostream outFile("output.ll", EC, sys::fs::OF_None);
-    if (EC) {
-        logger.error("Could not open output file: ", EC.message());
-        return 1;
-    }
+//    if (EC) {
+//        logger.error("Could not open output file: ", EC.message());
+//        return 1;
+//    }
 
     module->print(outFile, nullptr);
     outFile.close();
