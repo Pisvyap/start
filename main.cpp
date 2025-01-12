@@ -175,6 +175,7 @@ Value* NewExpressionNode::Codegen() {
 
 
 
+
 Value* FunctionCallExpressionNode::Codegen() {
     auto it = Functions.find(name);
 
@@ -183,12 +184,28 @@ Value* FunctionCallExpressionNode::Codegen() {
 
     Function* func = it->second;
     std::vector<Value*> argv;
-    for (const auto& arg: arguments) {
+
+    // Итерируемся по аргументам и обрабатываем их
+    for (const auto& arg : arguments) {
         Value* argV = arg->Codegen();
+
+        // Если аргумент имеет тип массива, преобразуем его в указатель на массив
+        if (argV->getType()->isArrayTy()) {
+            // Преобразуем массив в указатель на массив
+            llvm::Type* arrayType = argV->getType();
+            llvm::Value* arrayPtr = Builder.CreateAlloca(arrayType, nullptr, "array_ptr");
+            Builder.CreateStore(argV, arrayPtr);
+
+            // Передаем указатель вместо самого массива
+            argV = arrayPtr;
+        }
+
         argv.push_back(argV);
     }
+
     // TODO void появился, надо переделать
-    Value* res = Builder.CreateCall(func, argv); //Как я понял void у нас нет, поэтому пока так
+    // Вызываем функцию с подготовленными аргументами
+    Value* res = Builder.CreateCall(func, argv);
     return res;
 }
 
