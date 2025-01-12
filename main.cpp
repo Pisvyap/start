@@ -514,6 +514,50 @@ Value* PrintStatementNode::Codegen() {
 
         Builder.SetInsertPoint(afterPrintBlock);
     }
+    else if (valueType->isIntegerTy(1)) {
+        // Создаем строковые константы для "true" и "false"
+        Constant* trueStrConst = ConstantDataArray::getString(*context, "pravda\n");
+        auto trueStrVar = new GlobalVariable(
+            *module,
+            trueStrConst->getType(),
+            true,
+            GlobalValue::PrivateLinkage,
+            trueStrConst,
+            ".strTrue"
+        );
+
+        Constant* falseStrConst = ConstantDataArray::getString(*context, "lozh\n");
+        auto falseStrVar = new GlobalVariable(
+            *module,
+            falseStrConst->getType(),
+            true,
+            GlobalValue::PrivateLinkage,
+            falseStrConst,
+            ".strFalse"
+        );
+
+        // Получаем указатели на строковые данные
+        Value* trueStrPtr = Builder.CreateInBoundsGEP(
+            trueStrVar->getValueType(),
+            trueStrVar,
+            { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+              ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+        );
+
+        Value* falseStrPtr = Builder.CreateInBoundsGEP(
+            falseStrVar->getValueType(),
+            falseStrVar,
+            { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+              ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+        );
+
+        // Условное выражение: если value == 1, выбираем "true", иначе "false"
+        Value* condition = Builder.CreateICmpEQ(value, ConstantInt::get(llvm::Type::getInt1Ty(*context), 1));
+        Value* selectedStr = Builder.CreateSelect(condition, trueStrPtr, falseStrPtr);
+
+        // Вызываем printf для выбранной строки
+        Builder.CreateCall(printfFunc, { selectedStr });
+    }
     else if (valueType->isIntegerTy()) {
         Value* formatStrPtr = nullptr;
 
@@ -736,7 +780,7 @@ void optimize(){
 }
 
 int main() {
-    const std::string input = readFile("test.typlyp");
+    const std::string input = readFile("test2.typlyp");
 
     auto AST = build_ast(input);
 
