@@ -262,9 +262,11 @@ Value* ExpressionStatementNode::Codegen() {
 Value* ForStatementNode::Codegen() {
     // Очень надо будет чекать
     // TODO в этом блоке аллокация - она кидает ошибку т.к. инструкция alloc может быть только в начальной функции, но не в условных блоках
-    BasicBlock* initBB = BasicBlock::Create(*context, "for.init");
-    Builder.CreateBr(initBB);
-    Builder.SetInsertPoint(initBB);
+    // TODO пока что так костыльно работает, если все-таки будет вылетать ошибка из-за этого - переделаем
+    // BasicBlock* initBB = BasicBlock::Create(*context, "for.init");
+    // Builder.CreateBr(initBB);
+    // Builder.SetInsertPoint(initBB);
+
     init->Codegen();
     Function* TheFunction = Builder.GetInsertBlock()->getParent();
     BasicBlock* condBB = BasicBlock::Create(*context, "for.cond", TheFunction);
