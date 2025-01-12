@@ -1,19 +1,23 @@
 pust n: chislo = 100000;
-pust primes: logika<> = new logika<n>;
+pust primes: logika<> = new logika<100000>;
+
+schitaem (pust k: chislo = 0 ; k < n; k = k + 1;){
+    primes[k] = pravda;
+}
 
 primes[0] = lozh;
 primes[1] = lozh;
 
 schitaem (pust p: chislo = 2; p * p <= n; p = p + 1;) {
     esli (primes[p] == pravda) {
-        schitaem (pust i: chislo = p * p; i < n; i = i + p;){
+        p -> glaza;
+        schitaem (pust i: chislo = p; i < n; i = i + p;){
             primes[i] = lozh;
-            i = i + p;
         }
     }
 }
 
-schitaem (pust j: chislo = 0 ; j < limit; j = j + 1;){
+schitaem (pust j: chislo = 0 ; j < n; j = j + 1;){
     esli (primes[j]){
         j -> glaza;
     }
