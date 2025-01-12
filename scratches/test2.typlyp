@@ -1,0 +1,5 @@
+pust logiks: logika<> = new logika<6>;
+logiks[0] = lozh;
+logiks[1] = pravda;
+logiks[0] -> glaza;
+logiks[1] -> glaza;
