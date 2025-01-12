@@ -260,7 +260,8 @@ Value* ExpressionStatementNode::Codegen() {
 }
 
 Value* ForStatementNode::Codegen() {
-    //Очень надо будет чекать
+    // Очень надо будет чекать
+    // TODO в этом блоке аллокация - она кидает ошибку т.к. инструкция alloc может быть только в начальной функции, но не в условных блоках
     BasicBlock* initBB = BasicBlock::Create(*context, "for.init");
     Builder.CreateBr(initBB);
     Builder.SetInsertPoint(initBB);
@@ -272,15 +273,18 @@ Value* ForStatementNode::Codegen() {
     BasicBlock* afterBB = BasicBlock::Create(*context, "for.after", TheFunction);
 
     Builder.CreateBr(condBB);
+    Builder.SetInsertPoint(condBB);
     Value* condVal = condition->Codegen();
     Builder.CreateCondBr(condVal, bodyBB, afterBB);
+
     Builder.SetInsertPoint(bodyBB);
     body->Codegen();
-
     Builder.CreateBr(stepBB);
+
     Builder.SetInsertPoint(stepBB);
     step->Codegen();
     Builder.CreateBr(condBB);
+
     Builder.SetInsertPoint(afterBB);
     return ConstantInt::get(llvm::Type::getInt128Ty(*context), 0);
 }
@@ -370,7 +374,8 @@ Value* VariableDeclarationNode::Codegen() {
     if (!initVal) {
         initVal = Constant::getNullValue(varType);
     }
-
+    // TODO Делаем аллокацию без првоерки ее места(можно только в начале функции).
+    // TODO Сделать переключение на начало функции -> аллоцировать память -> вернуться к блоку с которым работали
     AllocaInst* alloc = Builder.CreateAlloca(varType, nullptr, name);
     alloc->setAlignment(Align(16));
     Builder.CreateStore(initVal, alloc);
@@ -734,6 +739,7 @@ int main() {
     Builder.CreateRetVoid();
 
     if (verifyModule(*module, &errs())) {
+        module->print(llvm::outs(), nullptr);
         logger.error("Error. Module verification failed.");
         return 1;
     }
