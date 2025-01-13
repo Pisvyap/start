@@ -173,9 +173,6 @@ Value* NewExpressionNode::Codegen() {
     return alloc;
 }
 
-
-
-
 Value* FunctionCallExpressionNode::Codegen() {
     auto it = Functions.find(name);
 
@@ -646,15 +643,43 @@ Value* FunctionNode::Codegen() {
     BasicBlock* entryBlock = BasicBlock::Create(*context, "entry", function);
     Builder.SetInsertPoint(entryBlock);
 
-    // Устанавливаем имена параметров и добавляем их в таблицу переменных
     auto paramIt = function->arg_begin();
     for (const auto& param : parameters) {
         Argument& llvmArg = *paramIt++;
         llvmArg.setName(param->name);
         IRBuilder<> tempBuilder(&function->getEntryBlock(), function->getEntryBlock().begin());
-        AllocaInst* alloca = tempBuilder.CreateAlloca(llvmArg.getType(), nullptr, param->name);
-        Builder.CreateStore(&llvmArg, alloca);
-        NamedValues[param->name] = alloca;
+
+        // Если параметр является массивом, создаем `alloca` для массива
+        if (param->type.is_array) {
+            llvm::Type* elementType = nullptr;
+            if (param->type.type == INT) {
+                elementType = llvm::Type::getInt128Ty(*context);
+            } else if (param->type.type == BOOL) {
+                elementType = llvm::Type::getInt1Ty(*context);
+            }
+            // todo Тут короче неправильно аллоцируется и копируется локально память т.к. в функции в поле param->type.array_size всегда будет ноль
+            // todo Все-таки исправить на распаковку ссылки, а не копирование массива
+            // Создаем alloca под массив
+            AllocaInst* allocaArray = tempBuilder.CreateAlloca(
+                ArrayType::get(elementType, param->type.array_size),
+                nullptr,
+                param->name);
+
+            // Копируем данные из переданного указателя в выделенную память
+            Value* castedPtr = Builder.CreateBitCast(&llvmArg, allocaArray->getType()->getPointerTo());
+            Builder.CreateMemCpy(
+                allocaArray, Align(16),
+                castedPtr, Align(16),
+                llvm::ConstantInt::get(llvm::Type::getInt128Ty(*context), param->type.array_size * elementType->getPrimitiveSizeInBits())
+            );
+
+            NamedValues[param->name] = allocaArray;
+        } else {
+            // Если не массив, то просто создаем alloca
+            AllocaInst* alloca = tempBuilder.CreateAlloca(llvmArg.getType(), nullptr, param->name);
+            Builder.CreateStore(&llvmArg, alloca);
+            NamedValues[param->name] = alloca;
+        }
     }
 
     // Генерируем код для тела функции
@@ -796,7 +821,7 @@ int main() {
         AST->Codegen();
     } catch (const CodegenException& e) {
         logger.error(e.what());
-        module->print(llvm::outs(), nullptr);
+        module->print(outs(), nullptr);
         return 1;
     }
 
