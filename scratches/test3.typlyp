@@ -1,8 +1,16 @@
-pust n: chislo = 100;
-pust primes: logika<> = new logika<100>;
-schitaem (pust k: chislo = 0 ; k < n; k = k + 1;){
-    primes[k] = pravda;
-    primes[k] -> glaza;
+delo quickSort(arr: chislo<>, left: chislo, right: chislo): chislo {
+    pust c:chislo = arr[left];
+    vernut c;
 }
-// Вот тут еще одна бага, из-за нее кстати эратосфера ломается
-// Внутри фора массивы по индексу выдают шизочисла
+
+pust numbers: chislo<> = new chislo<6>;
+numbers[0] = 3;
+numbers[1] = 2;
+numbers[2] = 1;
+numbers[3] = 8;
+numbers[4] = 6;
+numbers[5] = 10;
+pust b:chislo = quickSort(numbers, 0, 5);
+numbers[0]->glaza;
+b -> glaza;
+// А так с обращением к массиву внутри функции уже нет

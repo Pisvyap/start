@@ -103,10 +103,7 @@ Value* IdentifierNode::Codegen() {
                 name.c_str());
     } else if (Arrays.find(name) != Arrays.end()) {
         auto it = Arrays.find(name);
-        return Builder.CreateLoad(
-                it->second->getType(),
-                it->second,
-                name.c_str());
+        return it->second;
     } else {
         throw CodegenException("Identifier not found: " + name);
     }
@@ -193,12 +190,10 @@ Value* NewExpressionNode::Codegen() {
     ArrayType* arrayType = ArrayType::get(elementType, arraySize);
 
     // Создаем память под массив
-    llvm::Type* arrayPointerType = PointerType::get(arrayType, 0);
-    Value* arrayAlloc = Builder.CreateAlloca(arrayType, nullptr, "array_alloc");
+    AllocaInst* arrayAlloc = Builder.CreateAlloca(arrayType, nullptr, "array_alloc");
+    arrayAlloc->setAlignment(Align(16));
 
-    Value* castedAlloc = Builder.CreatePointerCast(arrayAlloc, arrayPointerType, "array_cast");
-
-    return castedAlloc; // Возвращаем указатель на массив
+    return arrayAlloc; // Возвращаем указатель на массив
 }
 
 Value* FunctionCallExpressionNode::Codegen() {
@@ -214,17 +209,6 @@ Value* FunctionCallExpressionNode::Codegen() {
     // todo тут что-то странное, кажется может быть ошибка из-за этого
     for (const auto& arg : arguments) {
         Value* argV = arg->Codegen();
-
-        // Если аргумент имеет тип массива, преобразуем его в указатель на массив
-        if (argV->getType()->isArrayTy()) {
-            // Преобразуем массив в указатель на массив
-            llvm::Type* arrayType = argV->getType();
-            llvm::Value* arrayPtr = Builder.CreateAlloca(arrayType, nullptr, "array_ptr");
-            Builder.CreateStore(argV, arrayPtr);
-
-            // Передаем указатель вместо самого массива
-            argV = arrayPtr;
-        }
 
         argv.push_back(argV);
     }
@@ -420,6 +404,7 @@ Value* VariableDeclarationNode::Codegen() {
             Arrays[name] = initVal;
             return initVal;
         }
+        // todo при инициализации массива забить его нулями?
     }
 
     // Если инициализатор отсутствует
@@ -438,7 +423,8 @@ Value* VariableDeclarationNode::Codegen() {
             throw CodegenException("Failed to deduce array type for allocation");
         }
 
-        Value* arrayAlloc = Builder.CreateAlloca(arrayType, nullptr, name);
+        AllocaInst* arrayAlloc = Builder.CreateAlloca(arrayType, nullptr, name);
+        arrayAlloc->setAlignment(Align(16));
         Arrays[name] = Builder.CreatePointerCast(arrayAlloc, PointerType::get(arrayType, 0), name + "_ptr");
         return Arrays[name];
     } else {
@@ -661,9 +647,9 @@ Value* FunctionNode::Codegen() {
     for (const auto& param : parameters) {
         llvm::Type* paramType = nullptr;
         if (param->type.is_array && param->type.type == INT) {
-            paramType = PointerType::get(llvm::Type::getInt128Ty(*context), 0);
+            paramType = PointerType::get(ArrayType::getInt128Ty(*context), 0);
         } else if (param->type.is_array && param->type.type == BOOL) {
-            paramType = PointerType::get(llvm::Type::getInt1Ty(*context), 0);
+            paramType = PointerType::get(ArrayType::getInt1Ty(*context), 0);
         } else if (param->type.type == INT)
             paramType = llvm::Type::getInt128Ty(*context);
         else if (param->type.type == BOOL) {
@@ -717,6 +703,7 @@ Value* FunctionNode::Codegen() {
         } else {
             // Если не массив, то просто создаем alloca
             AllocaInst* alloca = tempBuilder.CreateAlloca(llvmArg.getType(), nullptr, param->name);
+            alloca->setAlignment(Align(16));
             Builder.CreateStore(&llvmArg, alloca);
             NamedValues[param->name] = alloca;
         }
