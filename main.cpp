@@ -118,8 +118,10 @@ Value* ArrayIndexExpressionNode::Codegen() {
     if (!arrayValue)
         throw CodegenException("Array '" + name + "' was not declared");
 
-    // Проверка, является ли `arrayValue` указателем на массив
-    auto* arrayPointerType = llvm::dyn_cast<PointerType>(arrayValue->getType());
+    // Вытаскиваю аллокацию и ищу тип элемента массива и его размер
+    auto* alloca = dyn_cast<AllocaInst>(arrayValue);
+    auto arraySize = alloca->getAllocatedType()->getArrayNumElements();
+    auto arrayElementType = alloca->getAllocatedType()->getArrayElementType();
 
     // Генерация кода для индекса
     Value* indexValue = index->Codegen();
@@ -134,22 +136,15 @@ Value* ArrayIndexExpressionNode::Codegen() {
 
     // Получение типа элемента массива
     ArrayType *arrayType = nullptr;
-    // todo вытащить из указателя размер массива, как только это зарабоатет, то заработает ок
 
-    if (type.type == INT) {
-        logger.info("INT");
-        arrayType = ArrayType::get(llvm::Type::getInt128Ty(*context), 100);
+    if (arrayElementType == Builder.getInt128Ty()) {
+        arrayType = ArrayType::get(llvm::Type::getInt128Ty(*context), arraySize);
     }
-    else if (type.type == BOOL) {
-        logger.info("BOOL");
-        arrayType = ArrayType::get(llvm::Type::getInt1Ty(*context), 100);
+    else if (arrayElementType == Builder.getInt1Ty()) {
+        arrayType = ArrayType::get(llvm::Type::getInt1Ty(*context), arraySize);
     }
     else
         throw CodegenException("Array type is not availiable");
-
-    if (!arrayType) {
-        throw CodegenException("Array '" + name + "' was not declared");
-    }
 
     llvm::Type* elementType = arrayType->getElementType();
 
