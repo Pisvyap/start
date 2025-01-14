@@ -135,11 +135,14 @@ Value* ArrayIndexExpressionNode::Codegen() {
     // Получение типа элемента массива
     ArrayType *arrayType = nullptr;
     // todo вытащить из указателя размер массива, как только это зарабоатет, то заработает ок
+
     if (type.type == INT) {
-        arrayType = ArrayType::get(llvm::Type::getInt128Ty(*context), 6);
+        logger.info("INT");
+        arrayType = ArrayType::get(llvm::Type::getInt128Ty(*context), 100);
     }
     else if (type.type == BOOL) {
-        arrayType = ArrayType::get(llvm::Type::getInt1Ty(*context), 6);
+        logger.info("BOOL");
+        arrayType = ArrayType::get(llvm::Type::getInt1Ty(*context), 100);
     }
     else
         throw CodegenException("Array type is not availiable");
@@ -152,10 +155,10 @@ Value* ArrayIndexExpressionNode::Codegen() {
 
     // Получение указателя на элемент массива
     Value* elementPtr = Builder.CreateGEP(
-        arrayType,                      // Тип массива
-        arrayValue,                     // Указатель на массив
-        {Builder.getInt32(0), indexValue}, // Индекс
-        name + "_element_ptr"           // Имя (опционально)
+            elementType,                     // Тип элемента
+            arrayValue,                      // Указатель на массив
+            indexValue,                      // Индекс
+            name + "_element_ptr"            // Имя (опционально)
     );
 
     // Загрузка значения элемента массива
