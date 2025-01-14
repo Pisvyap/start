@@ -1,6 +1,8 @@
-pust logiks: logika<> = new logika<6>;
-logiks[0] = lozh;
-logiks[1] = pravda;
-logiks[1] -> glaza;
-logiks[1] -> glaza;
-logiks[1] -> glaza;
+pust n: chislo = 100;
+pust primes: logika<> = new logika<100>;
+schitaem (pust k: chislo = 0 ; k < n; k = k + 1;){
+    primes[k] = pravda;
+    primes[k] -> glaza;
+}
+// Вот тут еще одна бага, из-за нее кстати эратосфера ломается
+// Внутри фора массивы по индексу выдают шизочисла

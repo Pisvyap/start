@@ -1,10 +1,8 @@
-delo factorial(n: chislo): chislo {
-        esli (n == 0) {
-            n = 1;
-        } inache {
-            n = n * factorial(n - 1);
-        }
-        vernut n;
+pust n: chislo = 100;
+pust primes: logika<> = new logika<100>;
+schitaem (pust k: chislo = 0; k < n; k = k + 1;){
+    primes[k] = pravda;
+    primes[k] -> glaza;
 }
-pust result: chislo = factorial(20);
-result -> glaza;
+
+

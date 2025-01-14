@@ -1,14 +1,12 @@
-pust logiks: logika<> = new logika<6>;
-logiks[0] = lozh;
-logiks[1] = pravda;
-logiks[0] -> glaza;
-logiks[1] -> glaza;
-
 delo func(arr: chislo<>): chislo {
-    arr[0] = 1;
     vernut 1;
 }
 pust numbers: chislo<> = new chislo<6>;
 numbers[0] = 1;
+numbers[0] = 2;
+numbers[0] -> glaza;
+pust chislo22: chislo = numbers[0] + 2;
+chislo22 -> glaza;
 pust element1: chislo = func(numbers);
 pust element2: chislo = func(new chislo<4>);
+
