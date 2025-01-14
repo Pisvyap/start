@@ -5,6 +5,7 @@ class ArrayIndexExpressionNode : public ExpressionNode {
 public:
     std::string name;
     Ptr<ExpressionNode> index;
+    Type array_type;
     void print(const int indent) override {
         std::cout << name << '['; index->print(indent); std::cout << ']';
     }
@@ -14,6 +15,8 @@ public:
         Symbol* arr = table.lookup(name);
         if (arr == nullptr || arr->isFunction || !arr->type.is_array)
             throw std::runtime_error("Array '" + name + "' was not declared");
+
+        this->array_type = arr->type;
 
         // Проверка правильности индекса
         index->semantic_check(table);
