@@ -115,11 +115,6 @@ Value* ArrayIndexExpressionNode::Codegen() {
     if (!arrayValue)
         throw CodegenException("Array '" + name + "' was not declared");
 
-    // Вытаскиваю аллокацию и ищу тип элемента массива и его размер
-    auto* alloca = dyn_cast<AllocaInst>(arrayValue);
-    auto arraySize = alloca->getAllocatedType()->getArrayNumElements();
-    auto arrayElementType = alloca->getAllocatedType()->getArrayElementType();
-
     // Генерация кода для индекса
     Value* indexValue = index->Codegen();
     if (!indexValue->getType()->isIntegerTy())
@@ -131,19 +126,18 @@ Value* ArrayIndexExpressionNode::Codegen() {
         indexValue = Builder.CreateIntCast(indexValue, indexType, true, "indexCast");
     }
 
-    // Получение типа элемента массива
-    ArrayType *arrayType = nullptr;
-
-    if (arrayElementType == Builder.getInt128Ty()) {
-        arrayType = ArrayType::get(llvm::Type::getInt128Ty(*context), arraySize);
+    // Получаем тип элемента массива
+    auto* arrayPointerType = llvm::dyn_cast<PointerType>(arrayValue->getType());
+    if (!arrayPointerType)
+        throw CodegenException("Variable '" + name + "' is not a pointer");
+    llvm::Type* elementType = nullptr;
+    if (type.type == BOOL) {
+        elementType = llvm::Type::getInt1Ty(*context);
+    } else if (type.type == INT) {
+        elementType = llvm::Type::getInt128Ty(*context);
+    } else {
+        throw CodegenException("Unsupported array type in NewExpressionNode.");
     }
-    else if (arrayElementType == Builder.getInt1Ty()) {
-        arrayType = ArrayType::get(llvm::Type::getInt1Ty(*context), arraySize);
-    }
-    else
-        throw CodegenException("Array type is not availiable");
-
-    llvm::Type* elementType = arrayType->getElementType();
 
     // Получение указателя на элемент массива
     Value* elementPtr = Builder.CreateGEP(
