@@ -25,8 +25,10 @@ using namespace llvm;
 constexpr Logger logger;
 auto context = std::make_unique<LLVMContext>();
 auto module = std::make_unique<Module>("MyModule", *context); // LLVM-конструкция, содержит все функции/глобалы в куске кода
+DataLayout dataLayout = module->getDataLayout();
 IRBuilder Builder(*context);                          // вспомогательный объект, помогает генерировать инструкции LLVM
 std::map<std::string, AllocaInst*> NamedValues;         // таблица символов
+std::map<std::string, Value*> Arrays;
 std::map<std::string, Function*> Functions;
 
 // Ноды EXPRESSIONS
@@ -93,6 +95,7 @@ Value* UnaryOperationNode::Codegen() {
 }
 
 Value* IdentifierNode::Codegen() {
+    // todo перестало работать при разделении на два списка аргументов
     auto it = NamedValues.find(name);
     if (it == NamedValues.end())
         throw CodegenException("Identifier not found: " + name);
@@ -103,45 +106,61 @@ Value* IdentifierNode::Codegen() {
         name.c_str());
 }
 
-llvm::Value* ArrayIndexExpressionNode::Codegen() {
+Value* ArrayIndexExpressionNode::Codegen() {
     // Проверяем, существует ли массив с таким именем
-    AllocaInst* arrayAlloc = NamedValues[name];
-    if (!arrayAlloc)
+    Value* arrayValue = Arrays[name];
+    if (!arrayValue)
         throw CodegenException("Array '" + name + "' was not declared");
 
+    // Проверка, является ли `arrayValue` указателем на массив
+    auto* arrayPointerType = llvm::dyn_cast<PointerType>(arrayValue->getType());
+
     // Генерация кода для индекса
-    llvm::Value* indexValue = index->Codegen();
+    Value* indexValue = index->Codegen();
     if (!indexValue->getType()->isIntegerTy())
         throw CodegenException("Array index must be of integer type");
 
-    // Приведение индекса к `i32`, если он не соответствует
-    llvm::Type* indexType = llvm::Type::getInt32Ty(*context);
+    // Приведение индекса к `i128`, если он не соответствует
+    llvm::Type* indexType = llvm::Type::getInt128Ty(*context);
     if (indexValue->getType() != indexType) {
         indexValue = Builder.CreateIntCast(indexValue, indexType, true, "indexCast");
     }
 
+    // Получение типа элемента массива
+    ArrayType *arrayType = nullptr;
+    // todo вытащить из указателя размер массива, как только это зарабоатет, то заработает ок
+    if (type.type == INT) {
+        arrayType = ArrayType::get(llvm::Type::getInt128Ty(*context), 6);
+    }
+    else if (type.type == BOOL) {
+        arrayType = ArrayType::get(llvm::Type::getInt1Ty(*context), 6);
+    }
+    else
+        throw CodegenException("Array type is not availiable");
+
+    if (!arrayType) {
+        throw CodegenException("Array '" + name + "' was not declared");
+    }
+
+    llvm::Type* elementType = arrayType->getElementType();
+
     // Получение указателя на элемент массива
-    llvm::Value* elementPtr = Builder.CreateGEP(
-            arrayAlloc->getAllocatedType(), // Тип массива
-            arrayAlloc,                     // Указатель на массив
-            {Builder.getInt32(0), indexValue}, // Индекс
-            name + "_element_ptr"           // Имя (опционально)
+    Value* elementPtr = Builder.CreateGEP(
+        arrayType,                      // Тип массива
+        arrayValue,                     // Указатель на массив
+        {Builder.getInt32(0), indexValue}, // Индекс
+        name + "_element_ptr"           // Имя (опционально)
     );
 
-    // Получение типа элемента массива
-    llvm::Type* elementType = arrayAlloc->getAllocatedType()->getArrayElementType();
-
     // Загрузка значения элемента массива
-    llvm::Value* elementValue = Builder.CreateLoad(
-            elementType, // Тип элемента массива
-            elementPtr,  // Указатель
-            name + "_element_value" // Имя для отладочной информации
+    Value* elementValue = Builder.CreateLoad(
+        elementType,      // Тип элемента массива
+        elementPtr,       // Указатель
+        name + "_element_value" // Имя для отладочной информации
     );
 
     return elementValue; // Возвращаем значение элемента
 }
-
-
 
 Value* NewExpressionNode::Codegen() {
     // Генерируем код для выражения, которое задает размер массива
@@ -166,11 +185,16 @@ Value* NewExpressionNode::Codegen() {
         throw CodegenException("Unsupported array type in NewExpressionNode.");
     }
 
-    llvm::ArrayType* arrayType = llvm::ArrayType::get(elementType, arraySize);
-    AllocaInst* alloc = Builder.CreateAlloca(arrayType, nullptr, "array_alloc");
-    alloc->setAlignment(Align(16));
+    // Создаем тип массива
+    ArrayType* arrayType = ArrayType::get(elementType, arraySize);
 
-    return alloc;
+    // Создаем память под массив
+    llvm::Type* arrayPointerType = PointerType::get(arrayType, 0);
+    Value* arrayAlloc = Builder.CreateAlloca(arrayType, nullptr, "array_alloc");
+
+    Value* castedAlloc = Builder.CreatePointerCast(arrayAlloc, arrayPointerType, "array_cast");
+
+    return castedAlloc; // Возвращаем указатель на массив
 }
 
 Value* FunctionCallExpressionNode::Codegen() {
@@ -207,39 +231,41 @@ Value* FunctionCallExpressionNode::Codegen() {
 }
 
 // Ноды STATEMENTS
-llvm::Value* ArrayAssigmentNode::Codegen() {
+Value* ArrayAssigmentNode::Codegen() {
     // Проверяем, существует ли массив с таким именем
-    AllocaInst* arrayAlloc = NamedValues[name];
-    if (!arrayAlloc)
+    Value* arrayValue = Arrays[name];
+    if (!arrayValue)
         throw CodegenException("Array '" + name + "' was not declared");
 
+    // Проверка, является ли `arrayValue` указателем
+    auto* arrayPointerType = llvm::dyn_cast<PointerType>(arrayValue->getType());
+    if (!arrayPointerType)
+        throw CodegenException("Variable '" + name + "' is not a pointer");
+
+    // Генерация кода для значения, которое будет записано
+    Value* valueToStore = value->Codegen();
+
+    // Получение типа элемента массива
+    llvm::Type* elementType = valueToStore->getType();
+
     // Генерация кода для вычисления индекса
-    llvm::Value* indexValue = index->Codegen();
+    Value* indexValue = index->Codegen();
     if (!indexValue->getType()->isIntegerTy())
         throw CodegenException("Array index must be of integer type");
 
-    // Приведение индекса к необходимому типу, если требуется
-    llvm::Type* indexType = llvm::Type::getInt32Ty(*context);
+    // Приведение индекса к `i128`, если он не соответствует
+    llvm::Type* indexType = llvm::Type::getInt128Ty(*context);
     if (indexValue->getType() != indexType) {
         indexValue = Builder.CreateIntCast(indexValue, indexType, true, "indexCast");
     }
 
     // Получение указателя на элемент массива
-    llvm::Value* elementPtr = Builder.CreateGEP(
-            arrayAlloc->getAllocatedType(), // Тип массива
-            arrayAlloc,                     // Указатель на массив
-            {Builder.getInt32(0), indexValue}, // Индекс
-            name + "_element_ptr"           // Имя (опционально)
+    Value* elementPtr = Builder.CreateGEP(
+        elementType,                     // Тип элемента
+        arrayValue,                      // Указатель на массив
+        indexValue,                      // Индекс
+        name + "_element_ptr"            // Имя (опционально)
     );
-
-    // Генерация кода для значения, которое будет записано
-    llvm::Value* valueToStore = value->Codegen();
-
-    // Проверка типа: должны быть совместимы типы элемента массива и значения
-    llvm::Type* elementType = arrayAlloc->getAllocatedType()->getArrayElementType();
-    if (valueToStore->getType() != elementType) {
-        throw CodegenException("Type mismatch: cannot assign value to array element");
-    }
 
     // Создаем инструкцию записи (store)
     Builder.CreateStore(valueToStore, elementPtr);
@@ -379,25 +405,40 @@ Value* VariableDeclarationNode::Codegen() {
     if (initializer) {
         initVal = initializer->Codegen();
 
-        // Если это массив, инициализатор уже содержит правильный alloca
-        if (type.is_array && llvm::isa<AllocaInst>(initVal)) {
-            NamedValues[name] = llvm::cast<AllocaInst>(initVal);
+        // Если это массив, инициализатор уже содержит правильный указатель
+        if (type.is_array && initVal->getType()->isPointerTy()) {
+            Arrays[name] = initVal;
             return initVal;
         }
     }
 
-    // Если инициализатор отсутствует, создаем новую alloca
+    // Если инициализатор отсутствует
     if (!initVal) {
-        initVal = Constant::getNullValue(varType);
+        if (type.is_array) {
+            throw CodegenException("Array must be explicitly initialized");
+        } else {
+            initVal = Constant::getNullValue(varType);
+        }
     }
-    // TODO Делаем аллокацию без првоерки ее места(можно только в начале функции).
-    // TODO Сделать переключение на начало функции -> аллоцировать память -> вернуться к блоку с которым работали
-    AllocaInst* alloc = Builder.CreateAlloca(varType, nullptr, name);
-    alloc->setAlignment(Align(16));
-    Builder.CreateStore(initVal, alloc);
 
-    NamedValues[name] = alloc;
-    return alloc;
+    if (type.is_array) {
+        // Для массива создаем новую память с указанием размера
+        auto* arrayType = llvm::dyn_cast<ArrayType>(varType->getArrayElementType());
+        if (!arrayType) {
+            throw CodegenException("Failed to deduce array type for allocation");
+        }
+
+        Value* arrayAlloc = Builder.CreateAlloca(arrayType, nullptr, name);
+        Arrays[name] = Builder.CreatePointerCast(arrayAlloc, PointerType::get(arrayType, 0), name + "_ptr");
+        return Arrays[name];
+    } else {
+        // Для обычной переменной создаем alloca
+        AllocaInst* alloc = Builder.CreateAlloca(varType, nullptr, name);
+        alloc->setAlignment(Align(16));
+        Builder.CreateStore(initVal, alloc);
+        Arrays[name] = alloc;
+        return alloc;
+    }
 }
 
 
@@ -637,12 +678,12 @@ Value* FunctionNode::Codegen() {
     Functions[name] = function;
 
     // Сохраняем текущую точку вставки
-    llvm::BasicBlock* originalInsertBlock = Builder.GetInsertBlock();
+    BasicBlock* originalInsertBlock = Builder.GetInsertBlock();
 
     // Переходим в тело функции
     BasicBlock* entryBlock = BasicBlock::Create(*context, "entry", function);
     Builder.SetInsertPoint(entryBlock);
-
+// todo чек работает ли с массивами
     auto paramIt = function->arg_begin();
     for (const auto& param : parameters) {
         Argument& llvmArg = *paramIt++;
@@ -657,23 +698,12 @@ Value* FunctionNode::Codegen() {
             } else if (param->type.type == BOOL) {
                 elementType = llvm::Type::getInt1Ty(*context);
             }
-            // todo Тут короче неправильно аллоцируется и копируется локально память т.к. в функции в поле param->type.array_size всегда будет ноль
-            // todo Все-таки исправить на распаковку ссылки, а не копирование массива
-            // Создаем alloca под массив
-            AllocaInst* allocaArray = tempBuilder.CreateAlloca(
-                ArrayType::get(elementType, param->type.array_size),
-                nullptr,
-                param->name);
+            // Создаем указатель на элемент массива (работаем с массивом как с указателем)
+            llvm::Type* pointerType = PointerType::get(elementType, 0);
+            Value* castedPtr = Builder.CreateBitCast(&llvmArg, pointerType, param->name + "_ptr");
 
-            // Копируем данные из переданного указателя в выделенную память
-            Value* castedPtr = Builder.CreateBitCast(&llvmArg, allocaArray->getType()->getPointerTo());
-            Builder.CreateMemCpy(
-                allocaArray, Align(16),
-                castedPtr, Align(16),
-                llvm::ConstantInt::get(llvm::Type::getInt128Ty(*context), param->type.array_size * elementType->getPrimitiveSizeInBits())
-            );
-
-            NamedValues[param->name] = allocaArray;
+            // Сохраняем указатель на массив в Arrays
+            Arrays[param->name] = castedPtr;
         } else {
             // Если не массив, то просто создаем alloca
             AllocaInst* alloca = tempBuilder.CreateAlloca(llvmArg.getType(), nullptr, param->name);
@@ -698,7 +728,7 @@ Value* FunctionNode::Codegen() {
     }
 
     // Проверяем корректность функции
-    if (verifyFunction(*function, &llvm::errs())) {
+    if (verifyFunction(*function, &errs())) {
         throw CodegenException("Error: Function " + name + " contains errors!");
     }
 
@@ -709,14 +739,16 @@ Value* FunctionNode::Codegen() {
 }
 
 Value* ParameterNode::Codegen() {
-    Value* paramValue = NamedValues[name];
+    Value* paramValue = nullptr;
     if (type.is_array) {
+        paramValue = Arrays[name];
         if (type.array_size <= 0)
             throw CodegenException("Error: array " + name + " has invalid size: " + to_string(type.array_size));
 
         return paramValue;
     }
 
+    paramValue = NamedValues[name];
     if (type.type == INT or type.type == BOOL) {
         return paramValue;
     }
