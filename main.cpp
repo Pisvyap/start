@@ -95,15 +95,21 @@ Value* UnaryOperationNode::Codegen() {
 }
 
 Value* IdentifierNode::Codegen() {
-    // todo перестало работать при разделении на два списка аргументов
-    auto it = NamedValues.find(name);
-    if (it == NamedValues.end())
+    if (NamedValues.find(name) != NamedValues.end()) {
+        auto it = NamedValues.find(name);
+        return Builder.CreateLoad(
+                it->second->getAllocatedType(),
+                it->second,
+                name.c_str());
+    } else if (Arrays.find(name) != Arrays.end()) {
+        auto it = Arrays.find(name);
+        return Builder.CreateLoad(
+                it->second->getType(),
+                it->second,
+                name.c_str());
+    } else {
         throw CodegenException("Identifier not found: " + name);
-
-    return Builder.CreateLoad(
-        it->second->getAllocatedType(),
-        it->second,
-        name.c_str());
+    }
 }
 
 Value* ArrayIndexExpressionNode::Codegen() {
@@ -275,14 +281,19 @@ Value* ArrayAssigmentNode::Codegen() {
 
 Value* AssigmentStatementNode::Codegen() {
     Value* valPtr = value->Codegen();
-
-    auto it = NamedValues.find(name);
-    if (it == NamedValues.end())
+    if (NamedValues.find(name) != NamedValues.end()) {
+        auto it = NamedValues.find(name);
+        Value* varPtr = it->second;
+        Builder.CreateStore(valPtr, varPtr);
+        return nullptr;
+    } else if (Arrays.find(name) != Arrays.end()) {
+        auto it = Arrays.find(name);
+        Value* varPtr = it->second;
+        Builder.CreateStore(valPtr, varPtr);
+        return nullptr;
+    } else {
         throw CodegenException("Variable not found: " + name);
-
-    Value* varPtr = it->second;
-    Builder.CreateStore(valPtr, varPtr);
-    return nullptr;
+    }
 }
 
 Value* ExpressionStatementNode::Codegen() {
@@ -436,7 +447,7 @@ Value* VariableDeclarationNode::Codegen() {
         AllocaInst* alloc = Builder.CreateAlloca(varType, nullptr, name);
         alloc->setAlignment(Align(16));
         Builder.CreateStore(initVal, alloc);
-        Arrays[name] = alloc;
+        NamedValues[name] = alloc;
         return alloc;
     }
 }

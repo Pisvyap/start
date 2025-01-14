@@ -1,7 +1,10 @@
-delo func(arr: chislo<>, left: chislo): chislo {
-    arr[0] = 1;
-    vernut 1;
+delo factorial(n: chislo): chislo {
+        esli (n == 0) {
+            n = 1;
+        } inache {
+            n = n * factorial(n - 1);
+        }
+        vernut n;
 }
-pust numbers: chislo<> = new chislo<6>;
-numbers[0] = 1;
-pust element: chislo = 1;
+pust result: chislo = factorial(20);
+result -> glaza;
