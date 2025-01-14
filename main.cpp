@@ -211,6 +211,7 @@ Value* FunctionCallExpressionNode::Codegen() {
     std::vector<Value*> argv;
 
     // Итерируемся по аргументам и обрабатываем их
+    // todo тут что-то странное, кажется может быть ошибка из-за этого
     for (const auto& arg : arguments) {
         Value* argV = arg->Codegen();
 
