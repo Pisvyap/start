@@ -1,6 +1,36 @@
+delo partition(arr: chislo<>, left: chislo, right: chislo, pivot: chislo): chislo {
+    poka (left <= right) {
+        poka (arr[left] < pivot) {
+            left = left + 1;
+        }
+
+        poka (arr[right] > pivot) {
+            right = right - 1;
+        }
+
+        esli (left <= right) {
+            pust temp: chislo = arr[left];
+            arr[left] = arr[right];
+            arr[right] = temp;
+
+            left = left + 1;
+            right = right - 1;
+        }
+    }
+
+    vernut left;
+}
+
 delo quickSort(arr: chislo<>, left: chislo, right: chislo): chislo {
-    arr[left] = 1000;
-    vernut 1;
+    esli (left < right) {
+        pust pivot: chislo = arr[(left + right) / 2];
+        pust index: chislo = partition(arr, left, right, pivot);
+
+        quickSort(arr, left, index - 1);
+        quickSort(arr, index, right);
+    }
+
+    vernut 0;
 }
 
 pust numbers: chislo<> = new chislo<6>;
@@ -10,7 +40,8 @@ numbers[2] = 1;
 numbers[3] = 8;
 numbers[4] = 6;
 numbers[5] = 10;
-pust b:chislo = quickSort(numbers, 0, 5);
-numbers[0]->glaza;
-b -> glaza;
-// Так работает
+quickSort(numbers, 0, 6);
+
+schitaem (pust k: chislo = 0 ; k < 6; k = k + 1;){
+    numbers[k] -> glaza;
+}
