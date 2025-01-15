@@ -15,14 +15,14 @@ public:
 
 class Logger {
 public:
-    void log(const std::string& messages...) const {
+    static void log(const std::string& messages...) {
         for (const auto& message : messages) {
             std::cout << message;
         }
         std::cout << std::endl;
     }
 
-    void debug(const std::string& messages...) const {
+    static void debug(const std::string& messages...) {
         std::cout << "[DEBUG] ";
         for (const auto& message : messages) {
             std::cout << message;
@@ -30,7 +30,7 @@ public:
         std::cout << std::endl;
     }
 
-    void info(const std::string& messages...) const {
+    static void info(const std::string& messages...) {
         std::cout << "[INFO] ";
         for (const auto& message : messages) {
             std::cout << message;
@@ -38,7 +38,7 @@ public:
         std::cout << std::endl;
     }
 
-    void error(const std::string& messages...) const {
+    static void error(const std::string& messages...) {
         std::cerr << "[ERROR] ";
         for (const auto& message : messages) {
             std::cerr << message;
@@ -47,16 +47,25 @@ public:
     }
 };
 
-std::string readFile(const std::string& fileName) {
-    const std::string path = "../scratches/" + fileName; //тут у меня путь другой, специально не меняю в общей ветке
+std::string read_args(int argc, char* argv[]) {
+    if (argc < 1 || argc > 2) {
+        Logger::error("Usage: typlyp <input_file>");
+        exit(1);
+    }
 
-    std::ifstream file(path);
+    std::string input_file = argv[1];
+
+    return input_file;
+}
+
+std::string read_file(const std::string& fileName) {
+    std::ifstream file(fileName);
     if (!file.is_open()) {
-        std::cerr << "File " << path << " does not exist" << std::endl;
+        Logger::error("File ", fileName, " could not be opened");
         return std::string();
     }
 
-    std::string contents(std::istreambuf_iterator<char>{file}, {});
+    std::string contents(std::istreambuf_iterator{file}, {});
     file.close();
 
     return contents;

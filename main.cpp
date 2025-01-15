@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include <typlypParser.h>
 #include <llvm/Target/TargetMachine.h>
 
@@ -23,12 +24,12 @@
 
 using namespace llvm;
 
-constexpr Logger logger;
 auto context = std::make_unique<LLVMContext>();
-auto module = std::make_unique<Module>("MyModule", *context); // LLVM-конструкция, содержит все функции/глобалы в куске кода
+auto module = std::make_unique<Module>("MyModule", *context);
+// LLVM-конструкция, содержит все функции/глобалы в куске кода
 DataLayout dataLayout = module->getDataLayout();
-IRBuilder Builder(*context);                          // вспомогательный объект, помогает генерировать инструкции LLVM
-std::map<std::string, AllocaInst*> NamedValues;         // таблица символов
+IRBuilder Builder(*context); // вспомогательный объект, помогает генерировать инструкции LLVM
+std::map<std::string, AllocaInst*> NamedValues; // таблица символов
 std::map<std::string, Value*> Arrays;
 std::map<std::string, Function*> Functions;
 
@@ -99,9 +100,9 @@ Value* IdentifierNode::Codegen() {
     if (NamedValues.find(name) != NamedValues.end()) {
         auto it = NamedValues.find(name);
         return Builder.CreateLoad(
-                it->second->getAllocatedType(),
-                it->second,
-                name.c_str());
+            it->second->getAllocatedType(),
+            it->second,
+            name.c_str());
     } else if (Arrays.find(name) != Arrays.end()) {
         auto it = Arrays.find(name);
         return it->second;
@@ -142,16 +143,16 @@ Value* ArrayIndexExpressionNode::Codegen() {
 
     // Получение указателя на элемент массива
     Value* elementPtr = Builder.CreateGEP(
-            elementType,                     // Тип элемента
-            arrayValue,                      // Указатель на массив
-            indexValue,                      // Индекс
-            name + "_element_ptr"            // Имя (опционально)
+        elementType, // Тип элемента
+        arrayValue, // Указатель на массив
+        indexValue, // Индекс
+        name + "_element_ptr" // Имя (опционально)
     );
 
     // Загрузка значения элемента массива
     Value* elementValue = Builder.CreateLoad(
-        elementType,      // Тип элемента массива
-        elementPtr,       // Указатель
+        elementType, // Тип элемента массива
+        elementPtr, // Указатель
         name + "_element_value" // Имя для отладочной информации
     );
 
@@ -203,7 +204,7 @@ Value* FunctionCallExpressionNode::Codegen() {
 
     // Итерируемся по аргументам и обрабатываем их
     // todo тут что-то странное, кажется может быть ошибка из-за этого
-    for (const auto& arg : arguments) {
+    for (const auto& arg: arguments) {
         Value* argV = arg->Codegen();
 
         argv.push_back(argV);
@@ -246,10 +247,10 @@ Value* ArrayAssigmentNode::Codegen() {
 
     // Получение указателя на элемент массива
     Value* elementPtr = Builder.CreateGEP(
-        elementType,                     // Тип элемента
-        arrayValue,                      // Указатель на массив
-        indexValue,                      // Индекс
-        name + "_element_ptr"            // Имя (опционально)
+        elementType, // Тип элемента
+        arrayValue, // Указатель на массив
+        indexValue, // Индекс
+        name + "_element_ptr" // Имя (опционально)
     );
 
     // Создаем инструкцию записи (store)
@@ -468,7 +469,6 @@ Value* WhileStatementNode::Codegen() {
 Value* PrintStatementNode::Codegen() {
     Function* printfFunc = module->getFunction("printf");
     if (!printfFunc) {
-
         FunctionType* printfType = FunctionType::get(
             IntegerType::getInt128Ty(*context),
             PointerType::getUnqual(llvm::Type::getInt8Ty(*context)),
@@ -492,7 +492,6 @@ Value* PrintStatementNode::Codegen() {
     llvm::Type* valueType = value->getType();
 
     if (valueType->isIntegerTy(128)) {
-
         Value* lowPart = Builder.CreateTrunc(value, llvm::Type::getInt64Ty(*context), "lowPart");
         Value* highPart = Builder.CreateLShr(value, llvm::ConstantInt::get(valueType, 64));
         highPart = Builder.CreateTrunc(highPart, llvm::Type::getInt64Ty(*context), "highPart");
@@ -520,15 +519,19 @@ Value* PrintStatementNode::Codegen() {
         Value* singlePartFormatPtr = Builder.CreateInBoundsGEP(
             singlePartFormatVar->getValueType(),
             singlePartFormatVar,
-            { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
-              ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+            {
+                ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+                ConstantInt::get(llvm::Type::getInt32Ty(*context), 0)
+            }
         );
 
         Value* dualPartFormatPtr = Builder.CreateInBoundsGEP(
             dualPartFormatVar->getValueType(),
             dualPartFormatVar,
-            { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
-              ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+            {
+                ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+                ConstantInt::get(llvm::Type::getInt32Ty(*context), 0)
+            }
         );
 
         Value* isHighZero = Builder.CreateICmpEQ(highPart, ConstantInt::get(llvm::Type::getInt64Ty(*context), 0));
@@ -541,16 +544,15 @@ Value* PrintStatementNode::Codegen() {
         Builder.CreateCondBr(isHighZero, printLowPartBlock, printDualPartBlock);
 
         Builder.SetInsertPoint(printLowPartBlock);
-        Builder.CreateCall(printfFunc, { singlePartFormatPtr, lowPart });
+        Builder.CreateCall(printfFunc, {singlePartFormatPtr, lowPart});
         Builder.CreateBr(afterPrintBlock);
 
         Builder.SetInsertPoint(printDualPartBlock);
-        Builder.CreateCall(printfFunc, { dualPartFormatPtr, highPart, lowPart });
+        Builder.CreateCall(printfFunc, {dualPartFormatPtr, highPart, lowPart});
         Builder.CreateBr(afterPrintBlock);
 
         Builder.SetInsertPoint(afterPrintBlock);
-    }
-    else if (valueType->isIntegerTy(1)) {
+    } else if (valueType->isIntegerTy(1)) {
         // Создаем строковые константы для "true" и "false"
         Constant* trueStrConst = ConstantDataArray::getString(*context, "pravda\n");
         auto trueStrVar = new GlobalVariable(
@@ -576,15 +578,19 @@ Value* PrintStatementNode::Codegen() {
         Value* trueStrPtr = Builder.CreateInBoundsGEP(
             trueStrVar->getValueType(),
             trueStrVar,
-            { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
-              ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+            {
+                ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+                ConstantInt::get(llvm::Type::getInt32Ty(*context), 0)
+            }
         );
 
         Value* falseStrPtr = Builder.CreateInBoundsGEP(
             falseStrVar->getValueType(),
             falseStrVar,
-            { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
-              ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+            {
+                ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+                ConstantInt::get(llvm::Type::getInt32Ty(*context), 0)
+            }
         );
 
         // Условное выражение: если value == 1, выбираем "true", иначе "false"
@@ -592,9 +598,8 @@ Value* PrintStatementNode::Codegen() {
         Value* selectedStr = Builder.CreateSelect(condition, trueStrPtr, falseStrPtr);
 
         // Вызываем printf для выбранной строки
-        Builder.CreateCall(printfFunc, { selectedStr });
-    }
-    else if (valueType->isIntegerTy()) {
+        Builder.CreateCall(printfFunc, {selectedStr});
+    } else if (valueType->isIntegerTy()) {
         Value* formatStrPtr = nullptr;
 
         Constant* formatStrConst = ConstantDataArray::getString(*context, "%d\n");
@@ -609,11 +614,13 @@ Value* PrintStatementNode::Codegen() {
         formatStrPtr = Builder.CreateInBoundsGEP(
             formatStrVar->getValueType(),
             formatStrVar,
-            { ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
-              ConstantInt::get(llvm::Type::getInt32Ty(*context), 0) }
+            {
+                ConstantInt::get(llvm::Type::getInt32Ty(*context), 0),
+                ConstantInt::get(llvm::Type::getInt32Ty(*context), 0)
+            }
         );
 
-        Builder.CreateCall(printfFunc, { formatStrPtr, value });
+        Builder.CreateCall(printfFunc, {formatStrPtr, value});
     } else {
         throw std::runtime_error("Unsupported type for PrintStatementNode");
     }
@@ -646,7 +653,7 @@ Value* FunctionNode::Codegen() {
 
     // Определяем типы параметров
     std::vector<llvm::Type*> paramTypes;
-    for (const auto& param : parameters) {
+    for (const auto& param: parameters) {
         llvm::Type* paramType = nullptr;
         if (param->type.is_array && param->type.type == INT) {
             paramType = PointerType::get(ArrayType::getInt128Ty(*context), 0);
@@ -681,9 +688,9 @@ Value* FunctionNode::Codegen() {
     // Переходим в тело функции
     BasicBlock* entryBlock = BasicBlock::Create(*context, "entry", function);
     Builder.SetInsertPoint(entryBlock);
-// todo чек работает ли с массивами
+    // todo чек работает ли с массивами
     auto paramIt = function->arg_begin();
-    for (const auto& param : parameters) {
+    for (const auto& param: parameters) {
         Argument& llvmArg = *paramIt++;
         llvmArg.setName(param->name);
         IRBuilder<> tempBuilder(&function->getEntryBlock(), function->getEntryBlock().begin());
@@ -784,7 +791,7 @@ Ptr<ProgramNode> build_ast(const std::string& code) {
         ASTBuilder builder;
         auto ast_any = builder.visitProgram(tree);
         ast = std::any_cast<Ptr<ProgramNode> >(ast_any);
-        ast->print(0);
+        // ast->print(0);
 
         SemanticTable table;
         ast->semantic_check(table);
@@ -807,7 +814,7 @@ Function* create_main_function() {
 }
 
 std::unique_ptr<orc::LLJIT> createJIT() {
-    Expected<std::unique_ptr<orc::LLJIT>> jit = orc::LLJITBuilder().create();
+    Expected<std::unique_ptr<orc::LLJIT> > jit = orc::LLJITBuilder().create();
     if (!jit) {
         errs() << "Failed to create JIT: " << toString(jit.takeError()) << "\n";
         return nullptr;
@@ -820,7 +827,8 @@ std::unique_ptr<orc::LLJIT> createJIT() {
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Transforms/IPO/GlobalDCE.h"
 #include "llvm/Transforms/IPO/DeadArgumentElimination.h"
-void optimize(){
+
+void optimize() {
     PassBuilder passBuilder;
 
     ModuleAnalysisManager mam;
@@ -835,17 +843,19 @@ void optimize(){
     modulePassManager.run(*module, mam);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     GC_INIT();
 
-    const std::string input = readFile("test.typlyp");
+    const auto input_file = read_args(argc, argv);
+
+    const auto input = read_file(input_file);
 
     auto AST = build_ast(input);
 
     create_main_function();
 
     if (AST == nullptr) {
-        logger.error("Error. AST build failure.");
+        Logger::error("Error. AST build failure.");
         return 1;
     }
 
@@ -853,7 +863,7 @@ int main() {
         module->setDataLayout("e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128");
         AST->Codegen();
     } catch (const CodegenException& e) {
-        logger.error(e.what());
+        Logger::error(e.what());
         module->print(outs(), nullptr);
         return 1;
     }
@@ -862,21 +872,19 @@ int main() {
 
     if (verifyModule(*module, &errs())) {
         module->print(llvm::outs(), nullptr);
-        logger.error("Error. Module verification failed.");
+        Logger::error("Error. Module verification failed.");
         return 1;
     }
-    logger.info("module verification successful.");
 
     std::error_code EC;
     raw_fd_ostream outFile("output.ll", EC, sys::fs::OF_None);
-//    if (EC) {
-//        logger.error("Could not open output file: ", EC.message());
-//        return 1;
-//    }
+    //    if (EC) {
+    //        logger.error("Could not open output file: ", EC.message());
+    //        return 1;
+    //    }
 
     module->print(outFile, nullptr);
     outFile.close();
-    logger.info("LLVM IR written to output.ll");
 
     // Оптимизации
     //module->print(outs(), nullptr);
