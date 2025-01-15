@@ -48,13 +48,7 @@ ifStatement : 'esli' '(' expr ')' block ('inache' block)?;
 whileStatement : 'poka' '(' expr ')' block;
 
 // Новый цикл for
-forStatement : 'schitaem' '(' forInit? expr? ';' forUpdate? ')' block;
-
-// Инициализация цикла for
-forInit : varDecl | assignment;
-
-// Обновление переменной в цикле for
-forUpdate : assignment;
+forStatement : 'schitaem' '(' varDecl? expr? ';' assignment? ')' block;
 
 // Вывод на экран
 printStatement : expr '->' 'glaza' ';';

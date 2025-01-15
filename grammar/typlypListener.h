@@ -56,12 +56,6 @@ public:
   virtual void enterForStatement(typlypParser::ForStatementContext *ctx) = 0;
   virtual void exitForStatement(typlypParser::ForStatementContext *ctx) = 0;
 
-  virtual void enterForInit(typlypParser::ForInitContext *ctx) = 0;
-  virtual void exitForInit(typlypParser::ForInitContext *ctx) = 0;
-
-  virtual void enterForUpdate(typlypParser::ForUpdateContext *ctx) = 0;
-  virtual void exitForUpdate(typlypParser::ForUpdateContext *ctx) = 0;
-
   virtual void enterPrintStatement(typlypParser::PrintStatementContext *ctx) = 0;
   virtual void exitPrintStatement(typlypParser::PrintStatementContext *ctx) = 0;
 

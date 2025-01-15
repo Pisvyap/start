@@ -1,6 +1,6 @@
 delo quickSort(arr: chislo<>, left: chislo, right: chislo): chislo {
-    pust c:chislo = arr[left];
-    vernut c;
+    pust var: chislo = arr[left];
+    vernut var;
 }
 
 pust numbers: chislo<> = new chislo<6>;

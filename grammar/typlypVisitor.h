@@ -47,10 +47,6 @@ public:
 
     virtual std::any visitForStatement(typlypParser::ForStatementContext *context) = 0;
 
-    virtual std::any visitForInit(typlypParser::ForInitContext *context) = 0;
-
-    virtual std::any visitForUpdate(typlypParser::ForUpdateContext *context) = 0;
-
     virtual std::any visitPrintStatement(typlypParser::PrintStatementContext *context) = 0;
 
     virtual std::any visitExpr(typlypParser::ExprContext *context) = 0;

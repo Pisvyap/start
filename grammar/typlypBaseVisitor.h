@@ -71,14 +71,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitForInit(typlypParser::ForInitContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitForUpdate(typlypParser::ForUpdateContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitPrintStatement(typlypParser::PrintStatementContext *ctx) override {
     return visitChildren(ctx);
   }

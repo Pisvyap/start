@@ -58,12 +58,6 @@ public:
   virtual void enterForStatement(typlypParser::ForStatementContext * /*ctx*/) override { }
   virtual void exitForStatement(typlypParser::ForStatementContext * /*ctx*/) override { }
 
-  virtual void enterForInit(typlypParser::ForInitContext * /*ctx*/) override { }
-  virtual void exitForInit(typlypParser::ForInitContext * /*ctx*/) override { }
-
-  virtual void enterForUpdate(typlypParser::ForUpdateContext * /*ctx*/) override { }
-  virtual void exitForUpdate(typlypParser::ForUpdateContext * /*ctx*/) override { }
-
   virtual void enterPrintStatement(typlypParser::PrintStatementContext * /*ctx*/) override { }
   virtual void exitPrintStatement(typlypParser::PrintStatementContext * /*ctx*/) override { }
 

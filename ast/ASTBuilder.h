@@ -121,23 +121,13 @@ public:
     std::any visitForStatement(typlypParser::ForStatementContext* context) override {
         auto node = std::make_shared<ForStatementNode>();
 
-        node->init = std::any_cast<Ptr<StatementNode>>(visitForInit(context->forInit()));
+
+        node->init = std::dynamic_pointer_cast<VariableDeclarationNode>(std::any_cast<Ptr<StatementNode>>(visitVarDecl(context->varDecl())));
         node->condition = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()));
-        node->step = std::any_cast<Ptr<StatementNode>>(visitForUpdate(context->forUpdate()));
+        node->step = std::dynamic_pointer_cast<AssigmentStatementNode>(std::any_cast<Ptr<StatementNode>>(visitAssignment(context->assignment())));
         node->body = std::any_cast<Ptr<CodeBlockNode>>(visitBlock(context->block()));
 
         return static_cast<Ptr<StatementNode>>(node);;
-    }
-
-    std::any visitForUpdate(typlypParser::ForUpdateContext* context) override {
-        return std::any_cast<Ptr<StatementNode>>(visitAssignment(context->assignment()));
-    }
-
-    std::any visitForInit(typlypParser::ForInitContext* context) override {
-        if (context->varDecl())
-            return std::any_cast<Ptr<StatementNode>>(visitVarDecl(context->varDecl()));
-        else
-            return std::any_cast<Ptr<StatementNode>>(visitAssignment(context->assignment()));
     }
 
     std::any visitArrayAssignment(typlypParser::ArrayAssignmentContext* context) override {

@@ -25,9 +25,9 @@ public:
     RuleProgram = 0, RuleFunctionDecl = 1, RuleExternalDecl = 2, RuleParamList = 3, 
     RuleParam = 4, RuleBlock = 5, RuleStatement = 6, RuleVarDecl = 7, RuleAssignment = 8, 
     RuleArrayAssignment = 9, RuleReturnStatement = 10, RuleIfStatement = 11, 
-    RuleWhileStatement = 12, RuleForStatement = 13, RuleForInit = 14, RuleForUpdate = 15, 
-    RulePrintStatement = 16, RuleExpr = 17, RuleArgList = 18, RuleExprList = 19, 
-    RuleType = 20, RuleVoidType = 21, RuleScalarType = 22, RuleArrayType = 23
+    RuleWhileStatement = 12, RuleForStatement = 13, RulePrintStatement = 14, 
+    RuleExpr = 15, RuleArgList = 16, RuleExprList = 17, RuleType = 18, RuleVoidType = 19, 
+    RuleScalarType = 20, RuleArrayType = 21
   };
 
   explicit typlypParser(antlr4::TokenStream *input);
@@ -61,8 +61,6 @@ public:
   class IfStatementContext;
   class WhileStatementContext;
   class ForStatementContext;
-  class ForInitContext;
-  class ForUpdateContext;
   class PrintStatementContext;
   class ExprContext;
   class ArgListContext;
@@ -328,9 +326,9 @@ public:
     antlr4::tree::TerminalNode *SEMICOLON();
     antlr4::tree::TerminalNode *RPAREN();
     BlockContext *block();
-    ForInitContext *forInit();
+    VarDeclContext *varDecl();
     ExprContext *expr();
-    ForUpdateContext *forUpdate();
+    AssignmentContext *assignment();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -340,37 +338,6 @@ public:
   };
 
   ForStatementContext* forStatement();
-
-  class  ForInitContext : public antlr4::ParserRuleContext {
-  public:
-    ForInitContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    VarDeclContext *varDecl();
-    AssignmentContext *assignment();
-
-    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
-    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  ForInitContext* forInit();
-
-  class  ForUpdateContext : public antlr4::ParserRuleContext {
-  public:
-    ForUpdateContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    AssignmentContext *assignment();
-
-    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
-    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  ForUpdateContext* forUpdate();
 
   class  PrintStatementContext : public antlr4::ParserRuleContext {
   public:
