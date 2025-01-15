@@ -9,7 +9,7 @@ public:
 
     NumberLiteralNode(const std::string& value) {
         this->value = std::stoi(value);
-        this->type = INT;
+        this->type = Type(INT);
 
         this->int_value = this->value;
         this->bool_value = this->value != 0;

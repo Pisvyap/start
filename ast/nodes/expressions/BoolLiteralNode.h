@@ -7,7 +7,7 @@ public:
 
     BoolLiteralNode(const std::string& value) {
         this->value = (value == "pravda");
-        this->type = BOOL;
+        this->type = Type(BOOL);
 
         this->bool_value = this->value;
         this->int_value = this->value ? 1 : 0;
