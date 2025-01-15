@@ -15,7 +15,6 @@
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/FileSystem.h"
 #include "ast/nodes/expressions/UnaryOperationNode.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include <gc/gc.h>
@@ -26,15 +25,13 @@ using namespace llvm;
 
 auto context = std::make_unique<LLVMContext>();
 auto module = std::make_unique<Module>("MyModule", *context);
-// LLVM-конструкция, содержит все функции/глобалы в куске кода
 DataLayout dataLayout = module->getDataLayout();
-IRBuilder Builder(*context); // вспомогательный объект, помогает генерировать инструкции LLVM
-std::map<std::string, AllocaInst*> NamedValues; // таблица символов
+IRBuilder Builder(*context);
+std::map<std::string, AllocaInst*> NamedValues;
 std::map<std::string, Value*> Arrays;
 std::map<std::string, Function*> Functions;
 
 // Ноды EXPRESSIONS
-
 Value* NumberLiteralNode::Codegen() {
     ConstantInt* constVal = ConstantInt::get(
         *context,
@@ -112,23 +109,19 @@ Value* IdentifierNode::Codegen() {
 }
 
 Value* ArrayIndexExpressionNode::Codegen() {
-    // Проверяем, существует ли массив с таким именем
     Value* arrayValue = Arrays[name];
     if (!arrayValue)
         throw CodegenException("Array '" + name + "' was not declared");
 
-    // Генерация кода для индекса
     Value* indexValue = index->Codegen();
     if (!indexValue->getType()->isIntegerTy())
         throw CodegenException("Array index must be of integer type");
 
-    // Приведение индекса к `i128`, если он не соответствует
     llvm::Type* indexType = llvm::Type::getInt128Ty(*context);
     if (indexValue->getType() != indexType) {
         indexValue = Builder.CreateIntCast(indexValue, indexType, true, "indexCast");
     }
 
-    // Получаем тип элемента массива
     auto* arrayPointerType = llvm::dyn_cast<PointerType>(arrayValue->getType());
     if (!arrayPointerType)
         throw CodegenException("Variable '" + name + "' is not a pointer");
@@ -141,26 +134,23 @@ Value* ArrayIndexExpressionNode::Codegen() {
         throw CodegenException("Unsupported array type in NewExpressionNode.");
     }
 
-    // Получение указателя на элемент массива
     Value* elementPtr = Builder.CreateGEP(
-        elementType, // Тип элемента
-        arrayValue, // Указатель на массив
-        indexValue, // Индекс
-        name + "_element_ptr" // Имя (опционально)
+        elementType,
+        arrayValue,
+        indexValue,
+        name + "_element_ptr"
     );
 
-    // Загрузка значения элемента массива
     Value* elementValue = Builder.CreateLoad(
-        elementType, // Тип элемента массива
-        elementPtr, // Указатель
-        name + "_element_value" // Имя для отладочной информации
+        elementType,
+        elementPtr,
+        name + "_element_value"
     );
 
-    return elementValue; // Возвращаем значение элемента
+    return elementValue;
 }
 
 Value* NewExpressionNode::Codegen() {
-    // Генерируем код для выражения, которое задает размер массива
     Value* sizeExpr = expression->Codegen();
     llvm::Type* sizeType = llvm::Type::getInt128Ty(*context);
     Value* size128 = Builder.CreateZExtOrTrunc(sizeExpr, sizeType);
@@ -173,11 +163,10 @@ Value* NewExpressionNode::Codegen() {
     uint64_t arraySize = constantSize->getZExtValue();
     llvm::Type* elementType;
 
-    // Определяем тип элемента массива
     if (type.type == BOOL) {
         elementType = llvm::Type::getInt1Ty(*context);
     } else if (type.type == INT) {
-        elementType = llvm::Type::getInt128Ty(*context); // chislo
+        elementType = llvm::Type::getInt128Ty(*context);
     } else {
         throw CodegenException("Unsupported array type in NewExpressionNode.");
     }
@@ -202,58 +191,46 @@ Value* FunctionCallExpressionNode::Codegen() {
     Function* func = it->second;
     std::vector<Value*> argv;
 
-    // Итерируемся по аргументам и обрабатываем их
-    // todo тут что-то странное, кажется может быть ошибка из-за этого
     for (const auto& arg: arguments) {
         Value* argV = arg->Codegen();
 
         argv.push_back(argV);
     }
 
-    // TODO void появился, надо переделать
-    // Вызываем функцию с подготовленными аргументами
     Value* res = Builder.CreateCall(func, argv);
     return res;
 }
 
 // Ноды STATEMENTS
 Value* ArrayAssigmentNode::Codegen() {
-    // Проверяем, существует ли массив с таким именем
     Value* arrayValue = Arrays[name];
     if (!arrayValue)
         throw CodegenException("Array '" + name + "' was not declared");
 
-    // Проверка, является ли `arrayValue` указателем
     auto* arrayPointerType = llvm::dyn_cast<PointerType>(arrayValue->getType());
     if (!arrayPointerType)
         throw CodegenException("Variable '" + name + "' is not a pointer");
 
-    // Генерация кода для значения, которое будет записано
     Value* valueToStore = value->Codegen();
 
-    // Получение типа элемента массива
     llvm::Type* elementType = valueToStore->getType();
 
-    // Генерация кода для вычисления индекса
     Value* indexValue = index->Codegen();
     if (!indexValue->getType()->isIntegerTy())
         throw CodegenException("Array index must be of integer type");
 
-    // Приведение индекса к `i128`, если он не соответствует
     llvm::Type* indexType = llvm::Type::getInt128Ty(*context);
     if (indexValue->getType() != indexType) {
         indexValue = Builder.CreateIntCast(indexValue, indexType, true, "indexCast");
     }
 
-    // Получение указателя на элемент массива
     Value* elementPtr = Builder.CreateGEP(
-        elementType, // Тип элемента
-        arrayValue, // Указатель на массив
-        indexValue, // Индекс
-        name + "_element_ptr" // Имя (опционально)
+        elementType,
+        arrayValue,
+        indexValue,
+        name + "_element_ptr"
     );
 
-    // Создаем инструкцию записи (store)
     Builder.CreateStore(valueToStore, elementPtr);
 
     return valueToStore;
@@ -291,12 +268,6 @@ Value* ExpressionStatementNode::Codegen() {
 }
 
 Value* ForStatementNode::Codegen() {
-    // Очень надо будет чекать
-    // TODO в этом блоке аллокация - она кидает ошибку т.к. инструкция alloc может быть только в начальной функции, но не в условных блоках
-    // TODO пока что так костыльно работает, если все-таки будет вылетать ошибка из-за этого - переделаем
-    // BasicBlock* initBB = BasicBlock::Create(*context, "for.init");
-    // Builder.CreateBr(initBB);
-    // Builder.SetInsertPoint(initBB);
 
     init->Codegen();
     Function* TheFunction = Builder.GetInsertBlock()->getParent();
@@ -323,7 +294,6 @@ Value* ForStatementNode::Codegen() {
 }
 
 Value* IfStatementNode::Codegen() {
-    //Очень надо будет чекать
     Value* condVal = condition->Codegen();
     if (!condVal)
         throw CodegenException("Failed to generate condition for if statement");
@@ -396,15 +366,12 @@ Value* VariableDeclarationNode::Codegen() {
     if (initializer) {
         initVal = initializer->Codegen();
 
-        // Если это массив, инициализатор уже содержит правильный указатель
         if (type.is_array && initVal->getType()->isPointerTy()) {
             Arrays[name] = initVal;
             return initVal;
         }
-        // todo при инициализации массива забить его нулями?
     }
 
-    // Если инициализатор отсутствует
     if (!initVal) {
         if (type.is_array) {
             throw CodegenException("Array must be explicitly initialized");
@@ -414,7 +381,6 @@ Value* VariableDeclarationNode::Codegen() {
     }
 
     if (type.is_array) {
-        // Для массива создаем новую память с указанием размера
         auto* arrayType = llvm::dyn_cast<ArrayType>(varType->getArrayElementType());
         if (!arrayType) {
             throw CodegenException("Failed to deduce array type for allocation");
@@ -431,7 +397,6 @@ Value* VariableDeclarationNode::Codegen() {
         );
         return Arrays[name];
     } else {
-        // Для обычной переменной создаем alloca
         AllocaInst* alloc = Builder.CreateAlloca(varType, nullptr, name);
         alloc->setAlignment(Align(16));
         Builder.CreateStore(initVal, alloc);
@@ -442,7 +407,6 @@ Value* VariableDeclarationNode::Codegen() {
 
 
 Value* WhileStatementNode::Codegen() {
-    //Очень надо будет чекать
     Function* TheFunction = Builder.GetInsertBlock()->getParent();
     BasicBlock* condBB = BasicBlock::Create(*context, "while.cond", TheFunction);
     BasicBlock* bodyBB = BasicBlock::Create(*context, "while.body", TheFunction);
@@ -553,7 +517,6 @@ Value* PrintStatementNode::Codegen() {
 
         Builder.SetInsertPoint(afterPrintBlock);
     } else if (valueType->isIntegerTy(1)) {
-        // Создаем строковые константы для "true" и "false"
         Constant* trueStrConst = ConstantDataArray::getString(*context, "pravda\n");
         auto trueStrVar = new GlobalVariable(
             *module,
@@ -574,7 +537,6 @@ Value* PrintStatementNode::Codegen() {
             ".strFalse"
         );
 
-        // Получаем указатели на строковые данные
         Value* trueStrPtr = Builder.CreateInBoundsGEP(
             trueStrVar->getValueType(),
             trueStrVar,
@@ -593,11 +555,9 @@ Value* PrintStatementNode::Codegen() {
             }
         );
 
-        // Условное выражение: если value == 1, выбираем "true", иначе "false"
         Value* condition = Builder.CreateICmpEQ(value, ConstantInt::get(llvm::Type::getInt1Ty(*context), 1));
         Value* selectedStr = Builder.CreateSelect(condition, trueStrPtr, falseStrPtr);
 
-        // Вызываем printf для выбранной строки
         Builder.CreateCall(printfFunc, {selectedStr});
     } else if (valueType->isIntegerTy()) {
         Value* formatStrPtr = nullptr;
@@ -634,7 +594,7 @@ Value* CodeBlockNode::Codegen() {
     for (auto& statement: statements)
         statement->Codegen();
 
-    return llvm::Constant::getNullValue(llvm::Type::getInt32Ty(*context));
+    return Constant::getNullValue(llvm::Type::getInt32Ty(*context));
 }
 
 Value* FunctionNode::Codegen() {
@@ -651,7 +611,6 @@ Value* FunctionNode::Codegen() {
         throw CodegenException("Unknown return type: " + to_string(returnType.type));
     }
 
-    // Определяем типы параметров
     std::vector<llvm::Type*> paramTypes;
     for (const auto& param: parameters) {
         llvm::Type* paramType = nullptr;
@@ -669,33 +628,28 @@ Value* FunctionNode::Codegen() {
         paramTypes.push_back(paramType);
     }
 
-    // Создаем тип функции
     FunctionType* funcType = FunctionType::get(llvmReturnType, paramTypes, false);
 
-    // Создаем функцию в модуле
     Function* function = Function::Create(
         funcType,
-        Function::InternalLinkage, // ExternalLinkage, если функция вызывается извне
+        Function::InternalLinkage,
         name,
         module.get()
     );
 
     Functions[name] = function;
 
-    // Сохраняем текущую точку вставки
     BasicBlock* originalInsertBlock = Builder.GetInsertBlock();
 
-    // Переходим в тело функции
     BasicBlock* entryBlock = BasicBlock::Create(*context, "entry", function);
     Builder.SetInsertPoint(entryBlock);
-    // todo чек работает ли с массивами
+
     auto paramIt = function->arg_begin();
     for (const auto& param: parameters) {
         Argument& llvmArg = *paramIt++;
         llvmArg.setName(param->name);
         IRBuilder<> tempBuilder(&function->getEntryBlock(), function->getEntryBlock().begin());
 
-        // Если параметр является массивом, создаем `alloca` для массива
         if (param->type.is_array) {
             llvm::Type* elementType = nullptr;
             if (param->type.type == INT) {
@@ -703,14 +657,11 @@ Value* FunctionNode::Codegen() {
             } else if (param->type.type == BOOL) {
                 elementType = llvm::Type::getInt1Ty(*context);
             }
-            // Создаем указатель на элемент массива (работаем с массивом как с указателем)
             llvm::Type* pointerType = PointerType::get(elementType, 0);
             Value* castedPtr = Builder.CreateBitCast(&llvmArg, pointerType, param->name + "_ptr");
 
-            // Сохраняем указатель на массив в Arrays
             Arrays[param->name] = castedPtr;
         } else {
-            // Если не массив, то просто создаем alloca
             AllocaInst* alloca = tempBuilder.CreateAlloca(llvmArg.getType(), nullptr, param->name);
             alloca->setAlignment(Align(16));
             Builder.CreateStore(&llvmArg, alloca);
@@ -718,13 +669,11 @@ Value* FunctionNode::Codegen() {
         }
     }
 
-    // Генерируем код для тела функции
     Value* bodyValue = body->Codegen();
     if (!bodyValue) {
         throw CodegenException("Error while generating function body");
     }
 
-    // Если тело не заканчивается возвратом, добавляем возврат значения по умолчанию
     if (function->doesNotReturn()) {
         if (returnType.type == INT) {
             Builder.CreateRet(ConstantInt::get(*context, llvm::APInt(128, 0)));
@@ -733,12 +682,10 @@ Value* FunctionNode::Codegen() {
         }
     }
 
-    // Проверяем корректность функции
     if (verifyFunction(*function, &errs())) {
         throw CodegenException("Error: Function " + name + " contains errors!");
     }
 
-    // Восстанавливаем точку вставки
     Builder.SetInsertPoint(originalInsertBlock);
 
     return function;
@@ -776,16 +723,13 @@ Value* ProgramNode::Codegen() {
 
 
 Ptr<ProgramNode> build_ast(const std::string& code) {
-    // Создание ANTLR потока
     antlr4::ANTLRInputStream inputStream(code);
     auto lexer = typlypLexer(&inputStream);
     antlr4::CommonTokenStream tokenStream(&lexer);
     auto parser = typlypParser(&tokenStream);
 
-    // Дерево разбора
     auto tree = parser.program();
 
-    // Строим AST
     try {
         Ptr<ProgramNode> ast;
         ASTBuilder builder;
@@ -836,7 +780,6 @@ void optimize() {
 
     ModulePassManager modulePassManager;
 
-    // Удаление глобального dead code и удаление лишних аргументов в функции
     modulePassManager.addPass(GlobalDCEPass());
     modulePassManager.addPass(DeadArgumentEliminationPass());
 
@@ -875,16 +818,6 @@ int main(int argc, char* argv[]) {
         Logger::error("Error. Module verification failed.");
         return 1;
     }
-
-    std::error_code EC;
-    raw_fd_ostream outFile("output.ll", EC, sys::fs::OF_None);
-    //    if (EC) {
-    //        logger.error("Could not open output file: ", EC.message());
-    //        return 1;
-    //    }
-
-    module->print(outFile, nullptr);
-    outFile.close();
 
     // Оптимизации
     //module->print(outs(), nullptr);
