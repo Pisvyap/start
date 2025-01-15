@@ -1,47 +1,19 @@
-delo partition(arr: chislo<>, left: chislo, right: chislo, pivot: chislo): chislo {
-    poka (left <= right) {
-        poka (arr[left] < pivot) {
-            left = left + 1;
-        }
-
-        poka (arr[right] > pivot) {
-            right = right - 1;
-        }
-
-        esli (left <= right) {
-            pust temp: chislo = arr[left];
-            arr[left] = arr[right];
-            arr[right] = temp;
-
-            left = left + 1;
-            right = right - 1;
-        }
-    }
-
-    vernut left;
-}
-
-delo quickSort(arr: chislo<>, left: chislo, right: chislo): chislo {
-    esli (left < right) {
-        pust pivot: chislo = arr[(left + right) / 2];
-        pust index: chislo = partition(arr, left, right, pivot);
-
-        quickSort(arr, left, index - 1);
-        quickSort(arr, index, right);
-    }
-
+delo print(arr: logika<>): chislo {
+    arr[0] = pravda;
+    arr[0] -> glaza;
     vernut 0;
 }
-
-pust numbers: chislo<> = new chislo<6>;
-numbers[0] = 3;
-numbers[1] = 2;
-numbers[2] = 1;
-numbers[3] = 8;
-numbers[4] = 6;
-numbers[5] = 10;
-quickSort(numbers, 0, 6);
-
-schitaem (pust k: chislo = 0 ; k < 6; k = k + 1;){
-    numbers[k] -> glaza;
+pust primes: logika<> = new logika<100>;
+primes[0] = lozh;
+primes[1] = lozh;
+schitaem (pust p: chislo = 0; p < 100; p = p + 1;) {
+    primes[p] = pravda;
+    primes[p] -> glaza;
 }
+pust n: chislo = 0;
+poka (primes[10] != lozh) {
+    primes[n] = lozh;
+    primes[n] -> glaza;
+    n = n + 1;
+}
+pust b: chislo = print(primes);
