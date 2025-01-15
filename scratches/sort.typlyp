@@ -33,15 +33,26 @@ delo quickSort(arr: chislo<>, left: chislo, right: chislo): chislo {
     vernut 0;
 }
 
-pust numbers: chislo<> = new chislo<6>;
-numbers[0] = 3;
-numbers[1] = 2;
-numbers[2] = 1;
-numbers[3] = 8;
-numbers[4] = 6;
-numbers[5] = 10;
-quickSort(numbers, 0, 6);
+pust numbers: chislo<> = new chislo<10000>;
+pust temp: chislo = 0;
 
-schitaem (pust k: chislo = 0 ; k < 6; k = k + 1;){
+schitaem (pust i: chislo = 0 ; i < 10000; i = i + 1;) {
+    numbers[i] = i;
+}
+
+schitaem (pust j: chislo = 0 ; j < 10000; j = j + 1;){
+    schitaem (pust z: chislo = 0 ; z < 10000; z = z + 6;){
+        temp = numbers[j];
+        numbers[j] = numbers[z];
+        numbers[z] = temp;
+    }
+}
+schitaem (pust k: chislo = 100 ; k < 120; k = k + 1;){
+    numbers[k] -> glaza;
+}
+
+quickSort(numbers, 0, 10000);
+
+schitaem (pust k: chislo = 0 ; k < 10000; k = k + 1;){
     numbers[k] -> glaza;
 }
