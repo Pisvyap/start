@@ -17,6 +17,7 @@
 #include "llvm/Support/FileSystem.h"
 #include "ast/nodes/expressions/UnaryOperationNode.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
+#include <gc/gc.h>
 
 #include "utils/utils.h"
 
@@ -180,14 +181,15 @@ Value* NewExpressionNode::Codegen() {
         throw CodegenException("Unsupported array type in NewExpressionNode.");
     }
 
-    // Создаем тип массива
-    ArrayType* arrayType = ArrayType::get(elementType, arraySize);
+    void* allocatedArray = GC_MALLOC(arraySize * elementType->getPrimitiveSizeInBits() / 8);
+    if (!allocatedArray) {
+        throw CodegenException("Failed to allocate memory for array.");
+    }
 
-    // Создаем память под массив
-    AllocaInst* arrayAlloc = Builder.CreateAlloca(arrayType, nullptr, "array_alloc");
-    arrayAlloc->setAlignment(Align(16));
-
-    return arrayAlloc; // Возвращаем указатель на массив
+    return Builder.CreatePointerCast(
+            ConstantInt::get(llvm::Type::getInt64Ty(*context), reinterpret_cast<uint64_t>(allocatedArray)),
+            PointerType::getUnqual(elementType)
+    );
 }
 
 Value* FunctionCallExpressionNode::Codegen() {
@@ -417,9 +419,15 @@ Value* VariableDeclarationNode::Codegen() {
             throw CodegenException("Failed to deduce array type for allocation");
         }
 
-        AllocaInst* arrayAlloc = Builder.CreateAlloca(arrayType, nullptr, name);
-        arrayAlloc->setAlignment(Align(16));
-        Arrays[name] = Builder.CreatePointerCast(arrayAlloc, PointerType::get(arrayType, 0), name + "_ptr");
+        void* allocatedArray = GC_MALLOC(arrayType->getElementType()->getPrimitiveSizeInBits() / 8);
+        if (!allocatedArray) {
+            throw CodegenException("Failed to allocate memory for array.");
+        }
+
+        Arrays[name] = Builder.CreatePointerCast(
+                ConstantInt::get(llvm::Type::getInt64Ty(*context), reinterpret_cast<uint64_t>(allocatedArray)),
+                varType, name + "_ptr"
+        );
         return Arrays[name];
     } else {
         // Для обычной переменной создаем alloca
@@ -828,7 +836,9 @@ void optimize(){
 }
 
 int main() {
-    const std::string input = readFile("test.typlyp");
+    GC_INIT();
+
+    const std::string input = readFile("test1.typlyp");
 
     auto AST = build_ast(input);
 
