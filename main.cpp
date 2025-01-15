@@ -838,7 +838,7 @@ void optimize(){
 int main() {
     GC_INIT();
 
-    const std::string input = readFile("test1.typlyp");
+    const std::string input = readFile("test.typlyp");
 
     auto AST = build_ast(input);
 

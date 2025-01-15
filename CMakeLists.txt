@@ -29,7 +29,7 @@ llvm_map_components_to_libnames(
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "LLVM include dir: ${LLVM_INCLUDE_DIRS}")
-message(STATUS "LLVM libraries: ${LLVM_LIBS}")
+message(STATUS "LLVM libraries: ${LLVM_LIBRARY_DIRS}")
 
 set(
         SOURCE_FILES
