@@ -6,6 +6,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 set(LLVM_DIR "${CMAKE_SOURCE_DIR}/llvm-project/lib/cmake/llvm") #тут у меня путь другой, специально не меняю общей ветке
+set(BDWGC_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/bdwgc/zig-out/include")
+set(BDWGC_LIB_DIR "${CMAKE_SOURCE_DIR}/bdwgc/zig-out/lib")
+
+include_directories(${BDWGC_INCLUDE_DIR})
+link_directories(${BDWGC_LIB_DIR})
+
+find_library(BDWGC_LIBS gc HINTS ${BDWGC_LIB_DIR} REQUIRED)
 
 find_package(LLVM REQUIRED CONFIG)
 llvm_map_components_to_libnames(
@@ -89,6 +96,7 @@ target_link_libraries(
         PRIVATE
         ${LLVM_LIBS}
         ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/libs/antlr4-runtime.lib
+        ${BDWGC_LIBS}
 )
 
 target_include_directories(typlyp PRIVATE
