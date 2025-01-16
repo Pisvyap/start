@@ -1,5 +1,5 @@
-pust n: chislo = 50000;
-pust primes: logika<> = new logika<50000>;
+pust n: chislo = 100000;
+pust primes: logika<> = new logika<100000>;
 
 schitaem (pust k: chislo = 0 ; k < n; k = k + 1;){
     primes[k] = pravda;
