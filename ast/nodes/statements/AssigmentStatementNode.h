@@ -35,4 +35,12 @@ public:
     }
 
     llvm::Value *Codegen() override;
+
+    void generate_bytecode() override {
+        // Сначала вызываем генерацию от value (ожидая, что результат будет наверху стека)
+        value->generate_bytecode();
+
+        // И сохраняем в переменную
+        bc::bytecode.emplace_back(bc::OP::STORE_VAR, this->name);
+    }
 };

@@ -3,7 +3,7 @@
 
 #include "ExpressionNode.h"
 
-class FunctionCallExpressionNode : public ExpressionNode {
+class FunctionCallExpressionNode final : public ExpressionNode {
 public:
     std::string name;
     std::vector<Ptr<ExpressionNode>> arguments;
@@ -40,4 +40,14 @@ public:
     }
 
     llvm::Value *Codegen() override;
+
+    void generate_bytecode() override {
+        // Аргументы функции загружаются с конца. (Чтобы при чтении стека сверху вниз был верный порядок)
+        // Хз, может быть и в обычном порядке тоже норм. Пока неясно
+        for (auto it = arguments.rbegin(); it != arguments.rend(); ++it)
+            (*it)->generate_bytecode();
+
+        // Вызываем функцию TODO почему то падает на этом????
+        bc::bytecode.emplace_back(bc::OP::CALL, this->name);
+    }
 };

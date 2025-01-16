@@ -15,5 +15,9 @@ public:
         expression->semantic_check(table);
     }
 
+    void generate_bytecode() override {
+        expression->generate_bytecode();
+    }
+
     llvm::Value *Codegen() override;
 };

@@ -32,5 +32,13 @@ public:
         table.addSymbol(name, var);
     }
 
+    void generate_bytecode() override {
+        // Сначала вызываем генерацию для инициализатора
+        initializer->generate_bytecode();
+
+        // Теперь сохраняем в переменную
+        bc::bytecode.emplace_back(bc::OP::STORE_VAR, this->name);
+    }
+
     llvm::Value *Codegen() override;
 };

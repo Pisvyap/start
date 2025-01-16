@@ -44,7 +44,6 @@ set(
         ast/ASTBuilder.cpp
         ast/nodes/CodeBlockNode.h
         ast/nodes/expressions/ExpressionNode.h
-        ast/nodes/ExternalFunctionNode.h
         ast/nodes/FunctionNode.h
         ast/nodes/ParameterNode.h
         ast/nodes/ProgramNode.h
@@ -70,6 +69,8 @@ set(
         ast/semantics/SemanticTable.h
         utils/utils.h
         ast/nodes/statements/PrintStatementNode.h
+        bytecode/bytecode.cpp
+        bytecode/bytecode.h
 )
 
 if(MSVC)

@@ -16,5 +16,10 @@ public:
         std::cout << (value ? "TRUE" : "FALSE");
     }
 
+    void generate_bytecode() override {
+        // Пока что булевые переменные через 0 или 1, хз норм ли будет дальше так
+        bc::bytecode.emplace_back(bc::OP::LOAD_CONST, this->int_value);
+    }
+
     llvm::Value *Codegen() override;
 };

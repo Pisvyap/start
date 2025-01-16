@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../bytecode/bytecode.h"
 #include "semantics/SemanticTable.h"
 #include <llvm/IR/Value.h>
 #include <iostream>
@@ -16,6 +17,7 @@ public:
 
     virtual void semantic_check(SemanticTable& table) { }
     virtual llvm::Value* Codegen() { return nullptr; }
+    virtual void generate_bytecode() { }
 };
 
 template<typename T>

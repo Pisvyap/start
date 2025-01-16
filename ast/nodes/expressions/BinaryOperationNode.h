@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../ASTNode.h"
+#include "../../utils/utils.h"
 #include "ExpressionNode.h"
 
 class BinaryOperationNode : public ExpressionNode {
@@ -8,6 +9,7 @@ public:
     enum BinaryOperationType {
         Add, Sub, Mul, Div, Mod, LT, LE, GT, GE, EQ, NE
     };
+
     BinaryOperationType operation;
     Ptr<ExpressionNode> left;
     Ptr<ExpressionNode> right;
@@ -41,6 +43,22 @@ public:
         }
 
         this->type = get_type();
+    }
+
+    void generate_bytecode() override {
+        // Тут сперва нужно положить оба операнда на стек
+        // Сначала кладем ПРАВЫЙ операнд (если что поменять, хз как удобно потом будет)
+        right->generate_bytecode();
+        left->generate_bytecode();
+
+        // Теперь добавляем операцию
+        switch (operation) {
+            case Add:
+                bc::bytecode.emplace_back(bc::OP::ADD);
+                return;
+            default:
+                throw std::runtime_error("AST and Bytecode binary operators mismatch");
+        }
     }
 
     llvm::Value *Codegen() override;

@@ -21,15 +21,8 @@ struct Type {
     Type(ScalarType type, bool is_array) : type(type), is_array(is_array), array_size(0), is_void(false) { }
     Type(ScalarType type, bool is_array, int size) : type(type), is_array(is_array), array_size(size), is_void(false) { }
 
-    bool operator==(const Type& other) const {
-        return is_void
-            ? other.is_void
-            : type == other.type && is_array == other.is_array;
-    }
-
-    bool operator!=(const Type& other) const {
-        return !(*this == other);
-    }
+    bool operator==(const Type& other) const;
+    bool operator!=(const Type& other) const;
 };
 
 static Type map_type(const std::string& name, bool is_array) {
@@ -149,4 +142,6 @@ public:
         return nullptr;
     }
 };
+
+
 

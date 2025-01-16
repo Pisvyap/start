@@ -801,6 +801,11 @@ int main(int argc, char *argv[]) {
 
     auto AST = build_ast(input);
 
+    AST->generate_bytecode();
+    bc::print_bytecode();
+
+    return 0;
+
     create_main_function();
 
     if (AST == nullptr) {

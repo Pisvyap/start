@@ -47,7 +47,7 @@ public:
     }
 };
 
-std::string read_args(int argc, char* argv[]) {
+inline std::string read_args(int argc, char* argv[]) {
     if (argc < 1 || argc > 2) {
         Logger::error("Usage: typlyp <input_file>");
         exit(1);
@@ -58,7 +58,7 @@ std::string read_args(int argc, char* argv[]) {
     return input_file;
 }
 
-std::string read_file(const std::string& fileName) {
+inline std::string read_file(const std::string& fileName) {
     std::ifstream file(fileName);
     if (!file.is_open()) {
         Logger::error("File ", fileName, " could not be opened");

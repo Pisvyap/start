@@ -2,10 +2,9 @@
 
 #include "LiteralNode.h"
 
-// TODO use 128bit integers
 class NumberLiteralNode : public LiteralNode {
 public:
-    int value;
+    uint64_t value;
 
     NumberLiteralNode(const std::string& value) {
         this->value = std::stoi(value);
@@ -16,6 +15,10 @@ public:
     }
     void print(const int indent) override {
         std::cout << value;
+    }
+
+    void generate_bytecode() override {
+        bc::bytecode.emplace_back(bc::LOAD_CONST, this->value);
     }
 
     llvm::Value *Codegen() override;

@@ -28,5 +28,13 @@ public:
             stmt->semantic_check(table);
     }
 
+    void generate_bytecode() override {
+        // for (const auto& func : functions)
+            // func->generate_bytecode();
+
+        for (const auto& stmt : statements)
+            stmt->generate_bytecode();
+    }
+
     llvm::Value *Codegen() override;
 };

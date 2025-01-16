@@ -26,4 +26,18 @@ public:
     }
 
     llvm::Value *Codegen() override;
+
+    void generate_bytecode() override {
+        // Вызываем генерацию от expression (ожидая результат наверху)
+        expression->generate_bytecode();
+
+        // выполняем операцию
+        switch (operation) {
+            case NOT:
+                bc::bytecode.emplace_back(bc::OP::NOT);
+                return;
+            default:
+                throw std::runtime_error("AST and Bytecode unary operators mismatch");
+        }
+    }
 };
