@@ -795,71 +795,77 @@ void optimize() {
 int main(int argc, char *argv[]) {
     GC_INIT();
 
-    const auto input_file = read_args(argc, argv);
+    const auto input_file = read_file_name(argc, argv);
+    const auto interpreter_or_compile = interpret_or_compile(argc, argv);
 
     const auto input = read_file(input_file);
 
     auto AST = build_ast(input);
-
-    AST->generate_bytecode();
-    bc::print_bytecode();
-
-    return 0;
-
-    create_main_function();
-
     if (AST == nullptr) {
         Logger::error("Error. AST build failure.");
         return 1;
     }
 
-    try {
-        module->setDataLayout("e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128");
-        AST->Codegen();
-    } catch (const CodegenException &e) {
-        Logger::error(e.what());
-        module->print(outs(), nullptr);
-        return 1;
+    if (interpreter_or_compile == "-I"){
+        AST->generate_bytecode();
+        bc::print_bytecode();
+        //todo тут еще доделываем интерпретатор
+        return 0;
     }
+    else if (interpreter_or_compile == "-C"){
+        create_main_function();
 
-    Builder.CreateRetVoid();
+        try {
+            module->setDataLayout("e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128");
+            AST->Codegen();
+        } catch (const CodegenException &e) {
+            Logger::error(e.what());
+            module->print(outs(), nullptr);
+            return 1;
+        }
 
-    if (verifyModule(*module, &errs())) {
-        module->print(llvm::outs(), nullptr);
-        Logger::error("Error. Module verification failed.");
-        return 1;
+        Builder.CreateRetVoid();
+
+        if (verifyModule(*module, &errs())) {
+            module->print(llvm::outs(), nullptr);
+            Logger::error("Error. Module verification failed.");
+            return 1;
+        }
+
+        // Оптимизации
+        //module->print(outs(), nullptr);
+        optimize();
+        //module->print(errs(), nullptr);
+
+        InitializeNativeTarget();
+        InitializeNativeTargetAsmPrinter();
+        InitializeNativeTargetAsmParser();
+
+        auto jitOrError = createJIT();
+
+        auto jit = std::move(jitOrError);
+
+        orc::ThreadSafeModule tsm(std::move(module), std::move(context));
+
+        if (auto err = jit->addIRModule(std::move(tsm))) {
+            errs() << "Failed to add module to JIT: " << toString(std::move(err)) << "\n";
+            return 1;
+        }
+
+        auto symbolOrError = jit->lookup("main");
+        if (!symbolOrError) {
+            errs() << "Failed to find symbol '" << "main" << "': " << toString(symbolOrError.takeError()) << "\n";
+            return 1;
+        }
+
+        const auto functionPointer = symbolOrError->getValue();
+        const auto function = reinterpret_cast<int (*)()>(functionPointer);
+
+        function();
+
+        return 0;
     }
-
-    // Оптимизации
-    //module->print(outs(), nullptr);
-    optimize();
-    //module->print(errs(), nullptr);
-
-    InitializeNativeTarget();
-    InitializeNativeTargetAsmPrinter();
-    InitializeNativeTargetAsmParser();
-
-    auto jitOrError = createJIT();
-
-    auto jit = std::move(jitOrError);
-
-    orc::ThreadSafeModule tsm(std::move(module), std::move(context));
-
-    if (auto err = jit->addIRModule(std::move(tsm))) {
-        errs() << "Failed to add module to JIT: " << toString(std::move(err)) << "\n";
-        return 1;
+    else {
+        throw UnknownExecutionTypeException("Unknown execution type flag");
     }
-
-    auto symbolOrError = jit->lookup("main");
-    if (!symbolOrError) {
-        errs() << "Failed to find symbol '" << "main" << "': " << toString(symbolOrError.takeError()) << "\n";
-        return 1;
-    }
-
-    const auto functionPointer = symbolOrError->getValue();
-    const auto function = reinterpret_cast<int (*)()>(functionPointer);
-
-    function();
-
-    return 0;
 }

@@ -13,6 +13,17 @@ public:
     }
 };
 
+class UnknownExecutionTypeException final : public std::runtime_error {
+public:
+    explicit UnknownExecutionTypeException(const std::string& _Message)
+            : runtime_error(_Message) {
+    }
+
+    explicit UnknownExecutionTypeException(const char* _Message)
+            : runtime_error(_Message) {
+    }
+};
+
 class Logger {
 public:
     static void log(const std::string& messages...) {
@@ -47,9 +58,9 @@ public:
     }
 };
 
-inline std::string read_args(int argc, char* argv[]) {
-    if (argc < 1 || argc > 2) {
-        Logger::error("Usage: typlyp <input_file>");
+inline std::string read_file_name(int argc, char* argv[]) {
+    if (argc < 2) {
+        Logger::error("Usage: typlyp <input_file> <compilation_type -I|-C");
         exit(1);
     }
 
@@ -61,7 +72,7 @@ inline std::string read_args(int argc, char* argv[]) {
 inline std::string read_file(const std::string& fileName) {
     std::ifstream file(fileName);
     if (!file.is_open()) {
-        Logger::error("File ", fileName, " could not be opened");
+        Logger::error("File ", &fileName, " could not be opened");
         return std::string();
     }
 
@@ -69,4 +80,15 @@ inline std::string read_file(const std::string& fileName) {
     file.close();
 
     return contents;
+}
+
+inline std::string interpret_or_compile(int argc, char* argv[]) {
+    if (argc < 2) {
+        Logger::error("Usage: typlyp <input_file> <compilation_type -I|-C");
+        exit(1);
+    }
+
+    std::string flag = argv[2];
+
+    return flag;
 }
