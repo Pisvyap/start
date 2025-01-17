@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include <typlypParser.h>
-#include <llvm/Target/TargetMachine.h>
 
 #include "antlr4-runtime.h"
 #include "ast/ASTBuilder.h"
@@ -25,7 +24,6 @@ using namespace llvm;
 
 auto context = std::make_unique<LLVMContext>();
 auto module = std::make_unique<Module>("MyModule", *context);
-DataLayout dataLayout = module->getDataLayout();
 IRBuilder Builder(*context);
 std::map<std::string, AllocaInst *> NamedValues;
 std::map<std::string, Value *> Arrays;
@@ -125,7 +123,7 @@ Value *ArrayIndexExpressionNode::Codegen() {
     auto *arrayPointerType = llvm::dyn_cast<PointerType>(arrayValue->getType());
     if (!arrayPointerType)
         throw CodegenException("Variable '" + name + "' is not a pointer");
-    llvm::Type *elementType = nullptr;
+    llvm::Type *elementType;
     if (type.type == BOOL) {
         elementType = llvm::Type::getInt1Ty(*context);
     } else if (type.type == INT) {
@@ -164,15 +162,11 @@ Value *NewExpressionNode::Codegen() {
     llvm::Type *elementType;
 
     if (type.type == BOOL) {
-        elementType = llvm::Type::getInt1Ty(*context);
+        elementType = llvm::Type::getInt8Ty(*context); // Используем i8 вместо i1
     } else if (type.type == INT) {
         elementType = llvm::Type::getInt128Ty(*context);
     } else {
         throw CodegenException("Unsupported array type in NewExpressionNode.");
-    }
-
-    if (type.type == BOOL) {
-        elementType = llvm::Type::getInt8Ty(*context); // Используем i8 вместо i1
     }
 
     uint64_t elementSize = (type.type == BOOL) ? 1 : (elementType->getPrimitiveSizeInBits() / 8);
@@ -566,7 +560,7 @@ Value *PrintStatementNode::Codegen() {
 
         Builder.CreateCall(printfFunc, {selectedStr});
     } else if (valueType->isIntegerTy()) {
-        Value *formatStrPtr = nullptr;
+        Value *formatStrPtr;
 
         Constant *formatStrConst = ConstantDataArray::getString(*context, "%d\n");
         auto formatStrVar = new GlobalVariable(
@@ -604,7 +598,7 @@ Value *CodeBlockNode::Codegen() {
 }
 
 Value *FunctionNode::Codegen() {
-    llvm::Type *llvmReturnType = nullptr;
+    llvm::Type *llvmReturnType;
 
     if (returnType.is_array)
         throw CodegenException("Error. Functions cannot return arrays");
@@ -619,7 +613,7 @@ Value *FunctionNode::Codegen() {
 
     std::vector<llvm::Type *> paramTypes;
     for (const auto &param: parameters) {
-        llvm::Type *paramType = nullptr;
+        llvm::Type *paramType;
         if (param->type.is_array && param->type.type == INT) {
             paramType = PointerType::get(ArrayType::getInt128Ty(*context), 0);
         } else if (param->type.is_array && param->type.type == BOOL) {
@@ -698,7 +692,7 @@ Value *FunctionNode::Codegen() {
 }
 
 Value *ParameterNode::Codegen() {
-    Value *paramValue = nullptr;
+    Value *paramValue;
     if (type.is_array) {
         paramValue = Arrays[name];
         if (type.array_size <= 0)
@@ -793,7 +787,7 @@ void optimize() {
 }
 
 int main(int argc, char *argv[]) {
-    GC_INIT();
+    GC_INIT()
 
     const auto input_file = read_file_name(argc, argv);
     const auto interpreter_or_compile = interpret_or_compile(argc, argv);
