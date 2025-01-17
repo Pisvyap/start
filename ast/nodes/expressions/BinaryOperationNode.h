@@ -56,6 +56,33 @@ public:
             case Add:
                 bc::bytecode.emplace_back(bc::OP::ADD);
                 return;
+            case Sub:
+                bc::bytecode.emplace_back(bc::OP::SUB);
+                return;
+            case Mul:
+                bc::bytecode.emplace_back(bc::OP::MUL);
+                return;
+            case Div:
+                bc::bytecode.emplace_back(bc::OP::DIV);
+                return;
+            case LT:
+                bc::bytecode.emplace_back(bc::OP::LT);
+                return;
+            case LE:
+                bc::bytecode.emplace_back(bc::OP::LE);
+                return;
+            case GT:
+                bc::bytecode.emplace_back(bc::OP::GT);
+                return;
+            case GE:
+                bc::bytecode.emplace_back(bc::OP::GE);
+                return;
+            case EQ:
+                bc::bytecode.emplace_back(bc::OP::EQ);
+                return;
+            case NE:
+                bc::bytecode.emplace_back(bc::OP::NE);
+                return;
             default:
                 throw std::runtime_error("AST and Bytecode binary operators mismatch");
         }

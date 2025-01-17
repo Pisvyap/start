@@ -1,4 +1,1 @@
-delo foo(n: chislo): chislo {
-        vernut n + 1;
-}
-foo(2);
+1 > 4;

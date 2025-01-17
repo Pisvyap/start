@@ -52,6 +52,33 @@ std::ostream& bc::operator<<(std::ostream& os, const OP& op) {
         case ADD:
             os << "ADD";
             return os;
+        case SUB:
+            os << "SUB";
+            return os;
+        case MUL:
+            os << "MUL";
+            return os;
+        case DIV:
+            os << "DIV";
+            return os;
+        case GT:
+            os << "GT";
+            return os;
+        case GE:
+            os << "GE";
+            return os;
+        case LT:
+            os << "LT";
+            return os;
+        case LE:
+            os << "LE";
+           return os;
+        case EQ:
+            os << "EQ";
+            return os;
+        case NE:
+            os << "NE";
+           return os;
         case NOT:
             os << "NOT";
             return os;
