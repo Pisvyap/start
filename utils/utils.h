@@ -59,7 +59,8 @@ public:
 };
 
 inline std::string read_file_name(int argc, char* argv[]) {
-    if (argc < 2) {
+    // todo плюсовики, я не помню, название - это argv[0], а в argc оно тоже попадает? Ну то есть argc = 3(название программы, название файла, тип исполнения)
+    if (argc != 3) {
         Logger::error("Usage: typlyp <input_file> <compilation_type -I|-C");
         exit(1);
     }
@@ -83,7 +84,8 @@ inline std::string read_file(const std::string& fileName) {
 }
 
 inline std::string interpret_or_compile(int argc, char* argv[]) {
-    if (argc < 2) {
+    // todo плюсовики, я не помню, название - это argv[0], а в argc оно тоже попадает? Ну то есть argc = 3(название программы, название файла, тип исполнения)
+    if (argc != 3) {
         Logger::error("Usage: typlyp <input_file> <compilation_type -I|-C");
         exit(1);
     }
