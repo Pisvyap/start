@@ -6,6 +6,10 @@
 
 #include <iostream>
 
+namespace bc {
+    std::vector<bc::Instruction> bytecode;
+}
+
 void bc::print_bytecode() {
     for (const auto& bc : bc::bytecode) {
         std::cout << bc.op;
