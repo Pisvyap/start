@@ -20,5 +20,11 @@ public:
         } catch (const std::exception& e) { }
     }
 
+    void generate_bytecode() override {
+        expression -> generate_bytecode();
+
+        bc::bytecode.emplace_back(bc::ALLOC);
+    }
+
     llvm::Value *Codegen() override;
 };

@@ -34,5 +34,15 @@ public:
             throw std::runtime_error("Type mismatch in array assignment");
     }
 
+    void generate_bytecode() override {
+        index->generate_bytecode();
+
+        value->generate_bytecode();
+
+        bc::bytecode.emplace_back(bc::STORE_PTR, name);
+
+        bc::bytecode.emplace_back(bc::STORE_IN_ARRAY);
+    }
+
     llvm::Value *Codegen() override;
 };

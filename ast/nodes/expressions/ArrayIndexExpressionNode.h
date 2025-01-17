@@ -28,5 +28,13 @@ public:
         }
     }
 
+    void generate_bytecode() override {
+        index->generate_bytecode();
+
+        bc::bytecode.emplace_back(bc::LOAD_PTR, name);
+
+        bc::bytecode.emplace_back(bc::LOAD_FROM_ARRAY);
+    }
+
     llvm::Value *Codegen() override;
 };
