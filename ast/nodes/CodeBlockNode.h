@@ -20,4 +20,9 @@ public:
     }
 
     llvm::Value *Codegen() override;
+
+    void generate_bytecode() override {
+        for (const auto& stmt : statements)
+            stmt->generate_bytecode();
+    }
 };

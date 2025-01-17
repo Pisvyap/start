@@ -43,4 +43,25 @@ public:
     }
 
     llvm::Value *Codegen() override;
+
+    void generate_bytecode() override {
+        // Для начала выполняем условие
+        condition->generate_bytecode();
+
+        // В случае false переход.
+        bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, bc::LABEL_COUNT);
+
+        // Теперь тело true и переход к выходу из if
+        thenBlock->generate_bytecode();
+        bc::bytecode.emplace_back(bc::OP::JUMP, bc::LABEL_COUNT + 1);
+
+        // Генерируем метку для false (И увеличиваем счетчик меток)
+        bc::bytecode.emplace_back(bc::OP::LABEL, bc::LABEL_COUNT++);
+
+        // Теперь тело false
+        elseBlock->generate_bytecode();
+
+        // Метка выхода из if
+        bc::bytecode.emplace_back(bc::OP::LABEL, bc::LABEL_COUNT++);
+    }
 };

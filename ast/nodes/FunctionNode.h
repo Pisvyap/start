@@ -54,9 +54,7 @@ public:
         }
 
         // Обрабатываем тело
-        for (const auto& st: body->statements) {
-            st->generate_bytecode();
-        }
+        body->generate_bytecode();
 
         // Обозначаем конец
         bc::bytecode.emplace_back(bc::OP::FUNC_END);

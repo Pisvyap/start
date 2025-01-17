@@ -82,6 +82,15 @@ std::ostream& bc::operator<<(std::ostream& os, const OP& op) {
         case NOT:
             os << "NOT";
             return os;
+        case LABEL:
+            os << "LABEL";
+            return os;
+        case JUMP_IF_FALSE:
+            os << "JUMP_IF_FALSE";
+            return os;
+        case JUMP:
+            os << "JUMP";
+            return os;
         default:
             throw std::invalid_argument("missing operator<< branch for OP");
     }
