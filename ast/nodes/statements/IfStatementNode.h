@@ -48,20 +48,26 @@ public:
         // Для начала выполняем условие
         condition->generate_bytecode();
 
+        int false_label = bc::LABEL_COUNT;
+        int end_label = bc::LABEL_COUNT + 1;
+        bc::LABEL_COUNT += 2;
+
         // В случае false переход.
-        bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, bc::LABEL_COUNT);
+        bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, false_label);
 
         // Теперь тело true и переход к выходу из if
         thenBlock->generate_bytecode();
-        bc::bytecode.emplace_back(bc::OP::JUMP, bc::LABEL_COUNT + 1);
+        bc::bytecode.emplace_back(bc::OP::JUMP, end_label);
 
-        // Генерируем метку для false (И увеличиваем счетчик меток)
-        bc::bytecode.emplace_back(bc::OP::LABEL, bc::LABEL_COUNT++);
+        // Генерируем метку для false
+        bc::bytecode.emplace_back(bc::OP::LABEL, false_label);
 
         // Теперь тело false
-        elseBlock->generate_bytecode();
+        if (elseBlock != nullptr) {
+            elseBlock->generate_bytecode();
+        }
 
         // Метка выхода из if
-        bc::bytecode.emplace_back(bc::OP::LABEL, bc::LABEL_COUNT++);
+        bc::bytecode.emplace_back(bc::OP::LABEL, end_label);
     }
 };

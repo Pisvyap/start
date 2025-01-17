@@ -91,6 +91,9 @@ std::ostream& bc::operator<<(std::ostream& os, const OP& op) {
         case JUMP:
             os << "JUMP";
             return os;
+        case PRINT:
+            os << "PRINT";
+            return os;
         default:
             throw std::invalid_argument("missing operator<< branch for OP");
     }
