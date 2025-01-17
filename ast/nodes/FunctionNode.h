@@ -44,5 +44,23 @@ public:
         table.leaveScope();
     }
 
+    void generate_bytecode() override {
+        // Обозначаем начало функции
+        bc::bytecode.emplace_back(bc::OP::FUNC_BEGIN, name, parameters.size());
+
+        // Непонятно, каким образом надо обрабатывать параметры
+        for (auto& param : parameters) {
+
+        }
+
+        // Обрабатываем тело
+        for (const auto& st: body->statements) {
+            st->generate_bytecode();
+        }
+
+        // Обозначаем конец
+        bc::bytecode.emplace_back(bc::OP::FUNC_END);
+    }
+
     llvm::Value *Codegen() override;
 };

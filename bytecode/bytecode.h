@@ -9,7 +9,10 @@ namespace bc {
         LOAD_CONST,     // Запись константы в верхушку стека, я думаю константа = беззнаковое число
         LOAD_VAR,       // Запись заранее сохраненной переменной в верхушку стека
         STORE_VAR,      // Запись верхнего элемента стека в переменную (и удаление со стека)
-        CALL,               // Вызов функции, предполагаем, что аргументы уже на стеке подготовлены. Результат также помещается на стек
+        CALL,           // Вызов функции, предполагаем, что аргументы уже на стеке подготовлены. Результат также помещается на стек
+        FUNC_BEGIN,     // Обозначение, что дальше идет блок кода функции
+        FUNC_END,       // Обозначение конца блока функции
+        RETURN,         // Возвращение верхнего элемента стека
 
         // Бинарные операции. Берутся два верхних элемента стеки (удаляются). Результат помещается на верхушку стека
         ADD,
@@ -32,10 +35,20 @@ namespace bc {
         bool has_operand;
         bool has_name;
 
-        Instruction() : op(PASS), operand(0), has_operand(false), has_name(false) {}
-        explicit Instruction(const OP op) : op(op), operand(0), has_operand(false), has_name(false) {}
-        Instruction(const OP op, const uint64_t operand) : op(op), operand(operand), has_operand(true), has_name(false) {}
-        Instruction(const OP op, const std::string &name) : op(op), operand(0), name(name), has_operand(false), has_name(true) {}
+        Instruction()
+                    : op(PASS), operand(0), has_operand(false), has_name(false) {}
+
+        explicit Instruction(const OP op)
+                    : op(op), operand(0), has_operand(false), has_name(false) {}
+
+        Instruction(const OP op, const uint64_t operand)
+                    : op(op), operand(operand), has_operand(true), has_name(false) {}
+
+        Instruction(const OP op, const std::string &name)
+                    : op(op), operand(0), name(name), has_operand(false), has_name(true) {}
+
+        Instruction(const OP op, const std::string& name, const uint64_t operand)
+                    : op(op), operand(operand), name(name), has_operand(true), has_name(true) {}
     };
 
     // Здесь все инструкции, глобальная переменная

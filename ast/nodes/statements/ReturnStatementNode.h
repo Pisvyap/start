@@ -23,5 +23,12 @@ public:
                 + to_string(function->type) + "; got: " + to_string(expression->type) + ']');
     }
 
+    void generate_bytecode() override {
+        // Вызываем генерацию от выражения (после этого результат на верхушке стека)
+        expression->generate_bytecode();
+
+        bc::bytecode.emplace_back(bc::OP::RETURN);
+    }
+
     llvm::Value *Codegen() override;
 };

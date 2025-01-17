@@ -7,16 +7,18 @@
 #include <iostream>
 
 namespace bc {
-    std::vector<bc::Instruction> bytecode;
+    std::vector<Instruction> bytecode;
 }
 
 void bc::print_bytecode() {
-    for (const auto& bc : bc::bytecode) {
+    for (const auto& bc : bytecode) {
         std::cout << bc.op;
+        if (bc.has_name)
+            std::cout << ' ' << bc.name;
+
         if (bc.has_operand)
             std::cout << ' ' << bc.operand;
-        else
-            std::cout << ' ' << bc.name;
+
         std::cout << '\n';
     }
 }
@@ -35,8 +37,23 @@ std::ostream& bc::operator<<(std::ostream& os, const OP& op) {
         case STORE_VAR:
             os << "STORE_VAR";
             return os;
+        case CALL:
+            os << "CALL";
+            return os;
+        case FUNC_BEGIN:
+            os << "FUNC_BEGIN";
+            return os;
+        case FUNC_END:
+            os << "FUNC_END";
+            return os;
+        case RETURN:
+            os << "RETURN";
+            return os;
         case ADD:
             os << "ADD";
+            return os;
+        case NOT:
+            os << "NOT";
             return os;
         default:
             throw std::invalid_argument("missing operator<< branch for OP");
