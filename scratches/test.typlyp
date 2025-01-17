@@ -1,8 +1,5 @@
-delo factorial(n: chislo): chislo {
-        esli (n == 0) {
-            n = 1;
-        }
-        vernut n;
+pust x: chislo = 5;
+poka (1 < 2) {
+    x = x + 5;
 }
-pust result: chislo = factorial(20);
-result -> glaza;
+x -> glaza;

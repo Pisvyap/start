@@ -25,4 +25,24 @@ public:
     }
 
     llvm::Value *Codegen() override;
+
+    void generate_bytecode() override {
+        int while_start = bc::LABEL_COUNT;
+        int while_end = bc::LABEL_COUNT + 1;
+        bc::LABEL_COUNT += 2;
+
+        // Метка на условие и проверка его
+        bc::bytecode.emplace_back(bc::OP::LABEL, while_start);
+        condition->generate_bytecode();
+
+        // Переход в случае невыполнения условия
+        bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, while_end);
+
+        // Обработка тела цикла (и возврат к проверке условия)
+        body->generate_bytecode();
+        bc::bytecode.emplace_back(bc::OP::JUMP, while_start);
+
+        // Метка конца цикла
+        bc::bytecode.emplace_back(bc::OP::LABEL, while_end);
+    }
 };
