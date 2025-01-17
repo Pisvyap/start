@@ -48,6 +48,7 @@ public:
         // Обозначаем начало функции
         bc::bytecode.emplace_back(bc::OP::FUNC_BEGIN, name, parameters.size());
 
+        // TODO возможно нужны будут валидация параметров на уровне байткода, но пока что так
         // Непонятно, каким образом надо обрабатывать параметры
         for (auto& param : parameters) {
 

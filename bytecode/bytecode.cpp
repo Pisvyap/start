@@ -94,6 +94,21 @@ std::ostream& bc::operator<<(std::ostream& os, const OP& op) {
         case PRINT:
             os << "PRINT";
             return os;
+        case ALLOC:
+            os << "ALLOC";
+            return os;
+        case LOAD_PTR:
+            os << "LOAD_PTR";
+            return os;
+        case STORE_PTR:
+            os << "STORE_PTR";
+            return os;
+        case STORE_IN_ARRAY:
+            os << "STORE_IN_ARRAY";
+            return os;
+        case LOAD_FROM_ARRAY:
+            os << "LOAD_FROM_ARRAY";
+            return os;
         default:
             throw std::invalid_argument("missing operator<< branch for OP");
     }

@@ -11,5 +11,10 @@ public:
         std::cout << "Parameter[name=" << name << ";type=" << to_string(type) << ']' << std::endl;
     }
 
+    void generate_bytecode() override{
+        // Тут нормально что пусто
+        // TODO если понадобится все-таки в функциях - то доделаем
+    }
+
     llvm::Value *Codegen() override;
 };
