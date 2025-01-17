@@ -47,7 +47,7 @@ public:
         for (auto it = arguments.rbegin(); it != arguments.rend(); ++it)
             (*it)->generate_bytecode();
 
-        // Вызываем функцию TODO почему то падает на этом????
+        // Вызываем функцию
         bc::bytecode.emplace_back(bc::OP::CALL, this->name);
     }
 };

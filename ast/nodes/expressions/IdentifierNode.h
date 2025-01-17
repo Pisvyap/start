@@ -25,6 +25,9 @@ public:
             bc::bytecode.emplace_back(bc::OP::CALL, this->name);
         else
             bc::bytecode.emplace_back(bc::OP::LOAD_VAR, this->name);
+
+        // TODO тут неясно, что если в строке просто выражение, например число 5;
+        // Тогда эта переменная будет загружена на стек но потом не убрана с него -> как то подчищать
     }
 
     llvm::Value *Codegen() override;
