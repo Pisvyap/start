@@ -45,13 +45,18 @@ public:
     }
 
     void generate_bytecode() override {
-        // Обозначаем начало функции
-        bc::bytecode.emplace_back(bc::OP::FUNC_BEGIN, name, llvm::APInt(128, parameters.size()));
+        bc::bytecode.emplace_back(bc::OP::FUNC_BEGIN, name);
 
         // TODO возможно нужны будут валидация параметров на уровне байткода, но пока что так
         // Непонятно, каким образом надо обрабатывать параметры
         for (auto& param : parameters) {
-
+            if (param->type.is_array) {
+                bc::bytecode.emplace_back(bc::OP::STORE_PTR, param->name);
+            } else if (param->type.type == ScalarType::INT) {
+                bc::bytecode.emplace_back(bc::OP::STORE_VAR, param->name);
+            } else if (param->type.type == ScalarType::BOOL) {
+                bc::bytecode.emplace_back(bc::OP::STORE_VAR, param->name);
+            }
         }
 
         // Обрабатываем тело

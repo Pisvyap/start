@@ -48,6 +48,6 @@ public:
             (*it)->generate_bytecode();
 
         // Вызываем функцию
-        bc::bytecode.emplace_back(bc::OP::CALL, this->name);
+        bc::bytecode.emplace_back(bc::OP::CALL, this->name, llvm::APInt(128, arguments.size()));
     }
 };

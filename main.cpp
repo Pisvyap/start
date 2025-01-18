@@ -854,8 +854,8 @@ int main(int argc, char *argv[]) {
 
     if (interpreter_or_compile == "-I"){
         AST->generate_bytecode();
-        bc::print_bytecode();
-        std::cout << "---ABOBA---" << std::endl;
+        //bc::print_bytecode();
+        //std::cout << "---ABOBA---" << std::endl;
         bytecode_optimize();
         bc::print_bytecode();
         auto* virtualMachine = new vm::VirtualMachine();

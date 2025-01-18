@@ -1,1 +1,10 @@
-pust x: chislo = 1 + 2 * 3 - 3 / 2;
+pust n: chislo = 100;
+pust t: chislo = 0;
+poka (t <= n) {
+        t -> glaza;
+        t = t + 2;
+        poka (t == 4) {
+            t = t * 10;
+            t -> glaza;
+        }
+}

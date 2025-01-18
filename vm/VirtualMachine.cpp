@@ -11,6 +11,8 @@ namespace vm {
         for (size_t i = 0; i < bytecode.size(); i++) {
             if (bytecode[i].op == bc::LABEL) {
                 handleLabel(bytecode[i], i);
+            } else if (bytecode[i].op == bc::FUNC_BEGIN) {
+                functions.insert(std::make_pair(bytecode[i].name, i));
             }
         }
         while (instructionPointer < bytecode.size()) {
@@ -74,7 +76,10 @@ namespace vm {
                     break;
 
                 case bc::FUNC_BEGIN:
-                    handleFuncBegin();
+                    while (bytecode[instructionPointer].op != bc::OP::FUNC_END) {
+                        instructionPointer++;
+                    }
+                    //handleFuncBegin();
                     break;
 
                 case bc::FUNC_END:
@@ -83,6 +88,10 @@ namespace vm {
 
                 case bc::RETURN:
                     handleReturn();
+                    break;
+
+                case bc::CALL:
+                    handleCall(instr);
                     break;
 
                 case bc::LABEL:
@@ -213,7 +222,7 @@ namespace vm {
         dataStack.pop_back();
         llvm::APInt a = dataStack.back();
         dataStack.pop_back();
-        dataStack.push_back(llvm::APInt(128, a.sgt(b)));
+        dataStack.push_back(llvm::APInt(128, b.sgt(a)));
     }
 
     void VirtualMachine::handleGe() {
@@ -224,7 +233,7 @@ namespace vm {
         dataStack.pop_back();
         llvm::APInt a = dataStack.back();
         dataStack.pop_back();
-        dataStack.push_back(llvm::APInt(128, a.sge(b)));
+        dataStack.push_back(llvm::APInt(128, b.sge(a)));
     }
 
     void VirtualMachine::handleLt() {
@@ -246,7 +255,7 @@ namespace vm {
         dataStack.pop_back();
         llvm::APInt a = dataStack.back();
         dataStack.pop_back();
-        dataStack.push_back(llvm::APInt(128, a.sle(b)));
+        dataStack.push_back(llvm::APInt(128, b.sle(a)));
     }
 
     void VirtualMachine::handleEq() {
@@ -376,11 +385,19 @@ namespace vm {
         dataStack.pop_back();
     }
 
-    void VirtualMachine::handleFuncBegin() {}
+    void VirtualMachine::handleFuncBegin() {
+
+    }
 
     void VirtualMachine::handleFuncEnd() {}
 
     void VirtualMachine::handleReturn() {}
+
+    void VirtualMachine::handleCall(const bc::Instruction &instr) {
+        if (dataStack.size() < instr.operand.getLimitedValue()) {
+            throw std::runtime_error("Stack underflow on Call");
+        }
+    }
 
     void VirtualMachine::handleLabel(const bc::Instruction &instr, size_t &currentPointer) {
         labels.insert(std::make_pair(instr.operand.getLimitedValue(), currentPointer)); //Тут у него какие-то вопросы к APInt, пока так (хотя я сомневаюсь что нам понадобится так много якорей)

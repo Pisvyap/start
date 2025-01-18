@@ -10,3 +10,9 @@ chislo22 -> glaza;
 pust element1: chislo = func(numbers);
 pust element2: chislo = func(new chislo<4>);
 
+delo function(n: chislo): chislo {
+        vernut 2;
+}
+pust result: chislo = function(5);
+result -> glaza;
+
