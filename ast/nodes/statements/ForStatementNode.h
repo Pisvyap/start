@@ -41,20 +41,20 @@ public:
         bc::LABEL_COUNT += 2;
 
         // Метка на проверку условий
-        bc::bytecode.emplace_back(bc::OP::LABEL, for_start);
+        bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, for_start));
         condition->generate_bytecode();
 
         // Переход к концу цикла если не выполняется условие
-        bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, for_end);
+        bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, llvm::APInt(128, for_end));
 
         // Генерация тела цикла
         body->generate_bytecode();
 
         // выполнение update и переход к проверке условия
         step->generate_bytecode();
-        bc::bytecode.emplace_back(bc::OP::JUMP, for_start);
+        bc::bytecode.emplace_back(bc::OP::JUMP, llvm::APInt(128, for_start));
 
         // Метка выхода из цикла
-        bc::bytecode.emplace_back(bc::OP::LABEL, for_end);
+        bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, for_end));
     }
 };

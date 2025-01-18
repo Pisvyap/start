@@ -26,8 +26,8 @@ namespace vm {
         void handleStoreInArray();
         void handleLoadFromArray();
         void handlePass();
-        void handleLoadPtr();
-        void handleStorePtr();
+        void handleLoadPtr(const bc::Instruction &instr);
+        void handleStorePtr(const bc::Instruction &instr);
         void handleFuncBegin();
         void handleFuncEnd();
         void handleReturn();

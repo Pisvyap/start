@@ -61,11 +61,11 @@ namespace vm {
                     break;
 
                 case bc::LOAD_PTR:
-                    handleLoadPtr();
+                    handleLoadPtr(instr);
                     break;
 
                 case bc::STORE_PTR:
-                    handleStorePtr();
+                    handleStorePtr(instr);
                     break;
 
                 case bc::FUNC_BEGIN:
@@ -349,11 +349,27 @@ namespace vm {
     }
 
 
-    void VirtualMachine::handlePass() {}
+    void VirtualMachine::handlePass() {
+        //Курим бамбук
+    }
 
-    void VirtualMachine::handleLoadPtr() {}
+    void VirtualMachine::handleLoadPtr(const bc::Instruction &instr) { //Наскок я понял, тут отличие только в том, что это указатели, поэтому тот же что и для VAR
+        if (!instr.has_name) {
+            throw std::runtime_error("LOAD_PTR missing ptr name");
+        }
+        if (vars.find(instr.name) == vars.end()) {
+            throw std::runtime_error("Ptr not found: " + instr.name);
+        }
+        dataStack.push_back(vars[instr.name]);
+    }
 
-    void VirtualMachine::handleStorePtr() {}
+    void VirtualMachine::handleStorePtr(const bc::Instruction &instr) {
+        if (!instr.has_name) {
+            throw std::runtime_error("STORE_PTR missing ptr name");
+        }
+        vars[instr.name] = dataStack.back();
+        dataStack.pop_back();
+    }
 
     void VirtualMachine::handleFuncBegin() {}
 
@@ -367,5 +383,12 @@ namespace vm {
 
     void VirtualMachine::handleJump() {}
 
-    void VirtualMachine::handleNot() {}
+    void VirtualMachine::handleNot() {
+        if (dataStack.empty()) {
+            throw std::runtime_error("Stack underflow on Not");
+        }
+        llvm::APInt a = dataStack.back();
+        dataStack.pop_back();
+        dataStack.push_back(a == 1 ? llvm::APInt(1, 0) : llvm::APInt(1, 1));
+    }
 }

@@ -61,7 +61,7 @@ public:
 inline std::string read_file_name(int argc, char* argv[]) {
     // todo плюсовики, я не помню, название - это argv[0], а в argc оно тоже попадает? Ну то есть argc = 3(название программы, название файла, тип исполнения)
     if (argc != 3) {
-        Logger::error("Usage: typlyp <input_file> <compilation_type -I|-C");
+        Logger::error("Usage: typlyp <input_file> <compilation_type -I|-C>");
         exit(1);
     }
 

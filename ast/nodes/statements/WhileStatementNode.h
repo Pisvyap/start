@@ -32,17 +32,17 @@ public:
         bc::LABEL_COUNT += 2;
 
         // Метка на условие и проверка его
-        bc::bytecode.emplace_back(bc::OP::LABEL, while_start);
+        bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, while_start));
         condition->generate_bytecode();
 
         // Переход в случае невыполнения условия
-        bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, while_end);
+        bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, llvm::APInt(128, while_end));
 
         // Обработка тела цикла (и возврат к проверке условия)
         body->generate_bytecode();
-        bc::bytecode.emplace_back(bc::OP::JUMP, while_start);
+        bc::bytecode.emplace_back(bc::OP::JUMP, llvm::APInt(128, while_start));
 
         // Метка конца цикла
-        bc::bytecode.emplace_back(bc::OP::LABEL, while_end);
+        bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, while_end));
     }
 };

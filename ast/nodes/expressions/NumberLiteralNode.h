@@ -4,7 +4,7 @@
 
 class NumberLiteralNode : public LiteralNode {
 public:
-    uint64_t value;
+    uint64_t value; //А че тут 64?
 
     NumberLiteralNode(const std::string& value) {
         this->value = std::stoi(value);
@@ -18,7 +18,7 @@ public:
     }
 
     void generate_bytecode() override {
-        bc::bytecode.emplace_back(bc::LOAD_CONST, this->value);
+        bc::bytecode.emplace_back(bc::LOAD_CONST, llvm::APInt(128, this->value));
     }
 
     llvm::Value *Codegen() override;
