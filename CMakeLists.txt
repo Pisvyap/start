@@ -71,6 +71,8 @@ set(
         ast/nodes/statements/PrintStatementNode.h
         bytecode/bytecode.cpp
         bytecode/bytecode.h
+        vm/VirtualMachine.cpp
+        vm/VirtualMachine.h
 )
 
 if(MSVC)
