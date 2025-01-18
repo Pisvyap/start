@@ -1,3 +1,1 @@
-schitaem (pust k: chislo = 0 ; k < 10; k = k + 1;){
-    k -> glaza;
-}
+pust x: chislo = 1 + 2 * 3 - 3 / 2;

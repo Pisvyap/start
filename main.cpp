@@ -786,6 +786,57 @@ void optimize() {
     modulePassManager.run(*module, mam);
 }
 
+// Здесь будет пока что только свертка констант
+void bytecode_optimize(){
+    bool flag;
+    do {
+        auto array_size = bc::bytecode.size();
+        flag = false;
+        for (int i = 0; i < array_size; i++){
+            if (bc::bytecode[i].op == bc::OP::ADD) {
+                if (bc::bytecode[i-1].op == bc::OP::LOAD_CONST && bc::bytecode[i-2].op == bc::OP::LOAD_CONST) {
+                    bc::bytecode[i-2].op = bc::OP::LOAD_CONST;
+                    bc::bytecode[i-2].operand = bc::bytecode[i-2].operand + bc::bytecode[i-1].operand;
+                    bc::bytecode.erase(bc::bytecode.begin() + i - 1, bc:: bytecode.cbegin() + i + 1);
+                    i -=2;
+                    array_size-=2;
+                    flag = true;
+                }
+            }
+            if (bc::bytecode[i].op == bc::OP::SUB) {
+                if (bc::bytecode[i-1].op == bc::OP::LOAD_CONST && bc::bytecode[i-2].op == bc::OP::LOAD_CONST) {
+                    bc::bytecode[i-2].op = bc::OP::LOAD_CONST;
+                    bc::bytecode[i-2].operand = bc::bytecode[i-1].operand -bc::bytecode[i-2].operand;
+                    bc::bytecode.erase(bc::bytecode.begin() + i - 1, bc:: bytecode.cbegin() + i + 1);
+                    i -=2;
+                    array_size-=2;
+                    flag = true;
+                }
+            }
+            if (bc::bytecode[i].op == bc::OP::MUL) {
+                if (bc::bytecode[i-1].op == bc::OP::LOAD_CONST && bc::bytecode[i-2].op == bc::OP::LOAD_CONST) {
+                    bc::bytecode[i-2].op = bc::OP::LOAD_CONST;
+                    bc::bytecode[i-2].operand = bc::bytecode[i-2].operand * bc::bytecode[i-1].operand;
+                    bc::bytecode.erase(bc::bytecode.begin() + i - 1, bc:: bytecode.cbegin() + i + 1);
+                    i -=2;
+                    array_size-=2;
+                    flag = true;
+                }
+            }
+            if (bc::bytecode[i].op == bc::OP::DIV) {
+                if (bc::bytecode[i-1].op == bc::OP::LOAD_CONST && bc::bytecode[i-2].op == bc::OP::LOAD_CONST) {
+                    bc::bytecode[i-2].op = bc::OP::LOAD_CONST;
+                    bc::bytecode[i-2].operand = bc::bytecode[i-1].operand.sdiv(bc::bytecode[i-2].operand);
+                    bc::bytecode.erase(bc::bytecode.begin() + i - 1, bc:: bytecode.cbegin() + i + 1);
+                    i -=2;
+                    array_size-=2;
+                    flag = true;
+                }
+            }
+        }
+    } while (flag);
+}
+
 int main(int argc, char *argv[]) {
     GC_INIT()
 
@@ -802,6 +853,10 @@ int main(int argc, char *argv[]) {
 
     if (interpreter_or_compile == "-I"){
         AST->generate_bytecode();
+        bc::print_bytecode();
+        std::cout << "ABOBA" << std::endl;
+        bytecode_optimize();
+
         bc::print_bytecode();
         //todo тут еще доделываем интерпретатор
         return 0;
