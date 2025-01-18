@@ -8,6 +8,11 @@ namespace vm {
     VirtualMachine::VirtualMachine() = default;
 
     void VirtualMachine::execute(const std::vector<bc::Instruction> &bytecode) {
+        for (size_t i = 0; i < bytecode.size(); i++) {
+            if (bytecode[i].op == bc::LABEL) {
+                handleLabel(bytecode[i], i);
+            }
+        }
         while (instructionPointer < bytecode.size()) {
             const auto &instr = bytecode[instructionPointer];
 
@@ -81,15 +86,15 @@ namespace vm {
                     break;
 
                 case bc::LABEL:
-                    handleLabel();
+                    handlePass();
                     break;
 
                 case bc::JUMP_IF_FALSE:
-                    handleJumpIfFalse();
+                    handleJumpIfFalse(instr, instructionPointer);
                     break;
 
                 case bc::JUMP:
-                    handleJump();
+                    handleJump(instr, instructionPointer);
                     break;
 
                 case bc::GT:
@@ -230,7 +235,7 @@ namespace vm {
         dataStack.pop_back();
         llvm::APInt a = dataStack.back();
         dataStack.pop_back();
-        dataStack.push_back(llvm::APInt(128, a.slt(b)));
+        dataStack.push_back(llvm::APInt(128, b.slt(a)));
     }
 
     void VirtualMachine::handleLe() {
@@ -377,11 +382,26 @@ namespace vm {
 
     void VirtualMachine::handleReturn() {}
 
-    void VirtualMachine::handleLabel() {}
+    void VirtualMachine::handleLabel(const bc::Instruction &instr, size_t &currentPointer) {
+        labels.insert(std::make_pair(instr.operand.getLimitedValue(), currentPointer)); //Тут у него какие-то вопросы к APInt, пока так (хотя я сомневаюсь что нам понадобится так много якорей)
+    }
 
-    void VirtualMachine::handleJumpIfFalse() {}
+    void VirtualMachine::handleJumpIfFalse(const bc::Instruction &instr, size_t &currentPointer) {
+        if (dataStack.empty()) {
+            throw std::runtime_error("Stack underflow on JumpIfFalse");
+        }
+        auto toJumpIfFalse = dataStack.back();
+        dataStack.pop_back();
+        if (toJumpIfFalse == 0) {
+            if (labels.find(instr.operand.getLimitedValue()) != labels.end()) {
+                currentPointer = labels[instr.operand.getLimitedValue()];
+            }
+        }
+    }
 
-    void VirtualMachine::handleJump() {}
+    void VirtualMachine::handleJump(const bc::Instruction &instr, size_t &currentPointer) {
+        currentPointer = labels[instr.operand.getLimitedValue()];
+    }
 
     void VirtualMachine::handleNot() {
         if (dataStack.empty()) {

@@ -7,6 +7,7 @@
 #include "ast/ASTNode.h"
 #include "grammar/typlypLexer.h"
 
+#include "vm/VirtualMachine.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Module.h"
@@ -854,11 +855,11 @@ int main(int argc, char *argv[]) {
     if (interpreter_or_compile == "-I"){
         AST->generate_bytecode();
         bc::print_bytecode();
-        std::cout << "ABOBA" << std::endl;
+        std::cout << "---ABOBA---" << std::endl;
         bytecode_optimize();
-
         bc::print_bytecode();
-        //todo тут еще доделываем интерпретатор
+        auto* virtualMachine = new vm::VirtualMachine();
+        virtualMachine->execute(bc::bytecode);
         return 0;
     }
     else if (interpreter_or_compile == "-C"){
