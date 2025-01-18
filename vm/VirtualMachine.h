@@ -1,14 +1,15 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include "llvm/ADT/APInt.h"
 #include "gc.h"
 #include "../bytecode/bytecode.h"
 
 namespace vm {
 
     struct VirtualMachine {
-        std::vector<uint64_t> dataStack;               // Стек данных
-        std::unordered_map<std::string, uint64_t> vars; // Переменные
+        std::vector<llvm::APInt> dataStack;               // Стек данных
+        std::unordered_map<std::string, llvm::APInt> vars; // Переменные
         size_t instructionPointer = 0;                // Указатель на текущую инструкцию
 
         VirtualMachine();
@@ -39,9 +40,12 @@ namespace vm {
         void handleLe();
         void handleEq();
         void handleNe();
+        void handleSub();
+        void handleMul();
+        void handleDiv();
         void handleNot();
 
-        void handleUnsupported(bc::OP op)
+        void handleUnsupported(bc::OP op);
     };
 
 

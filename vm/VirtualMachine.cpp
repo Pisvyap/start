@@ -1,13 +1,11 @@
 #include "VirtualMachine.h"
+#include "llvm/ADT/SmallString.h"
 #include <stdexcept>
 #include <iostream>
 
 namespace vm {
 
-    // Конструктор
-    VirtualMachine::VirtualMachine() {
-        GC_INIT(); // Инициализация BDWGC
-    }
+    VirtualMachine::VirtualMachine() = default;
 
     void VirtualMachine::execute(const std::vector<bc::Instruction> &bytecode) {
         while (instructionPointer < bytecode.size()) {
@@ -28,6 +26,18 @@ namespace vm {
 
                 case bc::ADD:
                     handleAdd();
+                    break;
+
+                case bc::SUB:
+                    handleSub();
+                    break;
+
+                case bc::MUL:
+                    handleMul();
+                    break;
+
+                case bc::DIV:
+                    handleDiv();
                     break;
 
                 case bc::PRINT:
@@ -147,18 +157,123 @@ namespace vm {
         if (dataStack.size() < 2) {
             throw std::runtime_error("Stack underflow on ADD");
         }
-        uint64_t b = dataStack.back();
+        llvm::APInt b = dataStack.back();
         dataStack.pop_back();
-        uint64_t a = dataStack.back();
+        llvm::APInt a = dataStack.back();
         dataStack.pop_back();
         dataStack.push_back(a + b);
     }
+
+    void VirtualMachine::handleSub() {
+        if (dataStack.size() < 2) {
+            throw std::runtime_error("Stack underflow on SUB");
+        }
+        llvm::APInt b = dataStack.back();
+        dataStack.pop_back();
+        llvm::APInt a = dataStack.back();
+        dataStack.pop_back();
+        dataStack.push_back(a - b);
+    }
+
+    void VirtualMachine::handleMul() {
+        if (dataStack.size() < 2) {
+            throw std::runtime_error("Stack underflow on MUL");
+        }
+        llvm::APInt b = dataStack.back();
+        dataStack.pop_back();
+        llvm::APInt a = dataStack.back();
+        dataStack.pop_back();
+        dataStack.push_back(a * b);
+    }
+
+    void VirtualMachine::handleDiv() {
+        if (dataStack.size() < 2) {
+            throw std::runtime_error("Stack underflow on DIV");
+        }
+        llvm::APInt b = dataStack.back();
+        dataStack.pop_back();
+        if (b == 0) {
+            throw std::runtime_error("Division by zero");
+        }
+        llvm::APInt a = dataStack.back();
+        dataStack.pop_back();
+        dataStack.push_back(a.sdiv(b));
+    }
+
+    void VirtualMachine::handleGt() {
+        if (dataStack.size() < 2) {
+            throw std::runtime_error("Stack underflow on GT");
+        }
+        llvm::APInt b = dataStack.back();
+        dataStack.pop_back();
+        llvm::APInt a = dataStack.back();
+        dataStack.pop_back();
+        dataStack.push_back(llvm::APInt(128, a.sgt(b)));
+    }
+
+    void VirtualMachine::handleGe() {
+        if (dataStack.size() < 2) {
+            throw std::runtime_error("Stack underflow on GE");
+        }
+        llvm::APInt b = dataStack.back();
+        dataStack.pop_back();
+        llvm::APInt a = dataStack.back();
+        dataStack.pop_back();
+        dataStack.push_back(llvm::APInt(128, a.sge(b)));
+    }
+
+    void VirtualMachine::handleLt() {
+        if (dataStack.size() < 2) {
+            throw std::runtime_error("Stack underflow on LT");
+        }
+        llvm::APInt b = dataStack.back();
+        dataStack.pop_back();
+        llvm::APInt a = dataStack.back();
+        dataStack.pop_back();
+        dataStack.push_back(llvm::APInt(128, a.slt(b)));
+    }
+
+    void VirtualMachine::handleLe() {
+        if (dataStack.size() < 2) {
+            throw std::runtime_error("Stack underflow on LE");
+        }
+        llvm::APInt b = dataStack.back();
+        dataStack.pop_back();
+        llvm::APInt a = dataStack.back();
+        dataStack.pop_back();
+        dataStack.push_back(llvm::APInt(128, a.sle(b)));
+    }
+
+    void VirtualMachine::handleEq() {
+        if (dataStack.size() < 2) {
+            throw std::runtime_error("Stack underflow on EQ");
+        }
+        llvm::APInt b = dataStack.back();
+        dataStack.pop_back();
+        llvm::APInt a = dataStack.back();
+        dataStack.pop_back();
+        dataStack.push_back(llvm::APInt(128, a.eq(b)));
+    }
+
+    void VirtualMachine::handleNe() {
+        if (dataStack.size() < 2) {
+            throw std::runtime_error("Stack underflow on NE");
+        }
+        llvm::APInt b = dataStack.back();
+        dataStack.pop_back();
+        llvm::APInt a = dataStack.back();
+        dataStack.pop_back();
+        dataStack.push_back(llvm::APInt(128, !a.eq(b)));
+    }
+
 
     void VirtualMachine::handlePrint() {
         if (dataStack.empty()) {
             throw std::runtime_error("Stack underflow on PRINT");
         }
-        std::cout << "Output: " << dataStack.back() << std::endl;
+        llvm::SmallString<40> operandBuffer;
+        dataStack.back().toString(operandBuffer, 10, true);
+        std::cout << operandBuffer.c_str() << std::endl;
         dataStack.pop_back();
     }
 
@@ -166,26 +281,67 @@ namespace vm {
         if (!instr.has_operand) {
             throw std::runtime_error("ALLOC missing size operand");
         }
+
+        if (!instr.operand.isIntN(sizeof(size_t) * 8)) {
+            throw std::runtime_error("ALLOC operand exceeds platform size limit");
+        }
+
+        auto allocSize = static_cast<size_t>(instr.operand.getLimitedValue());
+
         // Выделяем память через GC_MALLOC
-        dataStack.push_back(reinterpret_cast<uint64_t>(GC_MALLOC(instr.operand)));
+        void *allocatedMemory = GC_MALLOC(allocSize);
+        if (!allocatedMemory) {
+            throw std::runtime_error("Memory allocation failed");
+        }
+
+        // Сохраняем указатель как llvm::APInt в стек
+        llvm::APInt ptrValue(sizeof(uintptr_t) * 8, reinterpret_cast<uintptr_t>(allocatedMemory));
+        dataStack.push_back(ptrValue);
     }
 
     void VirtualMachine::handleStoreInArray() {
-        uint64_t value = dataStack.back();
+        llvm::APInt value = dataStack.back();
         dataStack.pop_back();
-        uint64_t index = dataStack.back();
+
+        llvm::APInt index = dataStack.back();
         dataStack.pop_back();
-        uint64_t *arrayPtr = reinterpret_cast<uint64_t *>(dataStack.back());
+
+        llvm::APInt arrayPtrAPInt = dataStack.back();
         dataStack.pop_back();
-        arrayPtr[index] = value;
+
+        // Преобразуем указатель в реальный указатель на массив
+        uint64_t *arrayPtr = reinterpret_cast<uint64_t *>(arrayPtrAPInt.getLimitedValue());
+
+        uint64_t indexValue = index.getLimitedValue();
+
+        if (!arrayPtr) {
+            throw std::runtime_error("Null pointer dereferenced");
+        }
+
+        // Сохраняем значение в массиве
+        llvm::APInt *targetCell = reinterpret_cast<llvm::APInt *>(&arrayPtr[indexValue]);
+        *targetCell = value;
     }
 
     void VirtualMachine::handleLoadFromArray() {
-        uint64_t index = dataStack.back();
+        llvm::APInt index = dataStack.back();
         dataStack.pop_back();
-        uint64_t *arrayPtr = reinterpret_cast<uint64_t *>(dataStack.back());
+
+        llvm::APInt arrayPtrAPInt = dataStack.back();
         dataStack.pop_back();
-        dataStack.push_back(arrayPtr[index]);
+
+        // Преобразуем указатель из APInt в реальный указатель на массив
+        llvm::APInt *arrayPtr = reinterpret_cast<llvm::APInt *>(arrayPtrAPInt.getLimitedValue());
+
+        if (!arrayPtr) {
+            throw std::runtime_error("Null pointer dereferenced");
+        }
+
+        uint64_t indexValue = index.getLimitedValue();
+
+        llvm::APInt value = arrayPtr[indexValue];
+
+        dataStack.push_back(value);
     }
 
     void VirtualMachine::handleUnsupported(bc::OP op) {
@@ -210,18 +366,6 @@ namespace vm {
     void VirtualMachine::handleJumpIfFalse() {}
 
     void VirtualMachine::handleJump() {}
-
-    void VirtualMachine::handleGt() {}
-
-    void VirtualMachine::handleGe() {}
-
-    void VirtualMachine::handleLt() {}
-
-    void VirtualMachine::handleLe() {}
-
-    void VirtualMachine::handleEq() {}
-
-    void VirtualMachine::handleNe() {}
 
     void VirtualMachine::handleNot() {}
 }

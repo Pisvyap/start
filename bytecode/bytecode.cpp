@@ -3,6 +3,7 @@
 //
 
 #include "bytecode.h"
+#include "llvm/ADT/SmallString.h"
 
 #include <iostream>
 
@@ -16,8 +17,12 @@ void bc::print_bytecode() {
         if (bc.has_name)
             std::cout << ' ' << bc.name;
 
-        if (bc.has_operand)
-            std::cout << ' ' << bc.operand;
+        if (bc.has_operand){
+            llvm::SmallString<40> operandBuffer;
+            bc.operand.toString(operandBuffer, 10, true);
+            std::cout << ' ' << operandBuffer.c_str();
+        }
+
 
         std::cout << '\n';
     }

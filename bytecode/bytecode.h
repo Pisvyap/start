@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include "llvm/ADT/APInt.h"
 
 namespace bc {
     enum OP {
@@ -52,24 +53,24 @@ namespace bc {
     // ADD
     struct Instruction {
         OP op;
-        uint64_t operand; // возможное число
+        llvm::APInt operand; // возможное число
         std::string name; // возможное имя
         bool has_operand;
         bool has_name;
 
         Instruction()
-                    : op(PASS), operand(0), has_operand(false), has_name(false) {}
+                    : op(PASS), operand(128,0), has_operand(false), has_name(false) {}
 
         explicit Instruction(const OP op)
-                    : op(op), operand(0), has_operand(false), has_name(false) {}
+                    : op(op), operand(128, 0), has_operand(false), has_name(false) {}
 
-        Instruction(const OP op, const uint64_t operand)
+        Instruction(const OP op, const llvm::APInt operand)
                     : op(op), operand(operand), has_operand(true), has_name(false) {}
 
         Instruction(const OP op, const std::string &name)
-                    : op(op), operand(0), name(name), has_operand(false), has_name(true) {}
+                    : op(op), operand(128, 0), name(name), has_operand(false), has_name(true) {}
 
-        Instruction(const OP op, const std::string& name, const uint64_t operand)
+        Instruction(const OP op, const std::string& name, const llvm::APInt operand)
                     : op(op), operand(operand), name(name), has_operand(true), has_name(true) {}
     };
 
