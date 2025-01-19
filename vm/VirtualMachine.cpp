@@ -275,7 +275,7 @@ namespace vm {
         }
         llvm::APInt a = dataStack.back();
         dataStack.pop_back();
-        dataStack.push_back(a.sdiv(b));
+        dataStack.push_back(b.sdiv(a));
     }
 
     void VirtualMachine::handleGt() {
@@ -286,6 +286,8 @@ namespace vm {
         dataStack.pop_back();
         llvm::APInt a = dataStack.back();
         dataStack.pop_back();
+        a = (a.getLimitedValue() == 0) ? llvm::APInt(128, 0) : a ;
+        b = (b.getLimitedValue() == 0) ? llvm::APInt(128, 0) : b ;
         dataStack.push_back(llvm::APInt(128, b.sgt(a)));
     }
 
@@ -418,7 +420,6 @@ namespace vm {
         uint64_t indexValue = index.getLimitedValue();
 
         llvm::APInt value = arrayPtr[indexValue];
-
         dataStack.push_back(value);
     }
 
@@ -431,22 +432,40 @@ namespace vm {
         //Курим бамбук
     }
 
-    void VirtualMachine::handleLoadPtr(const bc::Instruction &instr) { //Наскок я понял, тут отличие только в том, что это указатели, поэтому тот же что и для VAR
+    void VirtualMachine::handleLoadPtr(const bc::Instruction &instr) {
         if (!instr.has_name) {
-            throw std::runtime_error("LOAD_PTR missing ptr name");
+            throw std::runtime_error("LOAD_VAR missing variable name");
         }
-        if (vars.find(instr.name) == vars.end()) {
-            throw std::runtime_error("Ptr not found: " + instr.name);
+
+        if (!functionStack.empty() && functionStack.back().find(instr.name) != functionStack.back().end()) {
+            dataStack.push_back(functionStack.back()[instr.name]); // Загружаем из локального контекста
+        } else if (vars.find(instr.name) != vars.end()) {
+            dataStack.push_back(vars[instr.name]); // Загружаем из глобальных переменных
+        } else {
+            throw std::runtime_error("Variable not found: " + instr.name);
         }
-        dataStack.push_back(vars[instr.name]);
     }
+
 
     void VirtualMachine::handleStorePtr(const bc::Instruction &instr) {
         if (!instr.has_name) {
-            throw std::runtime_error("STORE_PTR missing ptr name");
+            throw std::runtime_error("STORE_VAR missing variable name");
         }
-        vars[instr.name] = dataStack.back();
+        if (dataStack.empty()) {
+            throw std::runtime_error("Stack underflow on STORE_VAR");
+        }
+
+
+        llvm::APInt value = dataStack.back();
+
+
         dataStack.pop_back();
+
+        if (!functionStack.empty()) {
+            functionStack.back()[instr.name] = value; // Сохраняем в локальном контексте
+        } else {
+            vars[instr.name] = value; // Сохраняем в глобальных переменных
+        }
     }
 
     void VirtualMachine::handleFuncBegin(const bc::Instruction& instr) {
