@@ -314,17 +314,18 @@ namespace vm {
     }
 
     void VirtualMachine::handleStoreInArray() {
+
+        llvm::APInt arrayPtrAPInt = dataStack.back();
+        dataStack.pop_back();
+
         llvm::APInt value = dataStack.back();
         dataStack.pop_back();
 
         llvm::APInt index = dataStack.back();
         dataStack.pop_back();
 
-        llvm::APInt arrayPtrAPInt = dataStack.back();
-        dataStack.pop_back();
-
         // Преобразуем указатель в реальный указатель на массив
-        uint64_t *arrayPtr = reinterpret_cast<uint64_t *>(arrayPtrAPInt.getLimitedValue());
+        llvm::APInt *arrayPtr = reinterpret_cast<llvm::APInt *>(arrayPtrAPInt.getLimitedValue());
 
         uint64_t indexValue = index.getLimitedValue();
 
@@ -338,10 +339,10 @@ namespace vm {
     }
 
     void VirtualMachine::handleLoadFromArray() {
-        llvm::APInt index = dataStack.back();
+        llvm::APInt arrayPtrAPInt = dataStack.back();
         dataStack.pop_back();
 
-        llvm::APInt arrayPtrAPInt = dataStack.back();
+        llvm::APInt index = dataStack.back();
         dataStack.pop_back();
 
         // Преобразуем указатель из APInt в реальный указатель на массив
