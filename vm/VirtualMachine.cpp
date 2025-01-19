@@ -303,7 +303,7 @@ namespace vm {
         }
 
         // Выделяем память через GC_MALLOC
-        void *allocatedMemory = GC_MALLOC(allocSize.getLimitedValue());
+        void *allocatedMemory = GC_MALLOC(allocSize.getLimitedValue() * 16);
         if (!allocatedMemory) {
             throw std::runtime_error("Memory allocation failed");
         }
@@ -314,7 +314,6 @@ namespace vm {
     }
 
     void VirtualMachine::handleStoreInArray() {
-
         llvm::APInt arrayPtrAPInt = dataStack.back();
         dataStack.pop_back();
 
