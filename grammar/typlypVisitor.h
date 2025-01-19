@@ -23,8 +23,6 @@ public:
 
     virtual std::any visitFunctionDecl(typlypParser::FunctionDeclContext *context) = 0;
 
-    virtual std::any visitExternalDecl(typlypParser::ExternalDeclContext *context) = 0;
-
     virtual std::any visitParamList(typlypParser::ParamListContext *context) = 0;
 
     virtual std::any visitParam(typlypParser::ParamContext *context) = 0;

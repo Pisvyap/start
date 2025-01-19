@@ -1,24 +1,24 @@
-pust n: chislo = 100000;
-pust primes: logika<> = new logika<100000>;
+n kak chislo <- 100000;
+primes kak logika<> <- logika<100000>;
 
-schitaem (pust k: chislo = 0 ; k < n; k = k + 1;){
-    primes[k] = pravda;
+(k kak chislo <- 0 | k < n | k <- k + 1) -> perebor {
+    da -> primes[k];
 }
 
-primes[0] = lozh;
-primes[1] = lozh;
+primes[0] = net;
+primes[1] = net;
 
-schitaem (pust p: chislo = 2; p * p <= n; p = p + 1;) {
-    esli (primes[p] == pravda) {
+perebor <- (p kak chislo <- 2 | p * p <= n | p = p + 1) {
+    esli <- primes[p] = da {
         p -> glaza;
-        schitaem (pust i: chislo = p; i < n; i = i + p;){
-            primes[i] = lozh;
+        perebor <- (i kak chislo <- p | i < n | i = i + p) {
+            primes[i] <- net;
         }
     }
 }
 
-schitaem (pust j: chislo = 0 ; j < n; j = j + 1;){
-    esli (primes[j]){
+(j kak chislo <- 0 | j < n | j + 1 -> j ) -> perebor {
+    esli <- (primes[j]) {
         j -> glaza;
     }
 }

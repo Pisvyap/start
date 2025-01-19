@@ -1,4 +1,10 @@
-pust r: chislo = 3;
-1 + 1;
-1 + 1;
-pust n: chislo<> = new chislo<r>;
+delo factorial(n kak chislo) -> chislo {
+        esli <- (n = 0) {
+            n <- 1;
+        } inache {
+            n <- n * factorial(n - 1);
+        }
+        otdau n;
+}
+result kak chislo <- factorial(5);
+result -> glaza;

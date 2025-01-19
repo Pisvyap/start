@@ -518,7 +518,7 @@ Value *PrintStatementNode::Codegen() {
 
         Builder.SetInsertPoint(afterPrintBlock);
     } else if (valueType->isIntegerTy(1)) {
-        Constant *trueStrConst = ConstantDataArray::getString(*context, "pravda\n");
+        Constant *trueStrConst = ConstantDataArray::getString(*context, "da\n");
         auto trueStrVar = new GlobalVariable(
                 *module,
                 trueStrConst->getType(),
@@ -528,7 +528,7 @@ Value *PrintStatementNode::Codegen() {
                 ".strTrue"
         );
 
-        Constant *falseStrConst = ConstantDataArray::getString(*context, "lozh\n");
+        Constant *falseStrConst = ConstantDataArray::getString(*context, "net\n");
         auto falseStrVar = new GlobalVariable(
                 *module,
                 falseStrConst->getType(),

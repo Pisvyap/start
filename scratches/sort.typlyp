@@ -1,27 +1,27 @@
-delo partition(arr: chislo<>, left: chislo, right: chislo, pivot: chislo): chislo {
-    poka (left <= right) {
-        poka (arr[left] < pivot) {
-            left = left + 1;
+delo partition(arr kak chislo<>, left kak chislo, right kak chislo, pivot kak chislo) -> chislo {
+    poka <- (left <= right) {
+        poka <- (arr[left] < pivot) {
+            left + 1 -> left;
         }
 
-        poka (arr[right] > pivot) {
-            right = right - 1;
+        (arr[right] > pivot) -> poka {
+            right <- right - 1;
         }
 
-        esli (left <= right) {
-            pust temp: chislo = arr[left];
-            arr[left] = arr[right];
-            arr[right] = temp;
+        esli <- (left <= right) {
+            temp kak chislo = arr[left];
+            arr[left] <- arr[right];
+            temp -> arr[right];
 
-            left = left + 1;
-            right = right - 1;
+            left <- left + 1;
+            right -1 -> right;
         }
     }
 
-    vernut left;
+    otdau left;
 }
 
-delo quickSort(arr: chislo<>, left: chislo, right: chislo): chislo {
+delo quickSort(arr kak chislo<>, left kak chislo, right kak chislo): chislo {
     esli (left < right) {
         pust pivot: chislo = arr[(left + right) / 2];
         pust index: chislo = partition(arr, left, right, pivot);

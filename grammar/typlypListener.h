@@ -20,9 +20,6 @@ public:
   virtual void enterFunctionDecl(typlypParser::FunctionDeclContext *ctx) = 0;
   virtual void exitFunctionDecl(typlypParser::FunctionDeclContext *ctx) = 0;
 
-  virtual void enterExternalDecl(typlypParser::ExternalDeclContext *ctx) = 0;
-  virtual void exitExternalDecl(typlypParser::ExternalDeclContext *ctx) = 0;
-
   virtual void enterParamList(typlypParser::ParamListContext *ctx) = 0;
   virtual void exitParamList(typlypParser::ParamListContext *ctx) = 0;
 

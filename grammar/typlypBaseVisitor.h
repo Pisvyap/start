@@ -23,10 +23,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitExternalDecl(typlypParser::ExternalDeclContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitParamList(typlypParser::ParamListContext *ctx) override {
     return visitChildren(ctx);
   }

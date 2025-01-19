@@ -53,113 +53,131 @@ void typlypParserInitialize() {
 #endif
   auto staticData = std::make_unique<TyplypParserStaticData>(
     std::vector<std::string>{
-      "program", "functionDecl", "externalDecl", "paramList", "param", "block", 
-      "statement", "varDecl", "assignment", "arrayAssignment", "returnStatement", 
-      "ifStatement", "whileStatement", "forStatement", "printStatement", 
-      "expr", "argList", "exprList", "type", "voidType", "scalarType", "arrayType"
+      "program", "functionDecl", "paramList", "param", "block", "statement", 
+      "varDecl", "assignment", "arrayAssignment", "returnStatement", "ifStatement", 
+      "whileStatement", "forStatement", "printStatement", "expr", "argList", 
+      "exprList", "type", "voidType", "scalarType", "arrayType"
     },
     std::vector<std::string>{
-      "", "'delo'", "':'", "'vneshnaya'", "'pust'", "'vernut'", "'esli'", 
-      "'inache'", "'poka'", "'schitaem'", "'->'", "'glaza'", "'new'", "'extern'", 
-      "'nebytie'", "'chislo'", "'logika'", "", "", "", "", "", "", "'+'", 
-      "'-'", "'*'", "'/'", "'%'", "'<'", "'<='", "'>'", "'>='", "'=='", 
-      "'!='", "'&&'", "'||'", "'!'", "'='", "'['", "']'", "'('", "')'", 
-      "'{'", "'}'", "';'", "','"
+      "", "'delo'", "'kak'", "'otdau'", "'esli'", "'inache'", "'poka'", 
+      "'perebor'", "'glaza'", "'new'", "'nebytie'", "'chislo'", "'logika'", 
+      "", "", "", "", "", "", "'+'", "'-'", "'*'", "'/'", "'%'", "'<'", 
+      "'<='", "'>'", "'>='", "'='", "'!='", "'&&'", "'||'", "'!'", "'<-'", 
+      "'->'", "'['", "']'", "'('", "')'", "'{'", "'}'", "';'", "','", "'|'"
     },
     std::vector<std::string>{
-      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-      "BOOL", "INT", "ID", "WS", "COMMENT", "LINE_COMMENT", "PLUS", "MINUS", 
-      "MULT", "DIV", "MOD", "LT", "LE", "GT", "GE", "EQ", "NEQ", "AND", 
-      "OR", "NOT", "ASSIGN", "LBRACKET", "RBRACKET", "LPAREN", "RPAREN", 
-      "LBRACE", "RBRACE", "SEMICOLON", "COMMA"
+      "", "", "", "", "", "", "", "", "", "", "", "", "", "BOOL", "INT", 
+      "ID", "WS", "COMMENT", "LINE_COMMENT", "PLUS", "MINUS", "MULT", "DIV", 
+      "MOD", "LT", "LE", "GT", "GE", "EQ", "NEQ", "AND", "OR", "NOT", "LASSIGN", 
+      "RASSIGN", "LBRACKET", "RBRACKET", "LPAREN", "RPAREN", "LBRACE", "RBRACE", 
+      "SEMICOLON", "COMMA", "DIVIDER"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,45,258,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
+  	4,1,43,310,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
   	7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,
-  	14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,20,7,20,2,21,7,
-  	21,1,0,1,0,1,0,5,0,48,8,0,10,0,12,0,51,9,0,1,0,1,0,1,1,1,1,1,1,1,1,3,
-  	1,59,8,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,2,1,2,3,2,70,8,2,1,2,1,2,1,2,1,
-  	2,1,2,1,3,1,3,1,3,5,3,80,8,3,10,3,12,3,83,9,3,1,4,1,4,1,4,1,4,1,5,1,5,
-  	5,5,91,8,5,10,5,12,5,94,9,5,1,5,1,5,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,
-  	6,1,6,1,6,3,6,109,8,6,1,7,1,7,1,7,1,7,1,7,1,7,3,7,117,8,7,1,7,1,7,1,8,
-  	1,8,1,8,1,8,1,8,1,9,1,9,1,9,1,9,1,9,1,9,1,9,1,9,1,10,1,10,1,10,1,10,1,
-  	11,1,11,1,11,1,11,1,11,1,11,1,11,3,11,145,8,11,1,12,1,12,1,12,1,12,1,
-  	12,1,12,1,13,1,13,1,13,3,13,156,8,13,1,13,3,13,159,8,13,1,13,1,13,3,13,
-  	163,8,13,1,13,1,13,1,13,1,14,1,14,1,14,1,14,1,14,1,15,1,15,1,15,1,15,
-  	1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,
-  	3,15,191,8,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,
-  	3,15,204,8,15,1,15,3,15,207,8,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,
-  	15,1,15,1,15,1,15,1,15,5,15,221,8,15,10,15,12,15,224,9,15,1,16,1,16,1,
-  	16,5,16,229,8,16,10,16,12,16,232,9,16,1,17,1,17,1,17,5,17,237,8,17,10,
-  	17,12,17,240,9,17,1,18,1,18,1,18,3,18,245,8,18,1,19,1,19,1,20,1,20,1,
-  	21,1,21,1,21,1,21,1,21,3,21,256,8,21,1,21,0,1,30,22,0,2,4,6,8,10,12,14,
-  	16,18,20,22,24,26,28,30,32,34,36,38,40,42,0,5,1,0,25,27,1,0,23,24,1,0,
-  	28,31,1,0,32,33,1,0,15,16,274,0,49,1,0,0,0,2,54,1,0,0,0,4,65,1,0,0,0,
-  	6,76,1,0,0,0,8,84,1,0,0,0,10,88,1,0,0,0,12,108,1,0,0,0,14,110,1,0,0,0,
-  	16,120,1,0,0,0,18,125,1,0,0,0,20,133,1,0,0,0,22,137,1,0,0,0,24,146,1,
-  	0,0,0,26,152,1,0,0,0,28,167,1,0,0,0,30,206,1,0,0,0,32,225,1,0,0,0,34,
-  	233,1,0,0,0,36,244,1,0,0,0,38,246,1,0,0,0,40,248,1,0,0,0,42,255,1,0,0,
-  	0,44,48,3,2,1,0,45,48,3,4,2,0,46,48,3,12,6,0,47,44,1,0,0,0,47,45,1,0,
-  	0,0,47,46,1,0,0,0,48,51,1,0,0,0,49,47,1,0,0,0,49,50,1,0,0,0,50,52,1,0,
-  	0,0,51,49,1,0,0,0,52,53,5,0,0,1,53,1,1,0,0,0,54,55,5,1,0,0,55,56,5,19,
-  	0,0,56,58,5,40,0,0,57,59,3,6,3,0,58,57,1,0,0,0,58,59,1,0,0,0,59,60,1,
-  	0,0,0,60,61,5,41,0,0,61,62,5,2,0,0,62,63,3,36,18,0,63,64,3,10,5,0,64,
-  	3,1,0,0,0,65,66,5,3,0,0,66,67,5,19,0,0,67,69,5,40,0,0,68,70,3,6,3,0,69,
-  	68,1,0,0,0,69,70,1,0,0,0,70,71,1,0,0,0,71,72,5,41,0,0,72,73,5,2,0,0,73,
-  	74,3,36,18,0,74,75,5,44,0,0,75,5,1,0,0,0,76,81,3,8,4,0,77,78,5,45,0,0,
-  	78,80,3,8,4,0,79,77,1,0,0,0,80,83,1,0,0,0,81,79,1,0,0,0,81,82,1,0,0,0,
-  	82,7,1,0,0,0,83,81,1,0,0,0,84,85,5,19,0,0,85,86,5,2,0,0,86,87,3,36,18,
-  	0,87,9,1,0,0,0,88,92,5,42,0,0,89,91,3,12,6,0,90,89,1,0,0,0,91,94,1,0,
-  	0,0,92,90,1,0,0,0,92,93,1,0,0,0,93,95,1,0,0,0,94,92,1,0,0,0,95,96,5,43,
-  	0,0,96,11,1,0,0,0,97,109,3,14,7,0,98,109,3,28,14,0,99,109,3,16,8,0,100,
-  	109,3,18,9,0,101,109,3,20,10,0,102,109,3,22,11,0,103,109,3,24,12,0,104,
-  	109,3,26,13,0,105,106,3,30,15,0,106,107,5,44,0,0,107,109,1,0,0,0,108,
-  	97,1,0,0,0,108,98,1,0,0,0,108,99,1,0,0,0,108,100,1,0,0,0,108,101,1,0,
-  	0,0,108,102,1,0,0,0,108,103,1,0,0,0,108,104,1,0,0,0,108,105,1,0,0,0,109,
-  	13,1,0,0,0,110,111,5,4,0,0,111,112,5,19,0,0,112,113,5,2,0,0,113,116,3,
-  	36,18,0,114,115,5,37,0,0,115,117,3,30,15,0,116,114,1,0,0,0,116,117,1,
-  	0,0,0,117,118,1,0,0,0,118,119,5,44,0,0,119,15,1,0,0,0,120,121,5,19,0,
-  	0,121,122,5,37,0,0,122,123,3,30,15,0,123,124,5,44,0,0,124,17,1,0,0,0,
-  	125,126,5,19,0,0,126,127,5,38,0,0,127,128,3,30,15,0,128,129,5,39,0,0,
-  	129,130,5,37,0,0,130,131,3,30,15,0,131,132,5,44,0,0,132,19,1,0,0,0,133,
-  	134,5,5,0,0,134,135,3,30,15,0,135,136,5,44,0,0,136,21,1,0,0,0,137,138,
-  	5,6,0,0,138,139,5,40,0,0,139,140,3,30,15,0,140,141,5,41,0,0,141,144,3,
-  	10,5,0,142,143,5,7,0,0,143,145,3,10,5,0,144,142,1,0,0,0,144,145,1,0,0,
-  	0,145,23,1,0,0,0,146,147,5,8,0,0,147,148,5,40,0,0,148,149,3,30,15,0,149,
-  	150,5,41,0,0,150,151,3,10,5,0,151,25,1,0,0,0,152,153,5,9,0,0,153,155,
-  	5,40,0,0,154,156,3,14,7,0,155,154,1,0,0,0,155,156,1,0,0,0,156,158,1,0,
-  	0,0,157,159,3,30,15,0,158,157,1,0,0,0,158,159,1,0,0,0,159,160,1,0,0,0,
-  	160,162,5,44,0,0,161,163,3,16,8,0,162,161,1,0,0,0,162,163,1,0,0,0,163,
-  	164,1,0,0,0,164,165,5,41,0,0,165,166,3,10,5,0,166,27,1,0,0,0,167,168,
-  	3,30,15,0,168,169,5,10,0,0,169,170,5,11,0,0,170,171,5,44,0,0,171,29,1,
-  	0,0,0,172,173,6,15,-1,0,173,174,5,36,0,0,174,207,3,30,15,9,175,207,5,
-  	19,0,0,176,177,5,19,0,0,177,178,5,38,0,0,178,179,3,30,15,0,179,180,5,
-  	39,0,0,180,207,1,0,0,0,181,207,5,18,0,0,182,207,5,17,0,0,183,184,5,40,
-  	0,0,184,185,3,30,15,0,185,186,5,41,0,0,186,207,1,0,0,0,187,188,5,19,0,
-  	0,188,190,5,40,0,0,189,191,3,32,16,0,190,189,1,0,0,0,190,191,1,0,0,0,
-  	191,192,1,0,0,0,192,207,5,41,0,0,193,194,5,12,0,0,194,195,3,40,20,0,195,
-  	196,5,28,0,0,196,197,3,30,15,0,197,198,5,30,0,0,198,207,1,0,0,0,199,200,
-  	5,13,0,0,200,201,5,19,0,0,201,203,5,40,0,0,202,204,3,32,16,0,203,202,
-  	1,0,0,0,203,204,1,0,0,0,204,205,1,0,0,0,205,207,5,41,0,0,206,172,1,0,
-  	0,0,206,175,1,0,0,0,206,176,1,0,0,0,206,181,1,0,0,0,206,182,1,0,0,0,206,
-  	183,1,0,0,0,206,187,1,0,0,0,206,193,1,0,0,0,206,199,1,0,0,0,207,222,1,
-  	0,0,0,208,209,10,13,0,0,209,210,7,0,0,0,210,221,3,30,15,14,211,212,10,
-  	12,0,0,212,213,7,1,0,0,213,221,3,30,15,13,214,215,10,11,0,0,215,216,7,
-  	2,0,0,216,221,3,30,15,12,217,218,10,10,0,0,218,219,7,3,0,0,219,221,3,
-  	30,15,11,220,208,1,0,0,0,220,211,1,0,0,0,220,214,1,0,0,0,220,217,1,0,
-  	0,0,221,224,1,0,0,0,222,220,1,0,0,0,222,223,1,0,0,0,223,31,1,0,0,0,224,
-  	222,1,0,0,0,225,230,3,30,15,0,226,227,5,45,0,0,227,229,3,30,15,0,228,
-  	226,1,0,0,0,229,232,1,0,0,0,230,228,1,0,0,0,230,231,1,0,0,0,231,33,1,
-  	0,0,0,232,230,1,0,0,0,233,238,3,30,15,0,234,235,5,45,0,0,235,237,3,30,
-  	15,0,236,234,1,0,0,0,237,240,1,0,0,0,238,236,1,0,0,0,238,239,1,0,0,0,
-  	239,35,1,0,0,0,240,238,1,0,0,0,241,245,3,40,20,0,242,245,3,42,21,0,243,
-  	245,3,38,19,0,244,241,1,0,0,0,244,242,1,0,0,0,244,243,1,0,0,0,245,37,
-  	1,0,0,0,246,247,5,14,0,0,247,39,1,0,0,0,248,249,7,4,0,0,249,41,1,0,0,
-  	0,250,256,1,0,0,0,251,252,3,40,20,0,252,253,5,28,0,0,253,254,5,30,0,0,
-  	254,256,1,0,0,0,255,250,1,0,0,0,255,251,1,0,0,0,256,43,1,0,0,0,21,47,
-  	49,58,69,81,92,108,116,144,155,158,162,190,203,206,220,222,230,238,244,
-  	255
+  	14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,20,7,20,1,0,1,
+  	0,5,0,45,8,0,10,0,12,0,48,9,0,1,0,1,0,1,1,1,1,1,1,1,1,3,1,56,8,1,1,1,
+  	1,1,1,1,1,1,1,1,1,2,1,2,1,2,5,2,66,8,2,10,2,12,2,69,9,2,1,3,1,3,1,3,1,
+  	3,1,4,1,4,5,4,77,8,4,10,4,12,4,80,9,4,1,4,1,4,1,5,1,5,1,5,1,5,1,5,1,5,
+  	1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,3,5,105,8,
+  	5,1,6,1,6,1,6,1,6,1,6,3,6,112,8,6,1,6,1,6,1,6,3,6,117,8,6,1,6,1,6,1,6,
+  	3,6,122,8,6,1,7,1,7,1,7,1,7,1,7,1,7,1,7,3,7,131,8,7,1,8,1,8,1,8,1,8,1,
+  	8,1,8,1,8,1,8,1,8,1,8,1,8,1,8,1,8,1,8,3,8,147,8,8,1,9,1,9,1,9,1,10,1,
+  	10,1,10,1,10,1,10,1,10,1,10,1,10,3,10,160,8,10,1,10,1,10,1,10,1,10,1,
+  	10,1,10,1,10,1,10,3,10,170,8,10,3,10,172,8,10,1,11,1,11,1,11,1,11,1,11,
+  	1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,3,11,188,8,11,1,12,1,12,
+  	1,12,1,12,3,12,194,8,12,1,12,3,12,197,8,12,1,12,1,12,3,12,201,8,12,1,
+  	12,1,12,1,12,3,12,206,8,12,1,12,1,12,3,12,210,8,12,1,12,1,12,3,12,214,
+  	8,12,1,12,1,12,1,12,3,12,219,8,12,1,12,1,12,1,13,1,13,1,13,1,13,1,13,
+  	1,13,1,13,3,13,230,8,13,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,
+  	1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,3,14,250,8,14,1,14,1,14,
+  	1,14,1,14,1,14,1,14,1,14,3,14,259,8,14,1,14,1,14,1,14,1,14,1,14,1,14,
+  	1,14,1,14,1,14,1,14,1,14,1,14,5,14,273,8,14,10,14,12,14,276,9,14,1,15,
+  	1,15,1,15,5,15,281,8,15,10,15,12,15,284,9,15,1,16,1,16,1,16,5,16,289,
+  	8,16,10,16,12,16,292,9,16,1,17,1,17,1,17,3,17,297,8,17,1,18,1,18,1,19,
+  	1,19,1,20,1,20,1,20,1,20,1,20,3,20,308,8,20,1,20,0,1,28,21,0,2,4,6,8,
+  	10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,0,5,1,0,21,23,1,0,19,
+  	20,1,0,24,27,1,0,28,29,1,0,11,12,335,0,46,1,0,0,0,2,51,1,0,0,0,4,62,1,
+  	0,0,0,6,70,1,0,0,0,8,74,1,0,0,0,10,104,1,0,0,0,12,121,1,0,0,0,14,130,
+  	1,0,0,0,16,146,1,0,0,0,18,148,1,0,0,0,20,171,1,0,0,0,22,187,1,0,0,0,24,
+  	218,1,0,0,0,26,229,1,0,0,0,28,258,1,0,0,0,30,277,1,0,0,0,32,285,1,0,0,
+  	0,34,296,1,0,0,0,36,298,1,0,0,0,38,300,1,0,0,0,40,307,1,0,0,0,42,45,3,
+  	2,1,0,43,45,3,10,5,0,44,42,1,0,0,0,44,43,1,0,0,0,45,48,1,0,0,0,46,44,
+  	1,0,0,0,46,47,1,0,0,0,47,49,1,0,0,0,48,46,1,0,0,0,49,50,5,0,0,1,50,1,
+  	1,0,0,0,51,52,5,1,0,0,52,53,5,15,0,0,53,55,5,37,0,0,54,56,3,4,2,0,55,
+  	54,1,0,0,0,55,56,1,0,0,0,56,57,1,0,0,0,57,58,5,38,0,0,58,59,5,34,0,0,
+  	59,60,3,34,17,0,60,61,3,8,4,0,61,3,1,0,0,0,62,67,3,6,3,0,63,64,5,42,0,
+  	0,64,66,3,6,3,0,65,63,1,0,0,0,66,69,1,0,0,0,67,65,1,0,0,0,67,68,1,0,0,
+  	0,68,5,1,0,0,0,69,67,1,0,0,0,70,71,5,15,0,0,71,72,5,2,0,0,72,73,3,34,
+  	17,0,73,7,1,0,0,0,74,78,5,39,0,0,75,77,3,10,5,0,76,75,1,0,0,0,77,80,1,
+  	0,0,0,78,76,1,0,0,0,78,79,1,0,0,0,79,81,1,0,0,0,80,78,1,0,0,0,81,82,5,
+  	40,0,0,82,9,1,0,0,0,83,84,3,12,6,0,84,85,5,41,0,0,85,105,1,0,0,0,86,87,
+  	3,26,13,0,87,88,5,41,0,0,88,105,1,0,0,0,89,90,3,14,7,0,90,91,5,41,0,0,
+  	91,105,1,0,0,0,92,93,3,16,8,0,93,94,5,41,0,0,94,105,1,0,0,0,95,96,3,18,
+  	9,0,96,97,5,41,0,0,97,105,1,0,0,0,98,105,3,20,10,0,99,105,3,22,11,0,100,
+  	105,3,24,12,0,101,102,3,28,14,0,102,103,5,41,0,0,103,105,1,0,0,0,104,
+  	83,1,0,0,0,104,86,1,0,0,0,104,89,1,0,0,0,104,92,1,0,0,0,104,95,1,0,0,
+  	0,104,98,1,0,0,0,104,99,1,0,0,0,104,100,1,0,0,0,104,101,1,0,0,0,105,11,
+  	1,0,0,0,106,107,5,15,0,0,107,108,5,2,0,0,108,111,3,34,17,0,109,110,5,
+  	33,0,0,110,112,3,28,14,0,111,109,1,0,0,0,111,112,1,0,0,0,112,122,1,0,
+  	0,0,113,114,3,28,14,0,114,115,5,34,0,0,115,117,1,0,0,0,116,113,1,0,0,
+  	0,116,117,1,0,0,0,117,118,1,0,0,0,118,119,5,15,0,0,119,120,5,2,0,0,120,
+  	122,3,34,17,0,121,106,1,0,0,0,121,116,1,0,0,0,122,13,1,0,0,0,123,124,
+  	5,15,0,0,124,125,5,33,0,0,125,131,3,28,14,0,126,127,3,28,14,0,127,128,
+  	5,34,0,0,128,129,5,15,0,0,129,131,1,0,0,0,130,123,1,0,0,0,130,126,1,0,
+  	0,0,131,15,1,0,0,0,132,133,5,15,0,0,133,134,5,35,0,0,134,135,3,28,14,
+  	0,135,136,5,36,0,0,136,137,5,33,0,0,137,138,3,28,14,0,138,147,1,0,0,0,
+  	139,140,3,28,14,0,140,141,5,34,0,0,141,142,5,15,0,0,142,143,5,35,0,0,
+  	143,144,3,28,14,0,144,145,5,36,0,0,145,147,1,0,0,0,146,132,1,0,0,0,146,
+  	139,1,0,0,0,147,17,1,0,0,0,148,149,5,3,0,0,149,150,3,28,14,0,150,19,1,
+  	0,0,0,151,152,5,4,0,0,152,153,5,33,0,0,153,154,5,37,0,0,154,155,3,28,
+  	14,0,155,156,5,38,0,0,156,159,3,8,4,0,157,158,5,5,0,0,158,160,3,8,4,0,
+  	159,157,1,0,0,0,159,160,1,0,0,0,160,172,1,0,0,0,161,162,5,37,0,0,162,
+  	163,3,28,14,0,163,164,5,38,0,0,164,165,5,34,0,0,165,166,5,4,0,0,166,169,
+  	3,8,4,0,167,168,5,5,0,0,168,170,3,8,4,0,169,167,1,0,0,0,169,170,1,0,0,
+  	0,170,172,1,0,0,0,171,151,1,0,0,0,171,161,1,0,0,0,172,21,1,0,0,0,173,
+  	174,5,6,0,0,174,175,5,33,0,0,175,176,5,37,0,0,176,177,3,28,14,0,177,178,
+  	5,38,0,0,178,179,3,8,4,0,179,188,1,0,0,0,180,181,5,37,0,0,181,182,3,28,
+  	14,0,182,183,5,38,0,0,183,184,5,34,0,0,184,185,5,6,0,0,185,186,3,8,4,
+  	0,186,188,1,0,0,0,187,173,1,0,0,0,187,180,1,0,0,0,188,23,1,0,0,0,189,
+  	190,5,7,0,0,190,191,5,33,0,0,191,193,5,37,0,0,192,194,3,12,6,0,193,192,
+  	1,0,0,0,193,194,1,0,0,0,194,196,1,0,0,0,195,197,3,28,14,0,196,195,1,0,
+  	0,0,196,197,1,0,0,0,197,198,1,0,0,0,198,200,5,41,0,0,199,201,3,14,7,0,
+  	200,199,1,0,0,0,200,201,1,0,0,0,201,202,1,0,0,0,202,219,5,38,0,0,203,
+  	205,5,37,0,0,204,206,3,12,6,0,205,204,1,0,0,0,205,206,1,0,0,0,206,207,
+  	1,0,0,0,207,209,5,43,0,0,208,210,3,28,14,0,209,208,1,0,0,0,209,210,1,
+  	0,0,0,210,211,1,0,0,0,211,213,5,43,0,0,212,214,3,14,7,0,213,212,1,0,0,
+  	0,213,214,1,0,0,0,214,215,1,0,0,0,215,216,5,38,0,0,216,217,5,34,0,0,217,
+  	219,5,7,0,0,218,189,1,0,0,0,218,203,1,0,0,0,219,220,1,0,0,0,220,221,3,
+  	8,4,0,221,25,1,0,0,0,222,223,3,28,14,0,223,224,5,34,0,0,224,225,5,8,0,
+  	0,225,230,1,0,0,0,226,227,5,8,0,0,227,228,5,33,0,0,228,230,3,28,14,0,
+  	229,222,1,0,0,0,229,226,1,0,0,0,230,27,1,0,0,0,231,232,6,14,-1,0,232,
+  	233,5,32,0,0,233,259,3,28,14,8,234,259,5,15,0,0,235,236,5,15,0,0,236,
+  	237,5,35,0,0,237,238,3,28,14,0,238,239,5,36,0,0,239,259,1,0,0,0,240,259,
+  	5,14,0,0,241,259,5,13,0,0,242,243,5,37,0,0,243,244,3,28,14,0,244,245,
+  	5,38,0,0,245,259,1,0,0,0,246,247,5,15,0,0,247,249,5,37,0,0,248,250,3,
+  	30,15,0,249,248,1,0,0,0,249,250,1,0,0,0,250,251,1,0,0,0,251,259,5,38,
+  	0,0,252,253,5,9,0,0,253,254,3,38,19,0,254,255,5,24,0,0,255,256,3,28,14,
+  	0,256,257,5,26,0,0,257,259,1,0,0,0,258,231,1,0,0,0,258,234,1,0,0,0,258,
+  	235,1,0,0,0,258,240,1,0,0,0,258,241,1,0,0,0,258,242,1,0,0,0,258,246,1,
+  	0,0,0,258,252,1,0,0,0,259,274,1,0,0,0,260,261,10,12,0,0,261,262,7,0,0,
+  	0,262,273,3,28,14,13,263,264,10,11,0,0,264,265,7,1,0,0,265,273,3,28,14,
+  	12,266,267,10,10,0,0,267,268,7,2,0,0,268,273,3,28,14,11,269,270,10,9,
+  	0,0,270,271,7,3,0,0,271,273,3,28,14,10,272,260,1,0,0,0,272,263,1,0,0,
+  	0,272,266,1,0,0,0,272,269,1,0,0,0,273,276,1,0,0,0,274,272,1,0,0,0,274,
+  	275,1,0,0,0,275,29,1,0,0,0,276,274,1,0,0,0,277,282,3,28,14,0,278,279,
+  	5,42,0,0,279,281,3,28,14,0,280,278,1,0,0,0,281,284,1,0,0,0,282,280,1,
+  	0,0,0,282,283,1,0,0,0,283,31,1,0,0,0,284,282,1,0,0,0,285,290,3,28,14,
+  	0,286,287,5,42,0,0,287,289,3,28,14,0,288,286,1,0,0,0,289,292,1,0,0,0,
+  	290,288,1,0,0,0,290,291,1,0,0,0,291,33,1,0,0,0,292,290,1,0,0,0,293,297,
+  	3,38,19,0,294,297,3,40,20,0,295,297,3,36,18,0,296,293,1,0,0,0,296,294,
+  	1,0,0,0,296,295,1,0,0,0,297,35,1,0,0,0,298,299,5,10,0,0,299,37,1,0,0,
+  	0,300,301,7,4,0,0,301,39,1,0,0,0,302,308,1,0,0,0,303,304,3,38,19,0,304,
+  	305,5,24,0,0,305,306,5,26,0,0,306,308,1,0,0,0,307,302,1,0,0,0,307,303,
+  	1,0,0,0,308,41,1,0,0,0,31,44,46,55,67,78,104,111,116,121,130,146,159,
+  	169,171,187,193,196,200,205,209,213,218,229,249,258,272,274,282,290,296,
+  	307
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -226,14 +244,6 @@ typlypParser::FunctionDeclContext* typlypParser::ProgramContext::functionDecl(si
   return getRuleContext<typlypParser::FunctionDeclContext>(i);
 }
 
-std::vector<typlypParser::ExternalDeclContext *> typlypParser::ProgramContext::externalDecl() {
-  return getRuleContexts<typlypParser::ExternalDeclContext>();
-}
-
-typlypParser::ExternalDeclContext* typlypParser::ProgramContext::externalDecl(size_t i) {
-  return getRuleContext<typlypParser::ExternalDeclContext>(i);
-}
-
 std::vector<typlypParser::StatementContext *> typlypParser::ProgramContext::statement() {
   return getRuleContexts<typlypParser::StatementContext>();
 }
@@ -281,39 +291,32 @@ typlypParser::ProgramContext* typlypParser::program() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(49);
+    setState(46);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 1168232035194) != 0)) {
-      setState(47);
+      ((1ULL << _la) & 141733979098) != 0)) {
+      setState(44);
       _errHandler->sync(this);
       switch (_input->LA(1)) {
         case typlypParser::T__0: {
-          setState(44);
+          setState(42);
           functionDecl();
           break;
         }
 
-        case typlypParser::T__2: {
-          setState(45);
-          externalDecl();
-          break;
-        }
-
+        case typlypParser::T__2:
         case typlypParser::T__3:
-        case typlypParser::T__4:
         case typlypParser::T__5:
+        case typlypParser::T__6:
         case typlypParser::T__7:
         case typlypParser::T__8:
-        case typlypParser::T__11:
-        case typlypParser::T__12:
         case typlypParser::BOOL:
         case typlypParser::INT:
         case typlypParser::ID:
         case typlypParser::NOT:
         case typlypParser::LPAREN: {
-          setState(46);
+          setState(43);
           statement();
           break;
         }
@@ -321,11 +324,11 @@ typlypParser::ProgramContext* typlypParser::program() {
       default:
         throw NoViableAltException(this);
       }
-      setState(51);
+      setState(48);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
-    setState(52);
+    setState(49);
     match(typlypParser::EOF);
    
   }
@@ -354,6 +357,10 @@ tree::TerminalNode* typlypParser::FunctionDeclContext::LPAREN() {
 
 tree::TerminalNode* typlypParser::FunctionDeclContext::RPAREN() {
   return getToken(typlypParser::RPAREN, 0);
+}
+
+tree::TerminalNode* typlypParser::FunctionDeclContext::RASSIGN() {
+  return getToken(typlypParser::RASSIGN, 0);
 }
 
 typlypParser::TypeContext* typlypParser::FunctionDeclContext::type() {
@@ -407,130 +414,28 @@ typlypParser::FunctionDeclContext* typlypParser::functionDecl() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(54);
+    setState(51);
     match(typlypParser::T__0);
+    setState(52);
+    match(typlypParser::ID);
+    setState(53);
+    match(typlypParser::LPAREN);
     setState(55);
-    match(typlypParser::ID);
-    setState(56);
-    match(typlypParser::LPAREN);
+    _errHandler->sync(this);
+
+    _la = _input->LA(1);
+    if (_la == typlypParser::ID) {
+      setState(54);
+      paramList();
+    }
+    setState(57);
+    match(typlypParser::RPAREN);
     setState(58);
-    _errHandler->sync(this);
-
-    _la = _input->LA(1);
-    if (_la == typlypParser::ID) {
-      setState(57);
-      paramList();
-    }
+    match(typlypParser::RASSIGN);
+    setState(59);
+    type();
     setState(60);
-    match(typlypParser::RPAREN);
-    setState(61);
-    match(typlypParser::T__1);
-    setState(62);
-    type();
-    setState(63);
     block();
-   
-  }
-  catch (RecognitionException &e) {
-    _errHandler->reportError(this, e);
-    _localctx->exception = std::current_exception();
-    _errHandler->recover(this, _localctx->exception);
-  }
-
-  return _localctx;
-}
-
-//----------------- ExternalDeclContext ------------------------------------------------------------------
-
-typlypParser::ExternalDeclContext::ExternalDeclContext(ParserRuleContext *parent, size_t invokingState)
-  : ParserRuleContext(parent, invokingState) {
-}
-
-tree::TerminalNode* typlypParser::ExternalDeclContext::ID() {
-  return getToken(typlypParser::ID, 0);
-}
-
-tree::TerminalNode* typlypParser::ExternalDeclContext::LPAREN() {
-  return getToken(typlypParser::LPAREN, 0);
-}
-
-tree::TerminalNode* typlypParser::ExternalDeclContext::RPAREN() {
-  return getToken(typlypParser::RPAREN, 0);
-}
-
-typlypParser::TypeContext* typlypParser::ExternalDeclContext::type() {
-  return getRuleContext<typlypParser::TypeContext>(0);
-}
-
-tree::TerminalNode* typlypParser::ExternalDeclContext::SEMICOLON() {
-  return getToken(typlypParser::SEMICOLON, 0);
-}
-
-typlypParser::ParamListContext* typlypParser::ExternalDeclContext::paramList() {
-  return getRuleContext<typlypParser::ParamListContext>(0);
-}
-
-
-size_t typlypParser::ExternalDeclContext::getRuleIndex() const {
-  return typlypParser::RuleExternalDecl;
-}
-
-void typlypParser::ExternalDeclContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<typlypListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterExternalDecl(this);
-}
-
-void typlypParser::ExternalDeclContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<typlypListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitExternalDecl(this);
-}
-
-
-std::any typlypParser::ExternalDeclContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<typlypVisitor*>(visitor))
-    return parserVisitor->visitExternalDecl(this);
-  else
-    return visitor->visitChildren(this);
-}
-
-typlypParser::ExternalDeclContext* typlypParser::externalDecl() {
-  ExternalDeclContext *_localctx = _tracker.createInstance<ExternalDeclContext>(_ctx, getState());
-  enterRule(_localctx, 4, typlypParser::RuleExternalDecl);
-  size_t _la = 0;
-
-#if __cplusplus > 201703L
-  auto onExit = finally([=, this] {
-#else
-  auto onExit = finally([=] {
-#endif
-    exitRule();
-  });
-  try {
-    enterOuterAlt(_localctx, 1);
-    setState(65);
-    match(typlypParser::T__2);
-    setState(66);
-    match(typlypParser::ID);
-    setState(67);
-    match(typlypParser::LPAREN);
-    setState(69);
-    _errHandler->sync(this);
-
-    _la = _input->LA(1);
-    if (_la == typlypParser::ID) {
-      setState(68);
-      paramList();
-    }
-    setState(71);
-    match(typlypParser::RPAREN);
-    setState(72);
-    match(typlypParser::T__1);
-    setState(73);
-    type();
-    setState(74);
-    match(typlypParser::SEMICOLON);
    
   }
   catch (RecognitionException &e) {
@@ -591,7 +496,7 @@ std::any typlypParser::ParamListContext::accept(tree::ParseTreeVisitor *visitor)
 
 typlypParser::ParamListContext* typlypParser::paramList() {
   ParamListContext *_localctx = _tracker.createInstance<ParamListContext>(_ctx, getState());
-  enterRule(_localctx, 6, typlypParser::RuleParamList);
+  enterRule(_localctx, 4, typlypParser::RuleParamList);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -603,17 +508,17 @@ typlypParser::ParamListContext* typlypParser::paramList() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(76);
+    setState(62);
     param();
-    setState(81);
+    setState(67);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == typlypParser::COMMA) {
-      setState(77);
+      setState(63);
       match(typlypParser::COMMA);
-      setState(78);
+      setState(64);
       param();
-      setState(83);
+      setState(69);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -669,7 +574,7 @@ std::any typlypParser::ParamContext::accept(tree::ParseTreeVisitor *visitor) {
 
 typlypParser::ParamContext* typlypParser::param() {
   ParamContext *_localctx = _tracker.createInstance<ParamContext>(_ctx, getState());
-  enterRule(_localctx, 8, typlypParser::RuleParam);
+  enterRule(_localctx, 6, typlypParser::RuleParam);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -680,11 +585,11 @@ typlypParser::ParamContext* typlypParser::param() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(84);
+    setState(70);
     match(typlypParser::ID);
-    setState(85);
+    setState(71);
     match(typlypParser::T__1);
-    setState(86);
+    setState(72);
     type();
    
   }
@@ -746,7 +651,7 @@ std::any typlypParser::BlockContext::accept(tree::ParseTreeVisitor *visitor) {
 
 typlypParser::BlockContext* typlypParser::block() {
   BlockContext *_localctx = _tracker.createInstance<BlockContext>(_ctx, getState());
-  enterRule(_localctx, 10, typlypParser::RuleBlock);
+  enterRule(_localctx, 8, typlypParser::RuleBlock);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -758,20 +663,20 @@ typlypParser::BlockContext* typlypParser::block() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(88);
+    setState(74);
     match(typlypParser::LBRACE);
-    setState(92);
+    setState(78);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 1168232035184) != 0)) {
-      setState(89);
+      ((1ULL << _la) & 141733979096) != 0)) {
+      setState(75);
       statement();
-      setState(94);
+      setState(80);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
-    setState(95);
+    setState(81);
     match(typlypParser::RBRACE);
    
   }
@@ -792,6 +697,10 @@ typlypParser::StatementContext::StatementContext(ParserRuleContext *parent, size
 
 typlypParser::VarDeclContext* typlypParser::StatementContext::varDecl() {
   return getRuleContext<typlypParser::VarDeclContext>(0);
+}
+
+tree::TerminalNode* typlypParser::StatementContext::SEMICOLON() {
+  return getToken(typlypParser::SEMICOLON, 0);
 }
 
 typlypParser::PrintStatementContext* typlypParser::StatementContext::printStatement() {
@@ -826,10 +735,6 @@ typlypParser::ExprContext* typlypParser::StatementContext::expr() {
   return getRuleContext<typlypParser::ExprContext>(0);
 }
 
-tree::TerminalNode* typlypParser::StatementContext::SEMICOLON() {
-  return getToken(typlypParser::SEMICOLON, 0);
-}
-
 
 size_t typlypParser::StatementContext::getRuleIndex() const {
   return typlypParser::RuleStatement;
@@ -857,7 +762,7 @@ std::any typlypParser::StatementContext::accept(tree::ParseTreeVisitor *visitor)
 
 typlypParser::StatementContext* typlypParser::statement() {
   StatementContext *_localctx = _tracker.createInstance<StatementContext>(_ctx, getState());
-  enterRule(_localctx, 12, typlypParser::RuleStatement);
+  enterRule(_localctx, 10, typlypParser::RuleStatement);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -867,70 +772,80 @@ typlypParser::StatementContext* typlypParser::statement() {
     exitRule();
   });
   try {
-    setState(108);
+    setState(104);
     _errHandler->sync(this);
-    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 6, _ctx)) {
+    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 5, _ctx)) {
     case 1: {
       enterOuterAlt(_localctx, 1);
-      setState(97);
+      setState(83);
       varDecl();
+      setState(84);
+      match(typlypParser::SEMICOLON);
       break;
     }
 
     case 2: {
       enterOuterAlt(_localctx, 2);
-      setState(98);
+      setState(86);
       printStatement();
+      setState(87);
+      match(typlypParser::SEMICOLON);
       break;
     }
 
     case 3: {
       enterOuterAlt(_localctx, 3);
-      setState(99);
+      setState(89);
       assignment();
+      setState(90);
+      match(typlypParser::SEMICOLON);
       break;
     }
 
     case 4: {
       enterOuterAlt(_localctx, 4);
-      setState(100);
+      setState(92);
       arrayAssignment();
+      setState(93);
+      match(typlypParser::SEMICOLON);
       break;
     }
 
     case 5: {
       enterOuterAlt(_localctx, 5);
-      setState(101);
+      setState(95);
       returnStatement();
+      setState(96);
+      match(typlypParser::SEMICOLON);
       break;
     }
 
     case 6: {
       enterOuterAlt(_localctx, 6);
-      setState(102);
+      setState(98);
       ifStatement();
       break;
     }
 
     case 7: {
       enterOuterAlt(_localctx, 7);
-      setState(103);
+      setState(99);
       whileStatement();
       break;
     }
 
     case 8: {
       enterOuterAlt(_localctx, 8);
-      setState(104);
+      setState(100);
       forStatement();
       break;
     }
 
     case 9: {
       enterOuterAlt(_localctx, 9);
-      setState(105);
+      setState(101);
       expr(0);
-      setState(106);
+      setState(102);
       match(typlypParser::SEMICOLON);
       break;
     }
@@ -963,16 +878,16 @@ typlypParser::TypeContext* typlypParser::VarDeclContext::type() {
   return getRuleContext<typlypParser::TypeContext>(0);
 }
 
-tree::TerminalNode* typlypParser::VarDeclContext::SEMICOLON() {
-  return getToken(typlypParser::SEMICOLON, 0);
-}
-
-tree::TerminalNode* typlypParser::VarDeclContext::ASSIGN() {
-  return getToken(typlypParser::ASSIGN, 0);
+tree::TerminalNode* typlypParser::VarDeclContext::LASSIGN() {
+  return getToken(typlypParser::LASSIGN, 0);
 }
 
 typlypParser::ExprContext* typlypParser::VarDeclContext::expr() {
   return getRuleContext<typlypParser::ExprContext>(0);
+}
+
+tree::TerminalNode* typlypParser::VarDeclContext::RASSIGN() {
+  return getToken(typlypParser::RASSIGN, 0);
 }
 
 
@@ -1002,7 +917,7 @@ std::any typlypParser::VarDeclContext::accept(tree::ParseTreeVisitor *visitor) {
 
 typlypParser::VarDeclContext* typlypParser::varDecl() {
   VarDeclContext *_localctx = _tracker.createInstance<VarDeclContext>(_ctx, getState());
-  enterRule(_localctx, 14, typlypParser::RuleVarDecl);
+  enterRule(_localctx, 12, typlypParser::RuleVarDecl);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1013,27 +928,59 @@ typlypParser::VarDeclContext* typlypParser::varDecl() {
     exitRule();
   });
   try {
-    enterOuterAlt(_localctx, 1);
-    setState(110);
-    match(typlypParser::T__3);
-    setState(111);
-    match(typlypParser::ID);
-    setState(112);
-    match(typlypParser::T__1);
-    setState(113);
-    type();
-    setState(116);
+    setState(121);
     _errHandler->sync(this);
+    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 8, _ctx)) {
+    case 1: {
+      enterOuterAlt(_localctx, 1);
+      setState(106);
+      match(typlypParser::ID);
+      setState(107);
+      match(typlypParser::T__1);
+      setState(108);
+      type();
+      setState(111);
+      _errHandler->sync(this);
 
-    _la = _input->LA(1);
-    if (_la == typlypParser::ASSIGN) {
-      setState(114);
-      match(typlypParser::ASSIGN);
-      setState(115);
-      expr(0);
+      _la = _input->LA(1);
+      if (_la == typlypParser::LASSIGN) {
+        setState(109);
+        match(typlypParser::LASSIGN);
+        setState(110);
+        expr(0);
+      }
+      break;
     }
-    setState(118);
-    match(typlypParser::SEMICOLON);
+
+    case 2: {
+      enterOuterAlt(_localctx, 2);
+      setState(116);
+      _errHandler->sync(this);
+
+      switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 7, _ctx)) {
+      case 1: {
+        setState(113);
+        expr(0);
+        setState(114);
+        match(typlypParser::RASSIGN);
+        break;
+      }
+
+      default:
+        break;
+      }
+      setState(118);
+      match(typlypParser::ID);
+      setState(119);
+      match(typlypParser::T__1);
+      setState(120);
+      type();
+      break;
+    }
+
+    default:
+      break;
+    }
    
   }
   catch (RecognitionException &e) {
@@ -1055,16 +1002,16 @@ tree::TerminalNode* typlypParser::AssignmentContext::ID() {
   return getToken(typlypParser::ID, 0);
 }
 
-tree::TerminalNode* typlypParser::AssignmentContext::ASSIGN() {
-  return getToken(typlypParser::ASSIGN, 0);
+tree::TerminalNode* typlypParser::AssignmentContext::LASSIGN() {
+  return getToken(typlypParser::LASSIGN, 0);
 }
 
 typlypParser::ExprContext* typlypParser::AssignmentContext::expr() {
   return getRuleContext<typlypParser::ExprContext>(0);
 }
 
-tree::TerminalNode* typlypParser::AssignmentContext::SEMICOLON() {
-  return getToken(typlypParser::SEMICOLON, 0);
+tree::TerminalNode* typlypParser::AssignmentContext::RASSIGN() {
+  return getToken(typlypParser::RASSIGN, 0);
 }
 
 
@@ -1094,7 +1041,7 @@ std::any typlypParser::AssignmentContext::accept(tree::ParseTreeVisitor *visitor
 
 typlypParser::AssignmentContext* typlypParser::assignment() {
   AssignmentContext *_localctx = _tracker.createInstance<AssignmentContext>(_ctx, getState());
-  enterRule(_localctx, 16, typlypParser::RuleAssignment);
+  enterRule(_localctx, 14, typlypParser::RuleAssignment);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1104,15 +1051,34 @@ typlypParser::AssignmentContext* typlypParser::assignment() {
     exitRule();
   });
   try {
-    enterOuterAlt(_localctx, 1);
-    setState(120);
-    match(typlypParser::ID);
-    setState(121);
-    match(typlypParser::ASSIGN);
-    setState(122);
-    expr(0);
-    setState(123);
-    match(typlypParser::SEMICOLON);
+    setState(130);
+    _errHandler->sync(this);
+    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 9, _ctx)) {
+    case 1: {
+      enterOuterAlt(_localctx, 1);
+      setState(123);
+      match(typlypParser::ID);
+      setState(124);
+      match(typlypParser::LASSIGN);
+      setState(125);
+      expr(0);
+      break;
+    }
+
+    case 2: {
+      enterOuterAlt(_localctx, 2);
+      setState(126);
+      expr(0);
+      setState(127);
+      match(typlypParser::RASSIGN);
+      setState(128);
+      match(typlypParser::ID);
+      break;
+    }
+
+    default:
+      break;
+    }
    
   }
   catch (RecognitionException &e) {
@@ -1150,12 +1116,12 @@ tree::TerminalNode* typlypParser::ArrayAssignmentContext::RBRACKET() {
   return getToken(typlypParser::RBRACKET, 0);
 }
 
-tree::TerminalNode* typlypParser::ArrayAssignmentContext::ASSIGN() {
-  return getToken(typlypParser::ASSIGN, 0);
+tree::TerminalNode* typlypParser::ArrayAssignmentContext::LASSIGN() {
+  return getToken(typlypParser::LASSIGN, 0);
 }
 
-tree::TerminalNode* typlypParser::ArrayAssignmentContext::SEMICOLON() {
-  return getToken(typlypParser::SEMICOLON, 0);
+tree::TerminalNode* typlypParser::ArrayAssignmentContext::RASSIGN() {
+  return getToken(typlypParser::RASSIGN, 0);
 }
 
 
@@ -1185,7 +1151,7 @@ std::any typlypParser::ArrayAssignmentContext::accept(tree::ParseTreeVisitor *vi
 
 typlypParser::ArrayAssignmentContext* typlypParser::arrayAssignment() {
   ArrayAssignmentContext *_localctx = _tracker.createInstance<ArrayAssignmentContext>(_ctx, getState());
-  enterRule(_localctx, 18, typlypParser::RuleArrayAssignment);
+  enterRule(_localctx, 16, typlypParser::RuleArrayAssignment);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1195,21 +1161,46 @@ typlypParser::ArrayAssignmentContext* typlypParser::arrayAssignment() {
     exitRule();
   });
   try {
-    enterOuterAlt(_localctx, 1);
-    setState(125);
-    match(typlypParser::ID);
-    setState(126);
-    match(typlypParser::LBRACKET);
-    setState(127);
-    expr(0);
-    setState(128);
-    match(typlypParser::RBRACKET);
-    setState(129);
-    match(typlypParser::ASSIGN);
-    setState(130);
-    expr(0);
-    setState(131);
-    match(typlypParser::SEMICOLON);
+    setState(146);
+    _errHandler->sync(this);
+    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 10, _ctx)) {
+    case 1: {
+      enterOuterAlt(_localctx, 1);
+      setState(132);
+      match(typlypParser::ID);
+      setState(133);
+      match(typlypParser::LBRACKET);
+      setState(134);
+      expr(0);
+      setState(135);
+      match(typlypParser::RBRACKET);
+      setState(136);
+      match(typlypParser::LASSIGN);
+      setState(137);
+      expr(0);
+      break;
+    }
+
+    case 2: {
+      enterOuterAlt(_localctx, 2);
+      setState(139);
+      expr(0);
+      setState(140);
+      match(typlypParser::RASSIGN);
+      setState(141);
+      match(typlypParser::ID);
+      setState(142);
+      match(typlypParser::LBRACKET);
+      setState(143);
+      expr(0);
+      setState(144);
+      match(typlypParser::RBRACKET);
+      break;
+    }
+
+    default:
+      break;
+    }
    
   }
   catch (RecognitionException &e) {
@@ -1229,10 +1220,6 @@ typlypParser::ReturnStatementContext::ReturnStatementContext(ParserRuleContext *
 
 typlypParser::ExprContext* typlypParser::ReturnStatementContext::expr() {
   return getRuleContext<typlypParser::ExprContext>(0);
-}
-
-tree::TerminalNode* typlypParser::ReturnStatementContext::SEMICOLON() {
-  return getToken(typlypParser::SEMICOLON, 0);
 }
 
 
@@ -1262,7 +1249,7 @@ std::any typlypParser::ReturnStatementContext::accept(tree::ParseTreeVisitor *vi
 
 typlypParser::ReturnStatementContext* typlypParser::returnStatement() {
   ReturnStatementContext *_localctx = _tracker.createInstance<ReturnStatementContext>(_ctx, getState());
-  enterRule(_localctx, 20, typlypParser::RuleReturnStatement);
+  enterRule(_localctx, 18, typlypParser::RuleReturnStatement);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1273,12 +1260,10 @@ typlypParser::ReturnStatementContext* typlypParser::returnStatement() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(133);
-    match(typlypParser::T__4);
-    setState(134);
+    setState(148);
+    match(typlypParser::T__2);
+    setState(149);
     expr(0);
-    setState(135);
-    match(typlypParser::SEMICOLON);
    
   }
   catch (RecognitionException &e) {
@@ -1294,6 +1279,10 @@ typlypParser::ReturnStatementContext* typlypParser::returnStatement() {
 
 typlypParser::IfStatementContext::IfStatementContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
+}
+
+tree::TerminalNode* typlypParser::IfStatementContext::LASSIGN() {
+  return getToken(typlypParser::LASSIGN, 0);
 }
 
 tree::TerminalNode* typlypParser::IfStatementContext::LPAREN() {
@@ -1314,6 +1303,10 @@ std::vector<typlypParser::BlockContext *> typlypParser::IfStatementContext::bloc
 
 typlypParser::BlockContext* typlypParser::IfStatementContext::block(size_t i) {
   return getRuleContext<typlypParser::BlockContext>(i);
+}
+
+tree::TerminalNode* typlypParser::IfStatementContext::RASSIGN() {
+  return getToken(typlypParser::RASSIGN, 0);
 }
 
 
@@ -1343,7 +1336,7 @@ std::any typlypParser::IfStatementContext::accept(tree::ParseTreeVisitor *visito
 
 typlypParser::IfStatementContext* typlypParser::ifStatement() {
   IfStatementContext *_localctx = _tracker.createInstance<IfStatementContext>(_ctx, getState());
-  enterRule(_localctx, 22, typlypParser::RuleIfStatement);
+  enterRule(_localctx, 20, typlypParser::RuleIfStatement);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1354,26 +1347,65 @@ typlypParser::IfStatementContext* typlypParser::ifStatement() {
     exitRule();
   });
   try {
-    enterOuterAlt(_localctx, 1);
-    setState(137);
-    match(typlypParser::T__5);
-    setState(138);
-    match(typlypParser::LPAREN);
-    setState(139);
-    expr(0);
-    setState(140);
-    match(typlypParser::RPAREN);
-    setState(141);
-    block();
-    setState(144);
+    setState(171);
     _errHandler->sync(this);
+    switch (_input->LA(1)) {
+      case typlypParser::T__3: {
+        enterOuterAlt(_localctx, 1);
+        setState(151);
+        match(typlypParser::T__3);
+        setState(152);
+        match(typlypParser::LASSIGN);
+        setState(153);
+        match(typlypParser::LPAREN);
+        setState(154);
+        expr(0);
+        setState(155);
+        match(typlypParser::RPAREN);
+        setState(156);
+        block();
+        setState(159);
+        _errHandler->sync(this);
 
-    _la = _input->LA(1);
-    if (_la == typlypParser::T__6) {
-      setState(142);
-      match(typlypParser::T__6);
-      setState(143);
-      block();
+        _la = _input->LA(1);
+        if (_la == typlypParser::T__4) {
+          setState(157);
+          match(typlypParser::T__4);
+          setState(158);
+          block();
+        }
+        break;
+      }
+
+      case typlypParser::LPAREN: {
+        enterOuterAlt(_localctx, 2);
+        setState(161);
+        match(typlypParser::LPAREN);
+        setState(162);
+        expr(0);
+        setState(163);
+        match(typlypParser::RPAREN);
+        setState(164);
+        match(typlypParser::RASSIGN);
+        setState(165);
+        match(typlypParser::T__3);
+        setState(166);
+        block();
+        setState(169);
+        _errHandler->sync(this);
+
+        _la = _input->LA(1);
+        if (_la == typlypParser::T__4) {
+          setState(167);
+          match(typlypParser::T__4);
+          setState(168);
+          block();
+        }
+        break;
+      }
+
+    default:
+      throw NoViableAltException(this);
     }
    
   }
@@ -1392,6 +1424,10 @@ typlypParser::WhileStatementContext::WhileStatementContext(ParserRuleContext *pa
   : ParserRuleContext(parent, invokingState) {
 }
 
+tree::TerminalNode* typlypParser::WhileStatementContext::LASSIGN() {
+  return getToken(typlypParser::LASSIGN, 0);
+}
+
 tree::TerminalNode* typlypParser::WhileStatementContext::LPAREN() {
   return getToken(typlypParser::LPAREN, 0);
 }
@@ -1406,6 +1442,10 @@ tree::TerminalNode* typlypParser::WhileStatementContext::RPAREN() {
 
 typlypParser::BlockContext* typlypParser::WhileStatementContext::block() {
   return getRuleContext<typlypParser::BlockContext>(0);
+}
+
+tree::TerminalNode* typlypParser::WhileStatementContext::RASSIGN() {
+  return getToken(typlypParser::RASSIGN, 0);
 }
 
 
@@ -1435,7 +1475,7 @@ std::any typlypParser::WhileStatementContext::accept(tree::ParseTreeVisitor *vis
 
 typlypParser::WhileStatementContext* typlypParser::whileStatement() {
   WhileStatementContext *_localctx = _tracker.createInstance<WhileStatementContext>(_ctx, getState());
-  enterRule(_localctx, 24, typlypParser::RuleWhileStatement);
+  enterRule(_localctx, 22, typlypParser::RuleWhileStatement);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1445,17 +1485,46 @@ typlypParser::WhileStatementContext* typlypParser::whileStatement() {
     exitRule();
   });
   try {
-    enterOuterAlt(_localctx, 1);
-    setState(146);
-    match(typlypParser::T__7);
-    setState(147);
-    match(typlypParser::LPAREN);
-    setState(148);
-    expr(0);
-    setState(149);
-    match(typlypParser::RPAREN);
-    setState(150);
-    block();
+    setState(187);
+    _errHandler->sync(this);
+    switch (_input->LA(1)) {
+      case typlypParser::T__5: {
+        enterOuterAlt(_localctx, 1);
+        setState(173);
+        match(typlypParser::T__5);
+        setState(174);
+        match(typlypParser::LASSIGN);
+        setState(175);
+        match(typlypParser::LPAREN);
+        setState(176);
+        expr(0);
+        setState(177);
+        match(typlypParser::RPAREN);
+        setState(178);
+        block();
+        break;
+      }
+
+      case typlypParser::LPAREN: {
+        enterOuterAlt(_localctx, 2);
+        setState(180);
+        match(typlypParser::LPAREN);
+        setState(181);
+        expr(0);
+        setState(182);
+        match(typlypParser::RPAREN);
+        setState(183);
+        match(typlypParser::RASSIGN);
+        setState(184);
+        match(typlypParser::T__5);
+        setState(185);
+        block();
+        break;
+      }
+
+    default:
+      throw NoViableAltException(this);
+    }
    
   }
   catch (RecognitionException &e) {
@@ -1473,6 +1542,14 @@ typlypParser::ForStatementContext::ForStatementContext(ParserRuleContext *parent
   : ParserRuleContext(parent, invokingState) {
 }
 
+typlypParser::BlockContext* typlypParser::ForStatementContext::block() {
+  return getRuleContext<typlypParser::BlockContext>(0);
+}
+
+tree::TerminalNode* typlypParser::ForStatementContext::LASSIGN() {
+  return getToken(typlypParser::LASSIGN, 0);
+}
+
 tree::TerminalNode* typlypParser::ForStatementContext::LPAREN() {
   return getToken(typlypParser::LPAREN, 0);
 }
@@ -1485,8 +1562,16 @@ tree::TerminalNode* typlypParser::ForStatementContext::RPAREN() {
   return getToken(typlypParser::RPAREN, 0);
 }
 
-typlypParser::BlockContext* typlypParser::ForStatementContext::block() {
-  return getRuleContext<typlypParser::BlockContext>(0);
+std::vector<tree::TerminalNode *> typlypParser::ForStatementContext::DIVIDER() {
+  return getTokens(typlypParser::DIVIDER);
+}
+
+tree::TerminalNode* typlypParser::ForStatementContext::DIVIDER(size_t i) {
+  return getToken(typlypParser::DIVIDER, i);
+}
+
+tree::TerminalNode* typlypParser::ForStatementContext::RASSIGN() {
+  return getToken(typlypParser::RASSIGN, 0);
 }
 
 typlypParser::VarDeclContext* typlypParser::ForStatementContext::varDecl() {
@@ -1528,7 +1613,7 @@ std::any typlypParser::ForStatementContext::accept(tree::ParseTreeVisitor *visit
 
 typlypParser::ForStatementContext* typlypParser::forStatement() {
   ForStatementContext *_localctx = _tracker.createInstance<ForStatementContext>(_ctx, getState());
-  enterRule(_localctx, 26, typlypParser::RuleForStatement);
+  enterRule(_localctx, 24, typlypParser::RuleForStatement);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1540,40 +1625,101 @@ typlypParser::ForStatementContext* typlypParser::forStatement() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(152);
-    match(typlypParser::T__8);
-    setState(153);
-    match(typlypParser::LPAREN);
-    setState(155);
+    setState(218);
     _errHandler->sync(this);
+    switch (_input->LA(1)) {
+      case typlypParser::T__6: {
+        setState(189);
+        match(typlypParser::T__6);
+        setState(190);
+        match(typlypParser::LASSIGN);
+        setState(191);
+        match(typlypParser::LPAREN);
+        setState(193);
+        _errHandler->sync(this);
 
-    _la = _input->LA(1);
-    if (_la == typlypParser::T__3) {
-      setState(154);
-      varDecl();
-    }
-    setState(158);
-    _errHandler->sync(this);
+        switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 15, _ctx)) {
+        case 1: {
+          setState(192);
+          varDecl();
+          break;
+        }
 
-    _la = _input->LA(1);
-    if ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 1168232034304) != 0)) {
-      setState(157);
-      expr(0);
-    }
-    setState(160);
-    match(typlypParser::SEMICOLON);
-    setState(162);
-    _errHandler->sync(this);
+        default:
+          break;
+        }
+        setState(196);
+        _errHandler->sync(this);
 
-    _la = _input->LA(1);
-    if (_la == typlypParser::ID) {
-      setState(161);
-      assignment();
+        _la = _input->LA(1);
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 141733978624) != 0)) {
+          setState(195);
+          expr(0);
+        }
+        setState(198);
+        match(typlypParser::SEMICOLON);
+        setState(200);
+        _errHandler->sync(this);
+
+        _la = _input->LA(1);
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 141733978624) != 0)) {
+          setState(199);
+          assignment();
+        }
+        setState(202);
+        match(typlypParser::RPAREN);
+        break;
+      }
+
+      case typlypParser::LPAREN: {
+        setState(203);
+        match(typlypParser::LPAREN);
+        setState(205);
+        _errHandler->sync(this);
+
+        _la = _input->LA(1);
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 141733978624) != 0)) {
+          setState(204);
+          varDecl();
+        }
+        setState(207);
+        match(typlypParser::DIVIDER);
+        setState(209);
+        _errHandler->sync(this);
+
+        _la = _input->LA(1);
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 141733978624) != 0)) {
+          setState(208);
+          expr(0);
+        }
+        setState(211);
+        match(typlypParser::DIVIDER);
+        setState(213);
+        _errHandler->sync(this);
+
+        _la = _input->LA(1);
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 141733978624) != 0)) {
+          setState(212);
+          assignment();
+        }
+        setState(215);
+        match(typlypParser::RPAREN);
+        setState(216);
+        match(typlypParser::RASSIGN);
+        setState(217);
+        match(typlypParser::T__6);
+        break;
+      }
+
+    default:
+      throw NoViableAltException(this);
     }
-    setState(164);
-    match(typlypParser::RPAREN);
-    setState(165);
+    setState(220);
     block();
    
   }
@@ -1596,8 +1742,12 @@ typlypParser::ExprContext* typlypParser::PrintStatementContext::expr() {
   return getRuleContext<typlypParser::ExprContext>(0);
 }
 
-tree::TerminalNode* typlypParser::PrintStatementContext::SEMICOLON() {
-  return getToken(typlypParser::SEMICOLON, 0);
+tree::TerminalNode* typlypParser::PrintStatementContext::RASSIGN() {
+  return getToken(typlypParser::RASSIGN, 0);
+}
+
+tree::TerminalNode* typlypParser::PrintStatementContext::LASSIGN() {
+  return getToken(typlypParser::LASSIGN, 0);
 }
 
 
@@ -1627,7 +1777,7 @@ std::any typlypParser::PrintStatementContext::accept(tree::ParseTreeVisitor *vis
 
 typlypParser::PrintStatementContext* typlypParser::printStatement() {
   PrintStatementContext *_localctx = _tracker.createInstance<PrintStatementContext>(_ctx, getState());
-  enterRule(_localctx, 28, typlypParser::RulePrintStatement);
+  enterRule(_localctx, 26, typlypParser::RulePrintStatement);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1637,15 +1787,39 @@ typlypParser::PrintStatementContext* typlypParser::printStatement() {
     exitRule();
   });
   try {
-    enterOuterAlt(_localctx, 1);
-    setState(167);
-    expr(0);
-    setState(168);
-    match(typlypParser::T__9);
-    setState(169);
-    match(typlypParser::T__10);
-    setState(170);
-    match(typlypParser::SEMICOLON);
+    setState(229);
+    _errHandler->sync(this);
+    switch (_input->LA(1)) {
+      case typlypParser::T__8:
+      case typlypParser::BOOL:
+      case typlypParser::INT:
+      case typlypParser::ID:
+      case typlypParser::NOT:
+      case typlypParser::LPAREN: {
+        enterOuterAlt(_localctx, 1);
+        setState(222);
+        expr(0);
+        setState(223);
+        match(typlypParser::RASSIGN);
+        setState(224);
+        match(typlypParser::T__7);
+        break;
+      }
+
+      case typlypParser::T__7: {
+        enterOuterAlt(_localctx, 2);
+        setState(226);
+        match(typlypParser::T__7);
+        setState(227);
+        match(typlypParser::LASSIGN);
+        setState(228);
+        expr(0);
+        break;
+      }
+
+    default:
+      throw NoViableAltException(this);
+    }
    
   }
   catch (RecognitionException &e) {
@@ -1791,8 +1965,8 @@ typlypParser::ExprContext* typlypParser::expr(int precedence) {
   typlypParser::ExprContext *_localctx = _tracker.createInstance<ExprContext>(_ctx, parentState);
   typlypParser::ExprContext *previousContext = _localctx;
   (void)previousContext; // Silence compiler, in case the context is not used by generated code.
-  size_t startState = 30;
-  enterRecursionRule(_localctx, 30, typlypParser::RuleExpr, precedence);
+  size_t startState = 28;
+  enterRecursionRule(_localctx, 28, typlypParser::RuleExpr, precedence);
 
     size_t _la = 0;
 
@@ -1806,108 +1980,87 @@ typlypParser::ExprContext* typlypParser::expr(int precedence) {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(206);
+    setState(258);
     _errHandler->sync(this);
-    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 14, _ctx)) {
+    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 24, _ctx)) {
     case 1: {
-      setState(173);
+      setState(232);
       match(typlypParser::NOT);
-      setState(174);
-      expr(9);
+      setState(233);
+      expr(8);
       break;
     }
 
     case 2: {
-      setState(175);
+      setState(234);
       match(typlypParser::ID);
       break;
     }
 
     case 3: {
-      setState(176);
+      setState(235);
       match(typlypParser::ID);
-      setState(177);
+      setState(236);
       match(typlypParser::LBRACKET);
-      setState(178);
+      setState(237);
       expr(0);
-      setState(179);
+      setState(238);
       match(typlypParser::RBRACKET);
       break;
     }
 
     case 4: {
-      setState(181);
+      setState(240);
       match(typlypParser::INT);
       break;
     }
 
     case 5: {
-      setState(182);
+      setState(241);
       match(typlypParser::BOOL);
       break;
     }
 
     case 6: {
-      setState(183);
+      setState(242);
       match(typlypParser::LPAREN);
-      setState(184);
+      setState(243);
       expr(0);
-      setState(185);
+      setState(244);
       match(typlypParser::RPAREN);
       break;
     }
 
     case 7: {
-      setState(187);
+      setState(246);
       match(typlypParser::ID);
-      setState(188);
+      setState(247);
       match(typlypParser::LPAREN);
-      setState(190);
+      setState(249);
       _errHandler->sync(this);
 
       _la = _input->LA(1);
       if ((((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 1168232034304) != 0)) {
-        setState(189);
+        ((1ULL << _la) & 141733978624) != 0)) {
+        setState(248);
         argList();
       }
-      setState(192);
+      setState(251);
       match(typlypParser::RPAREN);
       break;
     }
 
     case 8: {
-      setState(193);
-      match(typlypParser::T__11);
-      setState(194);
+      setState(252);
+      match(typlypParser::T__8);
+      setState(253);
       scalarType();
-      setState(195);
+      setState(254);
       match(typlypParser::LT);
-      setState(196);
+      setState(255);
       expr(0);
-      setState(197);
+      setState(256);
       match(typlypParser::GT);
-      break;
-    }
-
-    case 9: {
-      setState(199);
-      match(typlypParser::T__12);
-      setState(200);
-      match(typlypParser::ID);
-      setState(201);
-      match(typlypParser::LPAREN);
-      setState(203);
-      _errHandler->sync(this);
-
-      _la = _input->LA(1);
-      if ((((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 1168232034304) != 0)) {
-        setState(202);
-        argList();
-      }
-      setState(205);
-      match(typlypParser::RPAREN);
       break;
     }
 
@@ -1915,45 +2068,45 @@ typlypParser::ExprContext* typlypParser::expr(int precedence) {
       break;
     }
     _ctx->stop = _input->LT(-1);
-    setState(222);
+    setState(274);
     _errHandler->sync(this);
-    alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 16, _ctx);
+    alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 26, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
         if (!_parseListeners.empty())
           triggerExitRuleEvent();
         previousContext = _localctx;
-        setState(220);
+        setState(272);
         _errHandler->sync(this);
-        switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 15, _ctx)) {
+        switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 25, _ctx)) {
         case 1: {
           _localctx = _tracker.createInstance<ExprContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpr);
-          setState(208);
+          setState(260);
 
-          if (!(precpred(_ctx, 13))) throw FailedPredicateException(this, "precpred(_ctx, 13)");
-          setState(209);
+          if (!(precpred(_ctx, 12))) throw FailedPredicateException(this, "precpred(_ctx, 12)");
+          setState(261);
           _la = _input->LA(1);
           if (!((((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 234881024) != 0))) {
+            ((1ULL << _la) & 14680064) != 0))) {
           _errHandler->recoverInline(this);
           }
           else {
             _errHandler->reportMatch(this);
             consume();
           }
-          setState(210);
-          expr(14);
+          setState(262);
+          expr(13);
           break;
         }
 
         case 2: {
           _localctx = _tracker.createInstance<ExprContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpr);
-          setState(211);
+          setState(263);
 
-          if (!(precpred(_ctx, 12))) throw FailedPredicateException(this, "precpred(_ctx, 12)");
-          setState(212);
+          if (!(precpred(_ctx, 11))) throw FailedPredicateException(this, "precpred(_ctx, 11)");
+          setState(264);
           _la = _input->LA(1);
           if (!(_la == typlypParser::PLUS
 
@@ -1964,39 +2117,39 @@ typlypParser::ExprContext* typlypParser::expr(int precedence) {
             _errHandler->reportMatch(this);
             consume();
           }
-          setState(213);
-          expr(13);
+          setState(265);
+          expr(12);
           break;
         }
 
         case 3: {
           _localctx = _tracker.createInstance<ExprContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpr);
-          setState(214);
+          setState(266);
 
-          if (!(precpred(_ctx, 11))) throw FailedPredicateException(this, "precpred(_ctx, 11)");
-          setState(215);
+          if (!(precpred(_ctx, 10))) throw FailedPredicateException(this, "precpred(_ctx, 10)");
+          setState(267);
           _la = _input->LA(1);
           if (!((((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 4026531840) != 0))) {
+            ((1ULL << _la) & 251658240) != 0))) {
           _errHandler->recoverInline(this);
           }
           else {
             _errHandler->reportMatch(this);
             consume();
           }
-          setState(216);
-          expr(12);
+          setState(268);
+          expr(11);
           break;
         }
 
         case 4: {
           _localctx = _tracker.createInstance<ExprContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpr);
-          setState(217);
+          setState(269);
 
-          if (!(precpred(_ctx, 10))) throw FailedPredicateException(this, "precpred(_ctx, 10)");
-          setState(218);
+          if (!(precpred(_ctx, 9))) throw FailedPredicateException(this, "precpred(_ctx, 9)");
+          setState(270);
           _la = _input->LA(1);
           if (!(_la == typlypParser::EQ
 
@@ -2007,8 +2160,8 @@ typlypParser::ExprContext* typlypParser::expr(int precedence) {
             _errHandler->reportMatch(this);
             consume();
           }
-          setState(219);
-          expr(11);
+          setState(271);
+          expr(10);
           break;
         }
 
@@ -2016,9 +2169,9 @@ typlypParser::ExprContext* typlypParser::expr(int precedence) {
           break;
         } 
       }
-      setState(224);
+      setState(276);
       _errHandler->sync(this);
-      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 16, _ctx);
+      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 26, _ctx);
     }
   }
   catch (RecognitionException &e) {
@@ -2078,7 +2231,7 @@ std::any typlypParser::ArgListContext::accept(tree::ParseTreeVisitor *visitor) {
 
 typlypParser::ArgListContext* typlypParser::argList() {
   ArgListContext *_localctx = _tracker.createInstance<ArgListContext>(_ctx, getState());
-  enterRule(_localctx, 32, typlypParser::RuleArgList);
+  enterRule(_localctx, 30, typlypParser::RuleArgList);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -2090,17 +2243,17 @@ typlypParser::ArgListContext* typlypParser::argList() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(225);
+    setState(277);
     expr(0);
-    setState(230);
+    setState(282);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == typlypParser::COMMA) {
-      setState(226);
+      setState(278);
       match(typlypParser::COMMA);
-      setState(227);
+      setState(279);
       expr(0);
-      setState(232);
+      setState(284);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -2164,7 +2317,7 @@ std::any typlypParser::ExprListContext::accept(tree::ParseTreeVisitor *visitor) 
 
 typlypParser::ExprListContext* typlypParser::exprList() {
   ExprListContext *_localctx = _tracker.createInstance<ExprListContext>(_ctx, getState());
-  enterRule(_localctx, 34, typlypParser::RuleExprList);
+  enterRule(_localctx, 32, typlypParser::RuleExprList);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -2176,17 +2329,17 @@ typlypParser::ExprListContext* typlypParser::exprList() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(233);
+    setState(285);
     expr(0);
-    setState(238);
+    setState(290);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == typlypParser::COMMA) {
-      setState(234);
+      setState(286);
       match(typlypParser::COMMA);
-      setState(235);
+      setState(287);
       expr(0);
-      setState(240);
+      setState(292);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -2246,7 +2399,7 @@ std::any typlypParser::TypeContext::accept(tree::ParseTreeVisitor *visitor) {
 
 typlypParser::TypeContext* typlypParser::type() {
   TypeContext *_localctx = _tracker.createInstance<TypeContext>(_ctx, getState());
-  enterRule(_localctx, 36, typlypParser::RuleType);
+  enterRule(_localctx, 34, typlypParser::RuleType);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -2256,26 +2409,26 @@ typlypParser::TypeContext* typlypParser::type() {
     exitRule();
   });
   try {
-    setState(244);
+    setState(296);
     _errHandler->sync(this);
-    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 19, _ctx)) {
+    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 29, _ctx)) {
     case 1: {
       enterOuterAlt(_localctx, 1);
-      setState(241);
+      setState(293);
       scalarType();
       break;
     }
 
     case 2: {
       enterOuterAlt(_localctx, 2);
-      setState(242);
+      setState(294);
       arrayType();
       break;
     }
 
     case 3: {
       enterOuterAlt(_localctx, 3);
-      setState(243);
+      setState(295);
       voidType();
       break;
     }
@@ -2327,7 +2480,7 @@ std::any typlypParser::VoidTypeContext::accept(tree::ParseTreeVisitor *visitor) 
 
 typlypParser::VoidTypeContext* typlypParser::voidType() {
   VoidTypeContext *_localctx = _tracker.createInstance<VoidTypeContext>(_ctx, getState());
-  enterRule(_localctx, 38, typlypParser::RuleVoidType);
+  enterRule(_localctx, 36, typlypParser::RuleVoidType);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -2338,8 +2491,8 @@ typlypParser::VoidTypeContext* typlypParser::voidType() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(246);
-    match(typlypParser::T__13);
+    setState(298);
+    match(typlypParser::T__9);
    
   }
   catch (RecognitionException &e) {
@@ -2384,7 +2537,7 @@ std::any typlypParser::ScalarTypeContext::accept(tree::ParseTreeVisitor *visitor
 
 typlypParser::ScalarTypeContext* typlypParser::scalarType() {
   ScalarTypeContext *_localctx = _tracker.createInstance<ScalarTypeContext>(_ctx, getState());
-  enterRule(_localctx, 40, typlypParser::RuleScalarType);
+  enterRule(_localctx, 38, typlypParser::RuleScalarType);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -2396,11 +2549,11 @@ typlypParser::ScalarTypeContext* typlypParser::scalarType() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(248);
+    setState(300);
     _la = _input->LA(1);
-    if (!(_la == typlypParser::T__14
+    if (!(_la == typlypParser::T__10
 
-    || _la == typlypParser::T__15)) {
+    || _la == typlypParser::T__11)) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -2463,7 +2616,7 @@ std::any typlypParser::ArrayTypeContext::accept(tree::ParseTreeVisitor *visitor)
 
 typlypParser::ArrayTypeContext* typlypParser::arrayType() {
   ArrayTypeContext *_localctx = _tracker.createInstance<ArrayTypeContext>(_ctx, getState());
-  enterRule(_localctx, 42, typlypParser::RuleArrayType);
+  enterRule(_localctx, 40, typlypParser::RuleArrayType);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -2473,27 +2626,34 @@ typlypParser::ArrayTypeContext* typlypParser::arrayType() {
     exitRule();
   });
   try {
-    setState(255);
+    setState(307);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case typlypParser::ASSIGN:
+      case typlypParser::T__8:
+      case typlypParser::BOOL:
+      case typlypParser::INT:
+      case typlypParser::ID:
+      case typlypParser::NOT:
+      case typlypParser::LASSIGN:
+      case typlypParser::LPAREN:
       case typlypParser::RPAREN:
       case typlypParser::LBRACE:
       case typlypParser::SEMICOLON:
-      case typlypParser::COMMA: {
+      case typlypParser::COMMA:
+      case typlypParser::DIVIDER: {
         enterOuterAlt(_localctx, 1);
 
         break;
       }
 
-      case typlypParser::T__14:
-      case typlypParser::T__15: {
+      case typlypParser::T__10:
+      case typlypParser::T__11: {
         enterOuterAlt(_localctx, 2);
-        setState(251);
+        setState(303);
         scalarType();
-        setState(252);
+        setState(304);
         match(typlypParser::LT);
-        setState(253);
+        setState(305);
         match(typlypParser::GT);
         break;
       }
@@ -2514,7 +2674,7 @@ typlypParser::ArrayTypeContext* typlypParser::arrayType() {
 
 bool typlypParser::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
   switch (ruleIndex) {
-    case 15: return exprSempred(antlrcpp::downCast<ExprContext *>(context), predicateIndex);
+    case 14: return exprSempred(antlrcpp::downCast<ExprContext *>(context), predicateIndex);
 
   default:
     break;
@@ -2524,10 +2684,10 @@ bool typlypParser::sempred(RuleContext *context, size_t ruleIndex, size_t predic
 
 bool typlypParser::exprSempred(ExprContext *_localctx, size_t predicateIndex) {
   switch (predicateIndex) {
-    case 0: return precpred(_ctx, 13);
-    case 1: return precpred(_ctx, 12);
-    case 2: return precpred(_ctx, 11);
-    case 3: return precpred(_ctx, 10);
+    case 0: return precpred(_ctx, 12);
+    case 1: return precpred(_ctx, 11);
+    case 2: return precpred(_ctx, 10);
+    case 3: return precpred(_ctx, 9);
 
   default:
     break;

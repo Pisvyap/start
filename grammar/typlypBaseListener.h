@@ -22,9 +22,6 @@ public:
   virtual void enterFunctionDecl(typlypParser::FunctionDeclContext * /*ctx*/) override { }
   virtual void exitFunctionDecl(typlypParser::FunctionDeclContext * /*ctx*/) override { }
 
-  virtual void enterExternalDecl(typlypParser::ExternalDeclContext * /*ctx*/) override { }
-  virtual void exitExternalDecl(typlypParser::ExternalDeclContext * /*ctx*/) override { }
-
   virtual void enterParamList(typlypParser::ParamListContext * /*ctx*/) override { }
   virtual void exitParamList(typlypParser::ParamListContext * /*ctx*/) override { }
 
