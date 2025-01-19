@@ -8,7 +8,6 @@ namespace vm {
     VirtualMachine::VirtualMachine() = default;
 
     void VirtualMachine::execute(const std::vector<bc::Instruction>& bytecode) {
-        // 1. Предварительная обработка
         size_t funcStart = -1;
         for (size_t i = 0; i < bytecode.size(); i++) {
             const auto& instr = bytecode[i];
@@ -35,7 +34,6 @@ namespace vm {
             throw std::runtime_error("FUNC_BEGIN without matching FUNC_END");
         }
 
-        // 2. Выполнение инструкций
         while (instructionPointer < bytecode.size()) {
             const auto& instr = bytecode[instructionPointer];
 
@@ -64,10 +62,10 @@ namespace vm {
     }
 
     void VirtualMachine::executeInstruction(const bc::Instruction instr)  {
-        if (test < 100) {
-            std::cout << "instr: " << instr.op << std::endl;
-            test++;
-        }
+//        if (test < 100) {
+//            std::cout << "instr: " << instr.op << std::endl;
+//            test++;
+//        }
         //std::cout << instr.op << std::endl;
         switch (instr.op) {
             case bc::LOAD_CONST:
@@ -453,12 +451,12 @@ namespace vm {
 
     void VirtualMachine::handleFuncBegin(const bc::Instruction& instr) {
         if (!instr.has_name) {
-            throw std::runtime_error("FUNC_BEGIN: отсутствует имя функции");
+            throw std::runtime_error("FUNC_BEGIN missing function name");
         }
 
         // Проверяем, что функция еще не существует в таблице
         if (functions.find(instr.name) != functions.end()) {
-            throw std::runtime_error("FUNC_BEGIN: функция с таким именем уже существует: " + instr.name);
+            throw std::runtime_error("FUNC_BEGIN A function with this name already exists: " + instr.name);
         }
 
         // Сохраняем начало функции в таблице
@@ -468,12 +466,12 @@ namespace vm {
 
     void VirtualMachine::handleFuncEnd() {
         if (callStack.empty()) {
-            throw std::runtime_error("FUNC_END: стек вызовов пуст");
+            throw std::runtime_error("FUNC_END стек вызовов пуст");
         }
 
         // Обновляем конец функции в таблице функций
         if (functions.empty()) {
-            throw std::runtime_error("FUNC_END: нет функции для завершения");
+            throw std::runtime_error("FUNC_END call stack is empty");
         }
 
         // Получаем имя функции, чтобы обновить диапазон
@@ -490,7 +488,7 @@ namespace vm {
 
     void VirtualMachine::handleReturn() {
         if (callStack.empty()) {
-            throw std::runtime_error("RETURN: пустой стек вызовов");
+            throw std::runtime_error("RETURN empty call stack");
         }
 
         // Получаем возвращаемое значение (или 0, если ничего нет в стеке)
@@ -515,20 +513,20 @@ namespace vm {
 
     void VirtualMachine::handleCall(const bc::Instruction& instr) {
         if (!instr.has_name) {
-            throw std::runtime_error("CALL: отсутствует имя функции");
+            throw std::runtime_error("CALL missing function name");
         }
 
 
         // Проверка наличия функции в таблице
         if (functions.find(instr.name) == functions.end()) {
-            throw std::runtime_error("CALL: функция не найдена: " + instr.name);
+            throw std::runtime_error("CALL function not found: " + instr.name);
         }
 
         size_t numArgs = instr.operand.getLimitedValue();
 
         // Проверяем, что в стеке есть достаточно аргументов
         if (dataStack.size() < numArgs) {
-            throw std::runtime_error("CALL: недостаточно аргументов для функции " + instr.name);
+            throw std::runtime_error("CALL not enough arguments for the function " + instr.name);
         }
 
         // Передаем аргументы в локальные переменные функции
