@@ -12,7 +12,7 @@ namespace vm {
         std::vector<llvm::APInt> dataStack;               // Стек данных
         std::unordered_map<std::string, llvm::APInt> vars; // Переменные
         std::map<uint64_t, size_t> labels;           //Якори
-        std::map<std::string, size_t> functions;    //Функции
+//        std::map<std::string, size_t> functions;    //Функции
         size_t instructionPointer = 0;                // Указатель на текущую инструкцию
 
         VirtualMachine();
@@ -25,7 +25,7 @@ namespace vm {
         void handleLoadVar(const bc::Instruction& instr);
         void handleAdd();
         void handlePrint();
-        void handleAlloc(const bc::Instruction& instr);
+        void handleAlloc();
         void handleStoreInArray();
         void handleLoadFromArray();
         void handlePass();

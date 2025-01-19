@@ -11,9 +11,10 @@ namespace vm {
         for (size_t i = 0; i < bytecode.size(); i++) {
             if (bytecode[i].op == bc::LABEL) {
                 handleLabel(bytecode[i], i);
-            } else if (bytecode[i].op == bc::FUNC_BEGIN) {
-                functions.insert(std::make_pair(bytecode[i].name, i));
             }
+//            else if (bytecode[i].op == bc::FUNC_BEGIN) {
+//                functions.insert(std::make_pair(bytecode[i].name, i));
+//            }
         }
         while (instructionPointer < bytecode.size()) {
             const auto &instr = bytecode[instructionPointer];
@@ -52,7 +53,7 @@ namespace vm {
                     break;
 
                 case bc::ALLOC:
-                    handleAlloc(instr);
+                    handleAlloc();
                     break;
 
                 case bc::STORE_IN_ARRAY:
@@ -76,9 +77,9 @@ namespace vm {
                     break;
 
                 case bc::FUNC_BEGIN:
-                    while (bytecode[instructionPointer].op != bc::OP::FUNC_END) {
-                        instructionPointer++;
-                    }
+//                    while (bytecode[instructionPointer].op != bc::OP::FUNC_END) {
+//                        instructionPointer++;
+//                    }
                     //handleFuncBegin();
                     break;
 
@@ -291,19 +292,18 @@ namespace vm {
         dataStack.pop_back();
     }
 
-    void VirtualMachine::handleAlloc(const bc::Instruction &instr) {
-        if (!instr.has_operand) {
-            throw std::runtime_error("ALLOC missing size operand");
+    void VirtualMachine::handleAlloc() {
+        if (dataStack.empty()) {
+            throw std::runtime_error("Stack underflow on Alloc");
         }
-
-        if (!instr.operand.isIntN(sizeof(size_t) * 8)) {
+        auto allocSize = dataStack.back();
+        dataStack.pop_back();
+        if (!allocSize.isIntN(sizeof(size_t) * 8)) {
             throw std::runtime_error("ALLOC operand exceeds platform size limit");
         }
 
-        auto allocSize = static_cast<size_t>(instr.operand.getLimitedValue());
-
         // Выделяем память через GC_MALLOC
-        void *allocatedMemory = GC_MALLOC(allocSize);
+        void *allocatedMemory = GC_MALLOC(allocSize.getLimitedValue());
         if (!allocatedMemory) {
             throw std::runtime_error("Memory allocation failed");
         }
@@ -394,9 +394,9 @@ namespace vm {
     void VirtualMachine::handleReturn() {}
 
     void VirtualMachine::handleCall(const bc::Instruction &instr) {
-        if (dataStack.size() < instr.operand.getLimitedValue()) {
-            throw std::runtime_error("Stack underflow on Call");
-        }
+//        if (dataStack.size() < instr.operand.getLimitedValue()) {
+//            throw std::runtime_error("Stack underflow on Call");
+//        }
     }
 
     void VirtualMachine::handleLabel(const bc::Instruction &instr, size_t &currentPointer) {

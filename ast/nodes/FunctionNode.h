@@ -47,7 +47,7 @@ public:
     void generate_bytecode() override {
         bc::bytecode.emplace_back(bc::OP::FUNC_BEGIN, name);
 
-        // TODO возможно нужны будут валидация параметров на уровне байткода, но пока что так
+        // TODO
         // Непонятно, каким образом надо обрабатывать параметры
         for (auto& param : parameters) {
             if (param->type.is_array) {

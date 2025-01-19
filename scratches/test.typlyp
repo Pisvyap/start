@@ -1,10 +1,4 @@
-pust n: chislo = 100;
-pust t: chislo = 0;
-poka (t <= n) {
-        t -> glaza;
-        t = t + 2;
-        poka (t == 4) {
-            t = t * 10;
-            t -> glaza;
-        }
-}
+pust r: chislo = 3;
+1 + 1;
+1 + 1;
+pust n: chislo<> = new chislo<r>;
