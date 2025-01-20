@@ -21,7 +21,7 @@ esli (x = 18) {
 ```
 ## Циклы
 ```
-k: chislo = 0;
+k: chislo <- 0;
 poka (k < 10) {
     glaza <- k;
     k + 1 -> k;
@@ -30,7 +30,7 @@ poka (k < 10) {
 
 Точки с запятой прошлый век, так выглядит намного эстетичнее
 ```
-perebor (k: chislo = 1 | k <= 10 | k = k + 1) {
+perebor (k: chislo <- 1 | k <= 10 | k + 1 -> k + 1) {
     k -> glaza;
 }
 ```
@@ -38,8 +38,8 @@ perebor (k: chislo = 1 | k <= 10 | k = k + 1) {
 ## Массивы
 
 ```
-arr: chislo<> = new chislo<10>;
-perebor (k: chislo = 0; k < 10; k = k + 1) {
+arr: chislo<> <- new chislo<10>;
+perebor (k: chislo <- 0; k < 10; k <- k + 1) {
     k * k -> arr[k];
 }
 
@@ -50,7 +50,7 @@ arr[0] -> glaza;
 Все данные для функции складываются в коробочку и отправляются прямо в саму функцию
 ```
 delo foo (a: chislo, b: chislo) -> logika {
-    otday a = b;
+    otday a + b;
 }
 
 [1, 2] -> foo -> glaza;
