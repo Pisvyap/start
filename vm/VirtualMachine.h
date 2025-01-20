@@ -23,7 +23,7 @@ namespace vm {
 
         // Выполнение байткода
         void execute(const std::vector<bc::Instruction>& bytecode);
-        void executeInstruction(const bc::Instruction instr);
+        void executeInstruction(const bc::Instruction& instr);
 
         void handleLoadConst(const bc::Instruction& instr);
         void handleStoreVar(const bc::Instruction& instr);

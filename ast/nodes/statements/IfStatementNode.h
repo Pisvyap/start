@@ -45,29 +45,23 @@ public:
     llvm::Value *Codegen() override;
 
     void generate_bytecode() override {
-        // Для начала выполняем условие
         condition->generate_bytecode();
 
         int false_label = bc::LABEL_COUNT;
         int end_label = bc::LABEL_COUNT + 1;
         bc::LABEL_COUNT += 2;
 
-        // В случае false переход.
         bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, llvm::APInt(128, false_label));
 
-        // Теперь тело true и переход к выходу из if
         thenBlock->generate_bytecode();
         bc::bytecode.emplace_back(bc::OP::JUMP, llvm::APInt(128, end_label));
 
-        // Генерируем метку для false
         bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, false_label));
 
-        // Теперь тело false
         if (elseBlock != nullptr) {
             elseBlock->generate_bytecode();
         }
 
-        // Метка выхода из if
         bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, end_label));
     }
 };

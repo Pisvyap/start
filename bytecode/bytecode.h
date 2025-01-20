@@ -13,7 +13,7 @@ namespace bc {
         LOAD_PTR,         // Запись заранее сохраненного указателя в верхушку стека
         STORE_PTR,        // Запись верхнего элемента стека (указателя) в переменную (и удаление со стека)
         STORE_IN_ARRAY,   // Запись в ячейку массива
-        LOAD_FROM_ARRAY,  //
+        LOAD_FROM_ARRAY,  // Запись в стек из ячейки массива
         CALL,             // Вызов функции, предполагаем, что аргументы уже на стеке подготовлены. Результат также помещается на стек
         FUNC_BEGIN,       // Обозначение, что дальше идет блок кода функции
         FUNC_END,         // Обозначение конца блока функции
@@ -64,13 +64,13 @@ namespace bc {
         explicit Instruction(const OP op)
                     : op(op), operand(128, 0), has_operand(false), has_name(false) {}
 
-        Instruction(const OP op, const llvm::APInt operand)
+        Instruction(const OP op, const llvm::APInt& operand)
                     : op(op), operand(operand), has_operand(true), has_name(false) {}
 
         Instruction(const OP op, const std::string &name)
                     : op(op), operand(128, 0), name(name), has_operand(false), has_name(true) {}
 
-        Instruction(const OP op, const std::string& name, const llvm::APInt operand)
+        Instruction(const OP op, const std::string& name, const llvm::APInt& operand)
                     : op(op), operand(operand), name(name), has_operand(true), has_name(true) {}
     };
 

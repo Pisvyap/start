@@ -13,16 +13,16 @@ namespace vm {
             const auto& instr = bytecode[i];
             if (instr.op == bc::FUNC_BEGIN) {
                 handleFuncBegin(instr);
-                funcStart = i;  // Запоминаем начало функции
+                funcStart = i;
             } else if (instr.op == bc::FUNC_END) {
                 if (funcStart == -1) {
                     throw std::runtime_error("FUNC_END without matching FUNC_BEGIN");
                 }
-                // Сохраняем диапазон инструкции функции
+
                 functions[bytecode[funcStart].name] = {funcStart, i};
                 funcStart = -1;
             } else if ( instr.op == bc::LABEL) {
-                // Обрабатываем метки вне функции
+
                 if (!instr.has_operand) {
                     throw std::runtime_error("LABEL missing operand");
                 }
@@ -41,7 +41,7 @@ namespace vm {
                 executeInstruction(instr);
                 continue;
             }
-            // Если инструкция находится в диапазоне определённой функции — пропускаем
+
             bool insideFunction = false;
             for (const auto& [funcName, range] : functions) {
                 auto [start, end] = range;
@@ -52,21 +52,14 @@ namespace vm {
             }
             if (insideFunction) {
                 instructionPointer++;
-                continue; // Пропускаем исполнение этой команды
+                continue;
             }
 
-            // Выполняем текущую инструкцию
             executeInstruction(instr);
         }
-
     }
 
-    void VirtualMachine::executeInstruction(const bc::Instruction instr)  {
-//        if (test < 100) {
-//            std::cout << "instr: " << instr.op << std::endl;
-//            test++;
-//        }
-        //std::cout << instr.op << std::endl;
+    void VirtualMachine::executeInstruction(const bc::Instruction& instr)  {
         switch (instr.op) {
             case bc::LOAD_CONST:
                 handleLoadConst(instr);
@@ -201,16 +194,14 @@ namespace vm {
             throw std::runtime_error("Stack underflow on STORE_VAR");
         }
 
-
         llvm::APInt value = dataStack.back();
-
 
         dataStack.pop_back();
 
         if (!functionStack.empty()) {
-            functionStack.back()[instr.name] = value; // Сохраняем в локальном контексте
+            functionStack.back()[instr.name] = value;
         } else {
-            vars[instr.name] = value; // Сохраняем в глобальных переменных
+            vars[instr.name] = value;
         }
     }
 
@@ -222,9 +213,9 @@ namespace vm {
         }
 
         if (!functionStack.empty() && functionStack.back().find(instr.name) != functionStack.back().end()) {
-            dataStack.push_back(functionStack.back()[instr.name]); // Загружаем из локального контекста
+            dataStack.push_back(functionStack.back()[instr.name]);
         } else if (vars.find(instr.name) != vars.end()) {
-            dataStack.push_back(vars[instr.name]); // Загружаем из глобальных переменных
+            dataStack.push_back(vars[instr.name]);
         } else {
             throw std::runtime_error("Variable not found: " + instr.name);
         }
@@ -332,7 +323,6 @@ namespace vm {
         dataStack.pop_back();
         llvm::APInt a = dataStack.back();
         dataStack.pop_back();
-
         dataStack.push_back(llvm::APInt(128, a.eq(b)));
     }
 
@@ -368,13 +358,11 @@ namespace vm {
             throw std::runtime_error("ALLOC operand exceeds platform size limit");
         }
 
-        // Выделяем память через GC_MALLOC
         void *allocatedMemory = GC_MALLOC(allocSize.getLimitedValue() * 16);
         if (!allocatedMemory) {
             throw std::runtime_error("Memory allocation failed");
         }
 
-        // Сохраняем указатель как llvm::APInt в стек
         llvm::APInt ptrValue(sizeof(uintptr_t) * 8, reinterpret_cast<uintptr_t>(allocatedMemory));
         dataStack.push_back(ptrValue);
     }
@@ -389,7 +377,6 @@ namespace vm {
         llvm::APInt index = dataStack.back();
         dataStack.pop_back();
 
-        // Преобразуем указатель в реальный указатель на массив
         llvm::APInt *arrayPtr = reinterpret_cast<llvm::APInt *>(arrayPtrAPInt.getLimitedValue());
 
         uint64_t indexValue = index.getLimitedValue();
@@ -398,7 +385,6 @@ namespace vm {
             throw std::runtime_error("Null pointer dereferenced");
         }
 
-        // Сохраняем значение в массиве
         llvm::APInt *targetCell = reinterpret_cast<llvm::APInt *>(&arrayPtr[indexValue]);
         *targetCell = value;
     }
@@ -410,7 +396,6 @@ namespace vm {
         llvm::APInt index = dataStack.back();
         dataStack.pop_back();
 
-        // Преобразуем указатель из APInt в реальный указатель на массив
         llvm::APInt *arrayPtr = reinterpret_cast<llvm::APInt *>(arrayPtrAPInt.getLimitedValue());
 
         if (!arrayPtr) {
@@ -438,9 +423,9 @@ namespace vm {
         }
 
         if (!functionStack.empty() && functionStack.back().find(instr.name) != functionStack.back().end()) {
-            dataStack.push_back(functionStack.back()[instr.name]); // Загружаем из локального контекста
+            dataStack.push_back(functionStack.back()[instr.name]);
         } else if (vars.find(instr.name) != vars.end()) {
-            dataStack.push_back(vars[instr.name]); // Загружаем из глобальных переменных
+            dataStack.push_back(vars[instr.name]);
         } else {
             throw std::runtime_error("Variable not found: " + instr.name);
         }
@@ -462,9 +447,9 @@ namespace vm {
         dataStack.pop_back();
 
         if (!functionStack.empty()) {
-            functionStack.back()[instr.name] = value; // Сохраняем в локальном контексте
+            functionStack.back()[instr.name] = value;
         } else {
-            vars[instr.name] = value; // Сохраняем в глобальных переменных
+            vars[instr.name] = value;
         }
     }
 
@@ -473,13 +458,11 @@ namespace vm {
             throw std::runtime_error("FUNC_BEGIN missing function name");
         }
 
-        // Проверяем, что функция еще не существует в таблице
         if (functions.find(instr.name) != functions.end()) {
             throw std::runtime_error("FUNC_BEGIN A function with this name already exists: " + instr.name);
         }
 
-        // Сохраняем начало функции в таблице
-        functions[instr.name] = {instructionPointer + 1, 0};  // Будем обновлять конец функции позже
+        functions[instr.name] = {instructionPointer + 1, 0};
     }
 
 
@@ -488,20 +471,17 @@ namespace vm {
             throw std::runtime_error("FUNC_END стек вызовов пуст");
         }
 
-        // Обновляем конец функции в таблице функций
         if (functions.empty()) {
             throw std::runtime_error("FUNC_END call stack is empty");
         }
 
-        // Получаем имя функции, чтобы обновить диапазон
         std::string funcName = functions.begin()->first;
-        functions[funcName].second = instructionPointer;  // Устанавливаем конец функции
+        functions[funcName].second = instructionPointer;
 
-        // Удаляем локальный контекст и восстанавливаем указатель на следующую инструкцию
         instructionPointer = callStack.back();
         callStack.pop_back();
         functionStack.pop_back();
-        isFunctionExec = false;  // Функция завершена
+        isFunctionExec = false;
     }
 
 
@@ -510,22 +490,18 @@ namespace vm {
             throw std::runtime_error("RETURN empty call stack");
         }
 
-        // Получаем возвращаемое значение (или 0, если ничего нет в стеке)
-        llvm::APInt returnValue = dataStack.empty() ? llvm::APInt(64, 0) : dataStack.back();
+        llvm::APInt returnValue = dataStack.empty() ? llvm::APInt(128, 0) : dataStack.back();
         if (!dataStack.empty()) {
             dataStack.pop_back();
         }
 
-        // Восстанавливаем указатель на инструкцию возврата
-        instructionPointer = callStack.back()-1;
+        instructionPointer = callStack.back() - 1;
         callStack.pop_back();
 
-        // Очищаем локальный контекст
         if (!functionStack.empty()) {
             functionStack.pop_back();
         }
 
-        // Возвращаем результат в стек
         dataStack.push_back(returnValue);
     }
 
@@ -535,39 +511,29 @@ namespace vm {
             throw std::runtime_error("CALL missing function name");
         }
 
-
-        // Проверка наличия функции в таблице
         if (functions.find(instr.name) == functions.end()) {
             throw std::runtime_error("CALL function not found: " + instr.name);
         }
 
         size_t numArgs = instr.operand.getLimitedValue();
 
-        // Проверяем, что в стеке есть достаточно аргументов
         if (dataStack.size() < numArgs) {
             throw std::runtime_error("CALL not enough arguments for the function " + instr.name);
         }
 
-        // Передаем аргументы в локальные переменные функции
         std::unordered_map<std::string, llvm::APInt> localVars;
 
-        // Сохраняем текущую позицию (для возврата после выполнения функции)
-        callStack.push_back(instructionPointer + 1);  // Сохраняем позицию после CALL
+        callStack.push_back(instructionPointer + 1);
 
-        // Создаем новый локальный контекст для функции
         functionStack.push_back(localVars);
 
-        // Переходим к началу функции
         auto [start, end] = functions[instr.name];
-        instructionPointer = start;  // Пропускаем FUNC_BEGIN
-        isFunctionExec = true;  // Функция теперь выполняется
+        instructionPointer = start;
+        isFunctionExec = true;
     }
 
-
-
-
     void VirtualMachine::handleLabel(const bc::Instruction &instr, size_t &currentPointer) {
-        labels.insert(std::make_pair(instr.operand.getLimitedValue(), currentPointer)); //Тут у него какие-то вопросы к APInt, пока так (хотя я сомневаюсь что нам понадобится так много якорей)
+        labels.insert(std::make_pair(instr.operand.getLimitedValue(), currentPointer));
     }
 
     void VirtualMachine::handleJumpIfFalse(const bc::Instruction &instr, size_t &currentPointer) {

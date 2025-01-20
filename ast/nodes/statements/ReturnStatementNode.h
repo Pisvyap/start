@@ -24,7 +24,6 @@ public:
     }
 
     void generate_bytecode() override {
-        // Вызываем генерацию от выражения (после этого результат на верхушке стека)
         expression->generate_bytecode();
 
         bc::bytecode.emplace_back(bc::OP::RETURN);

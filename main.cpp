@@ -857,7 +857,7 @@ int main(int argc, char *argv[]) {
         //bc::print_bytecode();
         //std::cout << "---ABOBA---" << std::endl;
         bytecode_optimize();
-        bc::print_bytecode();
+        // bc::print_bytecode();
         auto* virtualMachine = new vm::VirtualMachine();
         virtualMachine->execute(bc::bytecode);
         return 0;

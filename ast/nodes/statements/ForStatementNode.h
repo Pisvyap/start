@@ -32,7 +32,6 @@ public:
     llvm::Value *Codegen() override;
 
     void generate_bytecode() override {
-        // Генерируем инициализацию
         // TODO Возможно стоит как то помечать, что это начало цикла FOR?
         init->generate_bytecode();
 
@@ -40,21 +39,16 @@ public:
         int for_end = bc::LABEL_COUNT + 1;
         bc::LABEL_COUNT += 2;
 
-        // Метка на проверку условий
         bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, for_start));
         condition->generate_bytecode();
 
-        // Переход к концу цикла если не выполняется условие
         bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, llvm::APInt(128, for_end));
 
-        // Генерация тела цикла
         body->generate_bytecode();
 
-        // выполнение update и переход к проверке условия
         step->generate_bytecode();
         bc::bytecode.emplace_back(bc::OP::JUMP, llvm::APInt(128, for_start));
 
-        // Метка выхода из цикла
         bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, for_end));
     }
 };

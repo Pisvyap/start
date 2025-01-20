@@ -16,10 +16,8 @@ public:
     llvm::Value *Codegen() override;
 
     void generate_bytecode() override {
-        // Генерируем выражение (результат на верхушке стека ожидается)
         expression->generate_bytecode();
 
-        // вызов печати
         bc::bytecode.emplace_back(bc::OP::PRINT);
     }
 };

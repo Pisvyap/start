@@ -47,8 +47,6 @@ public:
     void generate_bytecode() override {
         bc::bytecode.emplace_back(bc::OP::FUNC_BEGIN, name);
 
-        // TODO
-        // Непонятно, каким образом надо обрабатывать параметры
         for (auto& param : parameters) {
             if (param->type.is_array) {
                 bc::bytecode.emplace_back(bc::OP::STORE_PTR, param->name);
@@ -59,10 +57,8 @@ public:
             }
         }
 
-        // Обрабатываем тело
         body->generate_bytecode();
 
-        // Обозначаем конец
         bc::bytecode.emplace_back(bc::OP::FUNC_END);
     }
 

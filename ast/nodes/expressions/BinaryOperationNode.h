@@ -46,12 +46,9 @@ public:
     }
 
     void generate_bytecode() override {
-        // Тут сперва нужно положить оба операнда на стек
-        // Сначала кладем ПРАВЫЙ операнд (если что поменять, хз как удобно потом будет)
         right->generate_bytecode();
         left->generate_bytecode();
 
-        // Теперь добавляем операцию
         switch (operation) {
             case Add:
                 bc::bytecode.emplace_back(bc::OP::ADD);

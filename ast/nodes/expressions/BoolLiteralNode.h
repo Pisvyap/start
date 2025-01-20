@@ -17,7 +17,6 @@ public:
     }
 
     void generate_bytecode() override {
-        // Пока что булевые переменные через 0 или 1, хз норм ли будет дальше так
         bc::bytecode.emplace_back(bc::OP::LOAD_CONST, llvm::APInt(1, this->int_value));
     }
 
