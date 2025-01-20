@@ -43,6 +43,15 @@ schitaem (pust k: chislo = 0; k < 10; k = k + 1) {
 arr[9] -> glaza;
 ```
 
+## Функции
+```
+delo foo(a: chislo, b: chislo): chislo {
+    vernut a + b;
+}
+
+delo(1, 2) -> glaza;
+```
+
 ---
 
 # Стек
