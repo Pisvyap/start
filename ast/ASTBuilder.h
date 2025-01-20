@@ -134,8 +134,14 @@ public:
         auto node = std::make_shared<ArrayAssigmentNode>();
 
         node->name = context->ID()->getText();
-        node->index = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
-        node->value = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[1]));
+        if (context->LASSIGN()) {
+            node->index = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
+            node->value = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[1]));
+        } else {
+            node->index = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[1]));
+            node->value = std::any_cast<Ptr<ExpressionNode>>(visitExpr(context->expr()[0]));
+        }
+
 
         return static_cast<Ptr<StatementNode>>(node);
     }

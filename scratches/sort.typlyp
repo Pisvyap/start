@@ -14,23 +14,23 @@ delo partition(arr: chislo<>, left: chislo, right: chislo, pivot: chislo) -> chi
             temp -> arr[right];
 
             left <- left + 1;
-            right -1 -> right;
+            right - 1 -> right;
         }
     }
 
-    otday left;
+    otday <- left;
 }
 
 delo quickSort(arr: chislo<>, left: chislo, right: chislo) -> chislo {
     esli (left < right) {
-        pivot: chislo = arr[(left + right) / 2];
-        index: chislo = partition(arr, left, right, pivot);
+        pivot: chislo <- arr[(left + right) / 2];
+        index: chislo <- partition <- [arr, left, right, pivot];
 
-        quickSort <- (arr, left, index - 1);
-        quickSort <- (arr, index, right);
+        quickSort <- [arr, left, index - 1];
+        quickSort <- [arr, index, right];
     }
 
-    otday 0;
+    otday <- 0;
 }
 
 numbers: chislo<> <- new chislo<10000>;
@@ -40,7 +40,7 @@ perebor (i: chislo <- 0 | i < 10000 | i <- i + 1) {
     numbers[i] <- i;
 }
 
-perebor (j: chislo <- 0 ; j < 10000; j + 1 -> j) {
+perebor (j: chislo <- 0 | j < 10000 | j + 1 -> j) {
     perebor (z: chislo <- 0 | z < 10000 | z <- z + 6){
         numbers[j] -> temp;
         numbers[j] <- numbers[z];
@@ -48,7 +48,7 @@ perebor (j: chislo <- 0 ; j < 10000; j + 1 -> j) {
     }
 }
 
-quickSort <- (numbers, 0, 9999);
+quickSort <- [numbers, 0, 9999];
 
 perebor (k: chislo <- 0 | k < 10000 | k + 1 -> k) {
     numbers[k] -> glaza;

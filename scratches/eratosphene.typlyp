@@ -8,17 +8,17 @@ perebor (k: chislo <- 0 | k < n | k <- k + 1) {
 primes[0] <- net;
 primes[1] <- net;
 
-perebor (p: chislo <- 2 | p * p <= n | p = p + 1) {
+perebor (p: chislo <- 2 | p * p <= n | p <- p + 1) {
     esli (primes[p] = da) {
         p -> glaza;
-        perebor (i: chislo <- p | i < n | i = i + p) {
+        perebor (i: chislo <- p | i < n | i <- i + p) {
             primes[i] <- net;
         }
     }
 }
 
 perebor (j: chislo <- 0 | j < n | j + 1 -> j ) {
-    esli <- (primes[j]) {
+    esli (primes[j]) {
         j -> glaza;
     }
 }
