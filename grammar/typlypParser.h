@@ -26,8 +26,8 @@ public:
     RuleBlock = 4, RuleStatement = 5, RuleVarDecl = 6, RuleAssignment = 7, 
     RuleArrayAssignment = 8, RuleReturnStatement = 9, RuleIfStatement = 10, 
     RuleWhileStatement = 11, RuleForStatement = 12, RulePrintStatement = 13, 
-    RuleExpr = 14, RuleArgList = 15, RuleExprList = 16, RuleType = 17, RuleVoidType = 18, 
-    RuleScalarType = 19, RuleArrayType = 20
+    RuleExpr = 14, RuleArgList = 15, RuleType = 16, RuleVoidType = 17, RuleScalarType = 18, 
+    RuleArrayType = 19
   };
 
   explicit typlypParser(antlr4::TokenStream *input);
@@ -63,7 +63,6 @@ public:
   class PrintStatementContext;
   class ExprContext;
   class ArgListContext;
-  class ExprListContext;
   class TypeContext;
   class VoidTypeContext;
   class ScalarTypeContext;
@@ -392,24 +391,6 @@ public:
   };
 
   ArgListContext* argList();
-
-  class  ExprListContext : public antlr4::ParserRuleContext {
-  public:
-    ExprListContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    std::vector<ExprContext *> expr();
-    ExprContext* expr(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> COMMA();
-    antlr4::tree::TerminalNode* COMMA(size_t i);
-
-    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
-    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  ExprListContext* exprList();
 
   class  TypeContext : public antlr4::ParserRuleContext {
   public:

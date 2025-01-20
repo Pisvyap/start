@@ -64,9 +64,6 @@ public:
   virtual void enterArgList(typlypParser::ArgListContext * /*ctx*/) override { }
   virtual void exitArgList(typlypParser::ArgListContext * /*ctx*/) override { }
 
-  virtual void enterExprList(typlypParser::ExprListContext * /*ctx*/) override { }
-  virtual void exitExprList(typlypParser::ExprListContext * /*ctx*/) override { }
-
   virtual void enterType(typlypParser::TypeContext * /*ctx*/) override { }
   virtual void exitType(typlypParser::TypeContext * /*ctx*/) override { }
 

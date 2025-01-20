@@ -51,8 +51,6 @@ public:
 
     virtual std::any visitArgList(typlypParser::ArgListContext *context) = 0;
 
-    virtual std::any visitExprList(typlypParser::ExprListContext *context) = 0;
-
     virtual std::any visitType(typlypParser::TypeContext *context) = 0;
 
     virtual std::any visitVoidType(typlypParser::VoidTypeContext *context) = 0;

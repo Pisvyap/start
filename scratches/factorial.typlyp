@@ -6,5 +6,4 @@ delo factorial(n: chislo) -> chislo {
         }
         n -> otday;
 }
-[20] -> factorial -> result: chislo;
-result -> glaza;
+[20] -> factorial -> glaza;

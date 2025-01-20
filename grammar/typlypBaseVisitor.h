@@ -79,10 +79,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitExprList(typlypParser::ExprListContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitType(typlypParser::TypeContext *ctx) override {
     return visitChildren(ctx);
   }

@@ -5,9 +5,9 @@ grammar typlyp;
 // 2. Поменять присваивания на стрелочки // DONE
 // 3. vernut на otdau // DONE
 // 4. В форе поменять ; на | // DONE
-// 5. фор  и другие двусторонние (со стрелками) // DONE
 // 6. замена net и da // DONE
 // 7. стрелка в функциях // DONE
+// 8. замена != на =/=
 
 // Основное правило программы
 program : (functionDecl | statement)* EOF;
@@ -32,7 +32,7 @@ statement
     | ifStatement
     | whileStatement
     | forStatement
-    | expr ';'
+    | expr SEMICOLON
     ;
 
 // Объявление переменной
@@ -106,7 +106,7 @@ arrayType
     ;
 
 // Лексические правила
-BOOL : 'da' | 'net';               // Логические значения
+BOOL : 'da' | 'net';                   // Логические значения
 INT : [0-9]+;                          // Целые числа
 ID : [a-zA-Z_][a-zA-Z0-9_]*;           // Идентификаторы
 WS : [ \t\r\n]+ -> skip;               // Пропуск пробелов и новых строк
@@ -122,5 +122,5 @@ LASSIGN : '<-'; RASSIGN : '->';
 LBRACKET : '['; RBRACKET : ']';
 LPAREN : '('; RPAREN : ')';
 LBRACE : '{'; RBRACE : '}';
-SEMICOLON : ';'; COMMA : ',';
+SEMICOLON : ';' | '?'; COMMA : ',';
 DIVIDER : '|';

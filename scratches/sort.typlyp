@@ -40,8 +40,8 @@ perebor (i: chislo <- 0 | i < 10000 | i <- i + 1) {
     numbers[i] <- i;
 }
 
-perebor (j: chislo <- 0 | j < 10000 | j + 1 -> j) {
-    perebor (z: chislo <- 0 | z < 10000 | z <- z + 6){
+perebor (j: chislo <- 0 | j < 10000 | j + 55 -> j) {
+    perebor (z: chislo <- 0 | z < 10000 | z <- z + 44){
         numbers[j] -> temp;
         numbers[j] <- numbers[z];
         numbers[z] <- temp;

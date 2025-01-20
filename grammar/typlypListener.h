@@ -62,9 +62,6 @@ public:
   virtual void enterArgList(typlypParser::ArgListContext *ctx) = 0;
   virtual void exitArgList(typlypParser::ArgListContext *ctx) = 0;
 
-  virtual void enterExprList(typlypParser::ExprListContext *ctx) = 0;
-  virtual void exitExprList(typlypParser::ExprListContext *ctx) = 0;
-
   virtual void enterType(typlypParser::TypeContext *ctx) = 0;
   virtual void exitType(typlypParser::TypeContext *ctx) = 0;
 
