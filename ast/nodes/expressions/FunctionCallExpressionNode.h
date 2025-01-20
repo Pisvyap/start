@@ -45,6 +45,6 @@ public:
         for (auto it = arguments.rbegin(); it != arguments.rend(); ++it)
             (*it)->generate_bytecode();
 
-        bc::bytecode.emplace_back(bc::OP::CALL, this->name, llvm::APInt(128, arguments.size()));
+        bc::bytecode.emplace_back(bc::OP::ZOVY, this->name, llvm::APInt(128, arguments.size()));
     }
 };

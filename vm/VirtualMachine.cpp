@@ -11,17 +11,17 @@ namespace vm {
         size_t funcStart = -1;
         for (size_t i = 0; i < bytecode.size(); i++) {
             const auto& instr = bytecode[i];
-            if (instr.op == bc::FUNC_BEGIN) {
+            if (instr.op == bc::MISSIYA_NACHALO) {
                 handleFuncBegin(instr);
                 funcStart = i;
-            } else if (instr.op == bc::FUNC_END) {
+            } else if (instr.op == bc::MISSIYA_KONEC) {
                 if (funcStart == -1) {
                     throw std::runtime_error("FUNC_END without matching FUNC_BEGIN");
                 }
 
                 functions[bytecode[funcStart].name] = {funcStart, i};
                 funcStart = -1;
-            } else if ( instr.op == bc::LABEL) {
+            } else if ( instr.op == bc::METKA) {
 
                 if (!instr.has_operand) {
                     throw std::runtime_error("LABEL missing operand");
@@ -61,115 +61,115 @@ namespace vm {
 
     void VirtualMachine::executeInstruction(const bc::Instruction& instr)  {
         switch (instr.op) {
-            case bc::LOAD_CONST:
+            case bc::GRUZY_POSTOYANNUYU:
                 handleLoadConst(instr);
                 break;
 
-            case bc::STORE_VAR:
+            case bc::HRANY_PEREMENNUYU:
                 handleStoreVar(instr);
                 break;
 
-            case bc::LOAD_VAR:
+            case bc::GRUZY_PEREMENNUYU:
                 handleLoadVar(instr);
                 break;
 
-            case bc::ADD:
+            case bc::DOBAV:
                 handleAdd();
                 break;
 
-            case bc::SUB:
+            case bc::VICHTY:
                 handleSub();
                 break;
 
-            case bc::MUL:
+            case bc::UMNOZH:
                 handleMul();
                 break;
 
-            case bc::DIV:
+            case bc::DELY:
                 handleDiv();
                 break;
 
-            case bc::PRINT:
+            case bc::VIVEDY:
                 handlePrint();
                 break;
 
-            case bc::ALLOC:
+            case bc::VIDAY:
                 handleAlloc();
                 break;
 
-            case bc::STORE_IN_ARRAY:
+            case bc::GRUZY_V_SGRUDU:
                 handleStoreInArray();
                 break;
 
-            case bc::LOAD_FROM_ARRAY:
+            case bc::GRUZY_IZ_SGRUDY:
                 handleLoadFromArray();
                 break;
 
-            case bc::PASS:
+            case bc::PUSTAYA:
                 handlePass();
                 break;
 
-            case bc::LOAD_PTR:
+            case bc::GRUZY_UKAZATEL:
                 handleLoadPtr(instr);
                 break;
 
-            case bc::STORE_PTR:
+            case bc::HRANY_UKAZATEL:
                 handleStorePtr(instr);
                 break;
 
-            case bc::FUNC_BEGIN:
+            case bc::MISSIYA_NACHALO:
                 handleFuncBegin(instr);
                 break;
 
-            case bc::FUNC_END:
+            case bc::MISSIYA_KONEC:
                 handleFuncEnd();
                 break;
 
-            case bc::RETURN:
+            case bc::VERNUT:
                 handleReturn();
                 break;
 
-            case bc::CALL:
+            case bc::ZOVY:
                 handleCall(instr);
                 break;
 
-            case bc::LABEL:
+            case bc::METKA:
                 handlePass();
                 break;
 
-            case bc::JUMP_IF_FALSE:
+            case bc::PRIGAY_ESLI_NEPRAVDA:
                 handleJumpIfFalse(instr, instructionPointer);
                 break;
 
-            case bc::JUMP:
+            case bc::PRIGAY:
                 handleJump(instr, instructionPointer);
                 break;
 
-            case bc::GT:
+            case bc::BOLSHE:
                 handleGt();
                 break;
 
-            case bc::GE:
+            case bc::BOLSHE_ILI_RAVNO:
                 handleGe();
                 break;
 
-            case bc::LT:
+            case bc::MENSHE:
                 handleLt();
                 break;
 
-            case bc::LE:
+            case bc::MENSHE_ILI_RAVNO:
                 handleLe();
                 break;
 
-            case bc::EQ:
+            case bc::RAVNO:
                 handleEq();
                 break;
 
-            case bc::NE:
+            case bc::NE_RAVNO:
                 handleNe();
                 break;
 
-            case bc::NOT:
+            case bc::NE:
                 handleNot();
                 break;
 

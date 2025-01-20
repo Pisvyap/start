@@ -39,16 +39,16 @@ public:
         int for_end = bc::LABEL_COUNT + 1;
         bc::LABEL_COUNT += 2;
 
-        bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, for_start));
+        bc::bytecode.emplace_back(bc::OP::METKA, llvm::APInt(128, for_start));
         condition->generate_bytecode();
 
-        bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, llvm::APInt(128, for_end));
+        bc::bytecode.emplace_back(bc::OP::PRIGAY_ESLI_NEPRAVDA, llvm::APInt(128, for_end));
 
         body->generate_bytecode();
 
         step->generate_bytecode();
-        bc::bytecode.emplace_back(bc::OP::JUMP, llvm::APInt(128, for_start));
+        bc::bytecode.emplace_back(bc::OP::PRIGAY, llvm::APInt(128, for_start));
 
-        bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, for_end));
+        bc::bytecode.emplace_back(bc::OP::METKA, llvm::APInt(128, for_end));
     }
 };

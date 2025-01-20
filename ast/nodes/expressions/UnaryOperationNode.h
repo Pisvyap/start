@@ -32,7 +32,7 @@ public:
 
         switch (operation) {
             case NOT:
-                bc::bytecode.emplace_back(bc::OP::NOT);
+                bc::bytecode.emplace_back(bc::OP::NE);
                 return;
             default:
                 throw std::runtime_error("AST and Bytecode unary operators mismatch");

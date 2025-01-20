@@ -31,9 +31,9 @@ public:
     void generate_bytecode() override {
         index->generate_bytecode();
 
-        bc::bytecode.emplace_back(bc::LOAD_PTR, name);
+        bc::bytecode.emplace_back(bc::GRUZY_UKAZATEL, name);
 
-        bc::bytecode.emplace_back(bc::LOAD_FROM_ARRAY);
+        bc::bytecode.emplace_back(bc::GRUZY_IZ_SGRUDY);
     }
 
     llvm::Value *Codegen() override;

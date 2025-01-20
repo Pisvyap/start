@@ -18,6 +18,6 @@ public:
     void generate_bytecode() override {
         expression->generate_bytecode();
 
-        bc::bytecode.emplace_back(bc::OP::PRINT);
+        bc::bytecode.emplace_back(bc::OP::VIVEDY);
     }
 };

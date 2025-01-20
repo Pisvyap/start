@@ -18,7 +18,7 @@ public:
     }
 
     void generate_bytecode() override {
-        bc::bytecode.emplace_back(bc::LOAD_CONST, llvm::APInt(128, this->value));
+        bc::bytecode.emplace_back(bc::GRUZY_POSTOYANNUYU, llvm::APInt(128, this->value));
     }
 
     llvm::Value *Codegen() override;

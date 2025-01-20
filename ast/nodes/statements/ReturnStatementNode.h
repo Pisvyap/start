@@ -26,7 +26,7 @@ public:
     void generate_bytecode() override {
         expression->generate_bytecode();
 
-        bc::bytecode.emplace_back(bc::OP::RETURN);
+        bc::bytecode.emplace_back(bc::OP::VERNUT);
     }
 
     llvm::Value *Codegen() override;

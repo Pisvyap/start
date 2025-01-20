@@ -31,14 +31,14 @@ public:
         int while_end = bc::LABEL_COUNT + 1;
         bc::LABEL_COUNT += 2;
 
-        bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, while_start));
+        bc::bytecode.emplace_back(bc::OP::METKA, llvm::APInt(128, while_start));
         condition->generate_bytecode();
 
-        bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, llvm::APInt(128, while_end));
+        bc::bytecode.emplace_back(bc::OP::PRIGAY_ESLI_NEPRAVDA, llvm::APInt(128, while_end));
 
         body->generate_bytecode();
-        bc::bytecode.emplace_back(bc::OP::JUMP, llvm::APInt(128, while_start));
+        bc::bytecode.emplace_back(bc::OP::PRIGAY, llvm::APInt(128, while_start));
 
-        bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, while_end));
+        bc::bytecode.emplace_back(bc::OP::METKA, llvm::APInt(128, while_end));
     }
 };

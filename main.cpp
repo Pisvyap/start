@@ -794,9 +794,9 @@ void bytecode_optimize(){
         auto array_size = bc::bytecode.size();
         flag = false;
         for (int i = 0; i < array_size; i++){
-            if (bc::bytecode[i].op == bc::OP::ADD) {
-                if (bc::bytecode[i-1].op == bc::OP::LOAD_CONST && bc::bytecode[i-2].op == bc::OP::LOAD_CONST) {
-                    bc::bytecode[i-2].op = bc::OP::LOAD_CONST;
+            if (bc::bytecode[i].op == bc::OP::DOBAV) {
+                if (bc::bytecode[i-1].op == bc::OP::GRUZY_POSTOYANNUYU && bc::bytecode[i-2].op == bc::OP::GRUZY_POSTOYANNUYU) {
+                    bc::bytecode[i-2].op = bc::OP::GRUZY_POSTOYANNUYU;
                     bc::bytecode[i-2].operand = bc::bytecode[i-2].operand + bc::bytecode[i-1].operand;
                     bc::bytecode.erase(bc::bytecode.begin() + i - 1, bc:: bytecode.cbegin() + i + 1);
                     i -=2;
@@ -804,9 +804,9 @@ void bytecode_optimize(){
                     flag = true;
                 }
             }
-            if (bc::bytecode[i].op == bc::OP::SUB) {
-                if (bc::bytecode[i-1].op == bc::OP::LOAD_CONST && bc::bytecode[i-2].op == bc::OP::LOAD_CONST) {
-                    bc::bytecode[i-2].op = bc::OP::LOAD_CONST;
+            if (bc::bytecode[i].op == bc::OP::VICHTY) {
+                if (bc::bytecode[i-1].op == bc::OP::GRUZY_POSTOYANNUYU && bc::bytecode[i-2].op == bc::OP::GRUZY_POSTOYANNUYU) {
+                    bc::bytecode[i-2].op = bc::OP::GRUZY_POSTOYANNUYU;
                     bc::bytecode[i-2].operand = bc::bytecode[i-1].operand -bc::bytecode[i-2].operand;
                     bc::bytecode.erase(bc::bytecode.begin() + i - 1, bc:: bytecode.cbegin() + i + 1);
                     i -=2;
@@ -814,9 +814,9 @@ void bytecode_optimize(){
                     flag = true;
                 }
             }
-            if (bc::bytecode[i].op == bc::OP::MUL) {
-                if (bc::bytecode[i-1].op == bc::OP::LOAD_CONST && bc::bytecode[i-2].op == bc::OP::LOAD_CONST) {
-                    bc::bytecode[i-2].op = bc::OP::LOAD_CONST;
+            if (bc::bytecode[i].op == bc::OP::UMNOZH) {
+                if (bc::bytecode[i-1].op == bc::OP::GRUZY_POSTOYANNUYU && bc::bytecode[i-2].op == bc::OP::GRUZY_POSTOYANNUYU) {
+                    bc::bytecode[i-2].op = bc::OP::GRUZY_POSTOYANNUYU;
                     bc::bytecode[i-2].operand = bc::bytecode[i-2].operand * bc::bytecode[i-1].operand;
                     bc::bytecode.erase(bc::bytecode.begin() + i - 1, bc:: bytecode.cbegin() + i + 1);
                     i -=2;
@@ -824,9 +824,9 @@ void bytecode_optimize(){
                     flag = true;
                 }
             }
-            if (bc::bytecode[i].op == bc::OP::DIV) {
-                if (bc::bytecode[i-1].op == bc::OP::LOAD_CONST && bc::bytecode[i-2].op == bc::OP::LOAD_CONST) {
-                    bc::bytecode[i-2].op = bc::OP::LOAD_CONST;
+            if (bc::bytecode[i].op == bc::OP::DELY) {
+                if (bc::bytecode[i-1].op == bc::OP::GRUZY_POSTOYANNUYU && bc::bytecode[i-2].op == bc::OP::GRUZY_POSTOYANNUYU) {
+                    bc::bytecode[i-2].op = bc::OP::GRUZY_POSTOYANNUYU;
                     bc::bytecode[i-2].operand = bc::bytecode[i-1].operand.sdiv(bc::bytecode[i-2].operand);
                     bc::bytecode.erase(bc::bytecode.begin() + i - 1, bc:: bytecode.cbegin() + i + 1);
                     i -=2;

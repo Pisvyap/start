@@ -30,88 +30,88 @@ void bc::print_bytecode() {
 
 std::ostream& bc::operator<<(std::ostream& os, const OP& op) {
     switch (op) {
-        case PASS:
+        case PUSTAYA:
             os << "PASS";
             return os;
-        case LOAD_CONST:
+        case GRUZY_POSTOYANNUYU:
             os << "LOAD_CONST";
             return os;
-        case LOAD_VAR:
+        case GRUZY_PEREMENNUYU:
             os << "LOAD_VAR";
             return os;
-        case STORE_VAR:
+        case HRANY_PEREMENNUYU:
             os << "STORE_VAR";
             return os;
-        case CALL:
+        case ZOVY:
             os << "CALL";
             return os;
-        case FUNC_BEGIN:
+        case MISSIYA_NACHALO:
             os << "FUNC_BEGIN";
             return os;
-        case FUNC_END:
+        case MISSIYA_KONEC:
             os << "FUNC_END";
             return os;
-        case RETURN:
+        case VERNUT:
             os << "RETURN";
             return os;
-        case ADD:
+        case DOBAV:
             os << "ADD";
             return os;
-        case SUB:
+        case VICHTY:
             os << "SUB";
             return os;
-        case MUL:
+        case UMNOZH:
             os << "MUL";
             return os;
-        case DIV:
+        case DELY:
             os << "DIV";
             return os;
-        case GT:
+        case BOLSHE:
             os << "GT";
             return os;
-        case GE:
+        case BOLSHE_ILI_RAVNO:
             os << "GE";
             return os;
-        case LT:
+        case MENSHE:
             os << "LT";
             return os;
-        case LE:
+        case MENSHE_ILI_RAVNO:
             os << "LE";
            return os;
-        case EQ:
+        case RAVNO:
             os << "EQ";
             return os;
-        case NE:
+        case NE_RAVNO:
             os << "NE";
            return os;
-        case NOT:
+        case NE:
             os << "NOT";
             return os;
-        case LABEL:
+        case METKA:
             os << "LABEL";
             return os;
-        case JUMP_IF_FALSE:
+        case PRIGAY_ESLI_NEPRAVDA:
             os << "JUMP_IF_FALSE";
             return os;
-        case JUMP:
+        case PRIGAY:
             os << "JUMP";
             return os;
-        case PRINT:
+        case VIVEDY:
             os << "PRINT";
             return os;
-        case ALLOC:
+        case VIDAY:
             os << "ALLOC";
             return os;
-        case LOAD_PTR:
+        case GRUZY_UKAZATEL:
             os << "LOAD_PTR";
             return os;
-        case STORE_PTR:
+        case HRANY_UKAZATEL:
             os << "STORE_PTR";
             return os;
-        case STORE_IN_ARRAY:
+        case GRUZY_V_SGRUDU:
             os << "STORE_IN_ARRAY";
             return os;
-        case LOAD_FROM_ARRAY:
+        case GRUZY_IZ_SGRUDY:
             os << "LOAD_FROM_ARRAY";
             return os;
         default:

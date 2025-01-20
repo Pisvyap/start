@@ -51,17 +51,17 @@ public:
         int end_label = bc::LABEL_COUNT + 1;
         bc::LABEL_COUNT += 2;
 
-        bc::bytecode.emplace_back(bc::OP::JUMP_IF_FALSE, llvm::APInt(128, false_label));
+        bc::bytecode.emplace_back(bc::OP::PRIGAY_ESLI_NEPRAVDA, llvm::APInt(128, false_label));
 
         thenBlock->generate_bytecode();
-        bc::bytecode.emplace_back(bc::OP::JUMP, llvm::APInt(128, end_label));
+        bc::bytecode.emplace_back(bc::OP::PRIGAY, llvm::APInt(128, end_label));
 
-        bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, false_label));
+        bc::bytecode.emplace_back(bc::OP::METKA, llvm::APInt(128, false_label));
 
         if (elseBlock != nullptr) {
             elseBlock->generate_bytecode();
         }
 
-        bc::bytecode.emplace_back(bc::OP::LABEL, llvm::APInt(128, end_label));
+        bc::bytecode.emplace_back(bc::OP::METKA, llvm::APInt(128, end_label));
     }
 };

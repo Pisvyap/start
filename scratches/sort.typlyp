@@ -47,12 +47,9 @@ schitaem (pust j: chislo = 0 ; j < 10000; j = j + 1;){
         numbers[z] = temp;
     }
 }
-schitaem (pust k: chislo = 100 ; k < 120; k = k + 1;){
-    numbers[k] -> glaza;
-}
 
 quickSort(numbers, 0, 10000);
 
-schitaem (pust k: chislo = 0 ; k < 10000; k = k + 1;){
+schitaem (pust k: chislo = 0 ; k < 10001; k = k + 1;){
     numbers[k] -> glaza;
 }

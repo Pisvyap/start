@@ -23,7 +23,7 @@ public:
     void generate_bytecode() override {
         expression -> generate_bytecode();
 
-        bc::bytecode.emplace_back(bc::ALLOC);
+        bc::bytecode.emplace_back(bc::VIDAY);
     }
 
     llvm::Value *Codegen() override;

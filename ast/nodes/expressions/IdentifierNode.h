@@ -21,9 +21,9 @@ public:
 
     void generate_bytecode() override {
         if (is_function)
-            bc::bytecode.emplace_back(bc::OP::CALL, this->name);
+            bc::bytecode.emplace_back(bc::OP::ZOVY, this->name);
         else
-            bc::bytecode.emplace_back(bc::OP::LOAD_VAR, this->name);
+            bc::bytecode.emplace_back(bc::OP::GRUZY_PEREMENNUYU, this->name);
     }
 
     llvm::Value *Codegen() override;

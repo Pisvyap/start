@@ -51,34 +51,34 @@ public:
 
         switch (operation) {
             case Add:
-                bc::bytecode.emplace_back(bc::OP::ADD);
+                bc::bytecode.emplace_back(bc::OP::DOBAV);
                 return;
             case Sub:
-                bc::bytecode.emplace_back(bc::OP::SUB);
+                bc::bytecode.emplace_back(bc::OP::VICHTY);
                 return;
             case Mul:
-                bc::bytecode.emplace_back(bc::OP::MUL);
+                bc::bytecode.emplace_back(bc::OP::UMNOZH);
                 return;
             case Div:
-                bc::bytecode.emplace_back(bc::OP::DIV);
+                bc::bytecode.emplace_back(bc::OP::DELY);
                 return;
             case LT:
-                bc::bytecode.emplace_back(bc::OP::LT);
+                bc::bytecode.emplace_back(bc::OP::MENSHE);
                 return;
             case LE:
-                bc::bytecode.emplace_back(bc::OP::LE);
+                bc::bytecode.emplace_back(bc::OP::MENSHE_ILI_RAVNO);
                 return;
             case GT:
-                bc::bytecode.emplace_back(bc::OP::GT);
+                bc::bytecode.emplace_back(bc::OP::BOLSHE);
                 return;
             case GE:
-                bc::bytecode.emplace_back(bc::OP::GE);
+                bc::bytecode.emplace_back(bc::OP::BOLSHE_ILI_RAVNO);
                 return;
             case EQ:
-                bc::bytecode.emplace_back(bc::OP::EQ);
+                bc::bytecode.emplace_back(bc::OP::RAVNO);
                 return;
             case NE:
-                bc::bytecode.emplace_back(bc::OP::NE);
+                bc::bytecode.emplace_back(bc::OP::NE_RAVNO);
                 return;
             default:
                 throw std::runtime_error("AST and Bytecode binary operators mismatch");

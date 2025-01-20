@@ -39,6 +39,6 @@ public:
     void generate_bytecode() override {
         value->generate_bytecode();
 
-        bc::bytecode.emplace_back(bc::OP::STORE_VAR, this->name);
+        bc::bytecode.emplace_back(bc::OP::HRANY_PEREMENNUYU, this->name);
     }
 };

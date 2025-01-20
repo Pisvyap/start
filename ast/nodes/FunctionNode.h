@@ -45,21 +45,21 @@ public:
     }
 
     void generate_bytecode() override {
-        bc::bytecode.emplace_back(bc::OP::FUNC_BEGIN, name);
+        bc::bytecode.emplace_back(bc::OP::MISSIYA_NACHALO, name);
 
         for (auto& param : parameters) {
             if (param->type.is_array) {
-                bc::bytecode.emplace_back(bc::OP::STORE_PTR, param->name);
+                bc::bytecode.emplace_back(bc::OP::HRANY_UKAZATEL, param->name);
             } else if (param->type.type == ScalarType::INT) {
-                bc::bytecode.emplace_back(bc::OP::STORE_VAR, param->name);
+                bc::bytecode.emplace_back(bc::OP::HRANY_PEREMENNUYU, param->name);
             } else if (param->type.type == ScalarType::BOOL) {
-                bc::bytecode.emplace_back(bc::OP::STORE_VAR, param->name);
+                bc::bytecode.emplace_back(bc::OP::HRANY_PEREMENNUYU, param->name);
             }
         }
 
         body->generate_bytecode();
 
-        bc::bytecode.emplace_back(bc::OP::FUNC_END);
+        bc::bytecode.emplace_back(bc::OP::MISSIYA_KONEC);
     }
 
     llvm::Value *Codegen() override;
