@@ -1,10 +1,24 @@
-delo factorial(n kak chislo) -> chislo {
-        esli <- (n = 0) {
-            n <- 1;
-        } inache {
-            n <- n * factorial(n - 1);
-        }
-        otdau n;
+n: chislo <- 100000;
+primes: logika<> <- new logika<100000>;
+
+perebor (k: chislo <- 0 | k < n | k <- k + 1) {
+    da -> primes[k];
 }
-result kak chislo <- factorial(5);
-result -> glaza;
+
+primes[0] <- net;
+primes[1] <- net;
+
+perebor (p: chislo <- 2 | p * p <= n | p <- p + 1) {
+    esli (primes[p] = da) {
+        p -> glaza;
+        perebor (i: chislo <- p | i < n | i <- i + p) {
+            primes[i] <- net;
+        }
+    }
+}
+
+perebor (j: chislo <- 0 | j < n | j + 1 -> j ) {
+    esli (primes[j]) {
+        j -> glaza;
+    }
+}

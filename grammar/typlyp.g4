@@ -17,7 +17,7 @@ functionDecl : 'delo' ID '(' paramList? ')' RASSIGN type block;
 
 // Список параметров
 paramList : param (',' param)*;
-param : ID 'kak' type;
+param : ID ':' type;
 
 // Блок кода
 block : '{' statement* '}';
@@ -36,8 +36,8 @@ statement
     ;
 
 // Объявление переменной
-varDecl : (ID 'kak' type (LASSIGN expr)?)
-        | ((expr RASSIGN)? ID 'kak' type);
+varDecl : (ID ':' type (LASSIGN expr)?)
+        | ((expr RASSIGN)? ID ':' type);
 
 // Присваивание значения переменной
 assignment  : (ID LASSIGN expr)
@@ -48,19 +48,17 @@ arrayAssignment : (ID LBRACKET expr RBRACKET LASSIGN expr)
                 | (expr RASSIGN ID LBRACKET expr RBRACKET);
 
 // Оператор возврата
-returnStatement : 'otdau' expr;
+returnStatement : ('otday' LASSIGN expr)
+                | (expr RASSIGN 'otday');
 
 // Условный оператор
-ifStatement : ('esli' LASSIGN LPAREN expr RPAREN block ('inache' block)?)
-            | (LPAREN expr RPAREN RASSIGN 'esli' block ('inache' block)?);
+ifStatement : 'esli' LPAREN expr RPAREN block ('inache' block)?;
 
 // Цикл
-whileStatement : ('poka' LASSIGN LPAREN expr RPAREN block)
-               | (LPAREN expr RPAREN RASSIGN 'poka' block);
+whileStatement : 'poka' LPAREN expr RPAREN block;
 
 // Новый цикл for
-forStatement : (('perebor' LASSIGN LPAREN varDecl? expr? SEMICOLON assignment? RPAREN)
-             | (LPAREN varDecl? DIVIDER expr? DIVIDER assignment? RPAREN RASSIGN 'perebor')) block;
+forStatement : 'perebor' LPAREN varDecl? DIVIDER expr? DIVIDER assignment? RPAREN block;
 
 // Вывод на экран
 printStatement  : (expr RASSIGN 'glaza')
@@ -77,16 +75,14 @@ expr
     | ID LBRACKET expr RBRACKET // done
     | INT // done
     | BOOL // done
-    | '(' expr ')' // done
-    | ID '(' argList? ')' // done
+    | LPAREN expr RPAREN // done
+    | ID LASSIGN LBRACKET argList? RBRACKET // done
+    | LBRACKET argList? RBRACKET RASSIGN ID  // done
     | 'new' scalarType '<' expr '>' // Создание массива done
     ;
 
 // Список аргументов
 argList : expr (',' expr)*;
-
-// Список выражений (для массивов)
-exprList : expr (',' expr)*;
 
 // Правила для типов
 type

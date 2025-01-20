@@ -187,7 +187,7 @@ public:
     }
 
     std::any visitExpr(typlypParser::ExprContext* context) override {
-        if (context->ID() && context->LPAREN() && context->RPAREN()) {
+        if (context->ID() && (context->LASSIGN() || context->RASSIGN()) && context->LBRACKET() && context->RBRACKET()) {
             auto node = std::make_shared<FunctionCallExpressionNode>();
             node->name = context->ID()->getText();
             if (context->argList())

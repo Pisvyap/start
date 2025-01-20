@@ -1,23 +1,23 @@
-n kak chislo <- 100000;
-primes kak logika<> <- logika<100000>;
+n: chislo <- 100000;
+primes: logika<> <- new logika<100000>;
 
-(k kak chislo <- 0 | k < n | k <- k + 1) -> perebor {
+perebor (k: chislo <- 0 | k < n | k <- k + 1) {
     da -> primes[k];
 }
 
-primes[0] = net;
-primes[1] = net;
+primes[0] <- net;
+primes[1] <- net;
 
-perebor <- (p kak chislo <- 2 | p * p <= n | p = p + 1) {
-    esli <- primes[p] = da {
+perebor (p: chislo <- 2 | p * p <= n | p = p + 1) {
+    esli (primes[p] = da) {
         p -> glaza;
-        perebor <- (i kak chislo <- p | i < n | i = i + p) {
+        perebor (i: chislo <- p | i < n | i = i + p) {
             primes[i] <- net;
         }
     }
 }
 
-(j kak chislo <- 0 | j < n | j + 1 -> j ) -> perebor {
+perebor (j: chislo <- 0 | j < n | j + 1 -> j ) {
     esli <- (primes[j]) {
         j -> glaza;
     }

@@ -1,10 +1,10 @@
-delo factorial(n kak chislo) -> chislo [
-        esli n = 0 [
+delo factorial(n: chislo) -> chislo {
+        esli (n = 0) {
             n <- 1;
-        ] inache [
-            n <- n * factorial(n - 1);
-        ]
-        otdau n;
-]
-result kak chislo <- factorial(20);
+        } inache {
+            n <- n * (factorial <- [n - 1]);
+        }
+        n -> otday;
+}
+[20] -> factorial -> result: chislo;
 result -> glaza;

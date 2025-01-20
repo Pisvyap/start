@@ -7,7 +7,7 @@ public:
     bool is_function;
 
     void print(const int indent) override {
-        std::cout << name;
+        std::cout << "ID " + name;
     }
 
     void semantic_check(SemanticTable& table) override {

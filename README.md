@@ -3,31 +3,34 @@
 
 # Синтаксис
 ## Переменные и арифметика
+Привычных присваиваний больше нет, направляй данные туда куда хочется, в любом направлении
 ```
-pust x: chislo = 10;
-x = x + 90;
+x: chislo <- 10;
+x + 90 -> x;
 x -> glaza;
 ```
 
 ## Условия
+Теперь можно писать нормальные сравнения без `==`
 ```
-elsi (x > 18) {
-    pravda -> glaza;
+esli (x = 18) {
+    da -> glaza;
 } inache {
-    lozh -> glaza;
+    net -> glaza;
 }
 ```
 ## Циклы
 ```
-pust k: chislo = 0;
-poka (k < 10) {
-    k -> glaza;
-    k = k + 1;
+k: chislo = 0;
+poka [k < 10] {
+    glaza <- k;
+    k + 1 -> k;
 }
 ```
 
+Точки с запятой прошлый век, так выглядит намного эстетичнее
 ```
-schitaem (pust k: chislo = 0; k < 10; k = k + 1) {
+perebor [k: chislo = 1 | k <= 10 | k = k + 1] {
     k -> glaza;
 }
 ```
@@ -35,12 +38,20 @@ schitaem (pust k: chislo = 0; k < 10; k = k + 1) {
 ## Массивы
 
 ```
-pust arr: chislo<> = new chislo<10>;
-schitaem (pust k: chislo = 0; k < 10; k = k + 1) {
-    arr[k] = k * k;
+arr: chislo<> = new chislo<10>;
+perebor (k: chislo = 0; k < 10; k = k + 1) {
+    k * k -> arr[k];
 }
 
-arr[9] -> glaza;
+arr[0] -> glaza;
+```
+
+## Функции
+
+```
+delo foo (a: chislo, b: chislo) -> logika {
+    otday a = b;
+}
 ```
 
 ---

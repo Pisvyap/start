@@ -847,6 +847,7 @@ int main(int argc, char *argv[]) {
     const auto input = read_file(input_file);
 
     auto AST = build_ast(input);
+    AST->print(0);
     if (AST == nullptr) {
         Logger::error("Error. AST build failure.");
         return 1;

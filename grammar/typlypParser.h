@@ -247,7 +247,9 @@ public:
   public:
     ReturnStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *LASSIGN();
     ExprContext *expr();
+    antlr4::tree::TerminalNode *RASSIGN();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -262,13 +264,11 @@ public:
   public:
     IfStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *LASSIGN();
     antlr4::tree::TerminalNode *LPAREN();
     ExprContext *expr();
     antlr4::tree::TerminalNode *RPAREN();
     std::vector<BlockContext *> block();
     BlockContext* block(size_t i);
-    antlr4::tree::TerminalNode *RASSIGN();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -283,12 +283,10 @@ public:
   public:
     WhileStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *LASSIGN();
     antlr4::tree::TerminalNode *LPAREN();
     ExprContext *expr();
     antlr4::tree::TerminalNode *RPAREN();
     BlockContext *block();
-    antlr4::tree::TerminalNode *RASSIGN();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -303,14 +301,11 @@ public:
   public:
     ForStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    BlockContext *block();
-    antlr4::tree::TerminalNode *LASSIGN();
     antlr4::tree::TerminalNode *LPAREN();
-    antlr4::tree::TerminalNode *SEMICOLON();
-    antlr4::tree::TerminalNode *RPAREN();
     std::vector<antlr4::tree::TerminalNode *> DIVIDER();
     antlr4::tree::TerminalNode* DIVIDER(size_t i);
-    antlr4::tree::TerminalNode *RASSIGN();
+    antlr4::tree::TerminalNode *RPAREN();
+    BlockContext *block();
     VarDeclContext *varDecl();
     ExprContext *expr();
     AssignmentContext *assignment();
@@ -355,7 +350,9 @@ public:
     antlr4::tree::TerminalNode *BOOL();
     antlr4::tree::TerminalNode *LPAREN();
     antlr4::tree::TerminalNode *RPAREN();
+    antlr4::tree::TerminalNode *LASSIGN();
     ArgListContext *argList();
+    antlr4::tree::TerminalNode *RASSIGN();
     ScalarTypeContext *scalarType();
     antlr4::tree::TerminalNode *LT();
     antlr4::tree::TerminalNode *GT();

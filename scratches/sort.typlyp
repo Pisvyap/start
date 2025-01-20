@@ -1,15 +1,15 @@
-delo partition(arr kak chislo<>, left kak chislo, right kak chislo, pivot kak chislo) -> chislo {
-    poka <- (left <= right) {
-        poka <- (arr[left] < pivot) {
+delo partition(arr: chislo<>, left: chislo, right: chislo, pivot: chislo) -> chislo {
+    poka (left <= right) {
+        poka (arr[left] < pivot) {
             left + 1 -> left;
         }
 
-        (arr[right] > pivot) -> poka {
+        poka (arr[right] > pivot) {
             right <- right - 1;
         }
 
-        esli <- (left <= right) {
-            temp kak chislo = arr[left];
+        esli (left <= right) {
+            temp: chislo <- arr[left];
             arr[left] <- arr[right];
             temp -> arr[right];
 
@@ -18,38 +18,38 @@ delo partition(arr kak chislo<>, left kak chislo, right kak chislo, pivot kak ch
         }
     }
 
-    otdau left;
+    otday left;
 }
 
-delo quickSort(arr kak chislo<>, left kak chislo, right kak chislo): chislo {
+delo quickSort(arr: chislo<>, left: chislo, right: chislo) -> chislo {
     esli (left < right) {
-        pust pivot: chislo = arr[(left + right) / 2];
-        pust index: chislo = partition(arr, left, right, pivot);
+        pivot: chislo = arr[(left + right) / 2];
+        index: chislo = partition(arr, left, right, pivot);
 
-        quickSort(arr, left, index - 1);
-        quickSort(arr, index, right);
+        quickSort <- (arr, left, index - 1);
+        quickSort <- (arr, index, right);
     }
 
-    vernut 0;
+    otday 0;
 }
 
-pust numbers: chislo<> = new chislo<10000>;
-pust temp: chislo = 0;
+numbers: chislo<> <- new chislo<10000>;
+temp: chislo <- 0;
 
-schitaem (pust i: chislo = 0 ; i < 10000; i = i + 1;) {
-    numbers[i] = i;
+perebor (i: chislo <- 0 | i < 10000 | i <- i + 1) {
+    numbers[i] <- i;
 }
 
-schitaem (pust j: chislo = 0 ; j < 10000; j = j + 1;){
-    schitaem (pust z: chislo = 0 ; z < 10000; z = z + 6;){
-        temp = numbers[j];
-        numbers[j] = numbers[z];
-        numbers[z] = temp;
+perebor (j: chislo <- 0 ; j < 10000; j + 1 -> j) {
+    perebor (z: chislo <- 0 | z < 10000 | z <- z + 6){
+        numbers[j] -> temp;
+        numbers[j] <- numbers[z];
+        numbers[z] <- temp;
     }
 }
 
-quickSort(numbers, 0, 9999);
+quickSort <- (numbers, 0, 9999);
 
-schitaem (pust k: chislo = 0 ; k < 10000; k = k + 1;){
+perebor (k: chislo <- 0 | k < 10000 | k + 1 -> k) {
     numbers[k] -> glaza;
 }
